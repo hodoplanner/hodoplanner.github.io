@@ -92,15 +92,9 @@
   @media(min-width:960px){ .plans{grid-template-columns:1fr 1fr 1fr} }
   .price{font-size:28px; font-weight:900}
   .tag{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#fff6d7; color:#6b4a00; font-weight:800; font-size:12px; border:1px solid #ffe8a6}
-  .old{ text-decoration:line-through; color:#9aa3b5 }
-  .free{ color:#0ea5a3; font-weight:900 }
 
   /* Avis */
   .quote{font-style:italic; color:#334155}
-  .reviews{display:grid; gap:14px}
-  @media(min-width:820px){ .reviews{grid-template-columns: repeat(3, 1fr)} }
-  .review{background:#fff; border:1px solid #e9eef6; border-radius:14px; padding:16px}
-  .stars{color:#f5b301}
 
   /* FAQ */
   details{
@@ -136,9 +130,10 @@
         <a href="#offre">Offre</a>
         <a href="#process">Process</a>
         <a href="#tarifs">Tarifs</a>
-        <a href="#avis">Avis</a>
         <a href="#faq">FAQ</a>
-        <a href="#contact" class="btn primary" style="height:36px"><i class="fa-solid fa-calendar-check"></i> Devis gratuit</a>
+        <a href="formulaire.html" class="btn primary" style="height:36px">
+          <i class="fa-solid fa-calendar-check"></i> Devis gratuit
+        </a>
       </nav>
     </div>
   </header>
@@ -153,7 +148,7 @@
         les pièges, et tu profites.
       </p>
       <div class="cta-row">
-        <a href="#contact" class="btn primary"><i class="fa-solid fa-paper-plane"></i> Demander un devis</a>
+        <a href="formulaire.html" class="btn primary"><i class="fa-solid fa-paper-plane"></i> Demander un devis</a>
         <a href="https://wa.me/XXXXXXXXXXX" target="_blank" class="btn ghost"><i class="fa-brands fa-whatsapp"></i> Discuter sur WhatsApp</a>
       </div>
       <div class="kpis">
@@ -213,31 +208,29 @@
   <!-- Tarifs -->
   <section class="section" id="tarifs">
     <h2>Formules</h2>
-    <p class="muted">Lancement : <b>gratuit en échange d’un avis</b>. Profites-en 👇</p>
+    <p class="muted">Des bases solides, ajustables selon ton projet.</p>
     <div class="plans">
       <div class="card">
         <div class="tag"><i class="fa-solid fa-feather"></i> Essentiel</div>
         <h3>Itinéraire & conseils</h3>
-        <p class="price"><span class="old">190€</span> → <span class="free">0€</span></p>
-        <p class="muted">Offre de lancement : gratuit contre un avis ⭐</p>
+        <p class="price">190€</p>
         <ul>
           <li>Itinéraire optimisé (7–12 jours)</li>
           <li>Listes d’incontournables & restos</li>
           <li>Guide PDF + cartes</li>
         </ul>
-        <a class="btn primary" href="#contact">Choisir</a>
+        <a class="btn primary" href="formulaire.html">Choisir</a>
       </div>
       <div class="card">
         <div class="tag"><i class="fa-solid fa-gem"></i> Complet</div>
         <h3>Plan + rappels de réservations</h3>
-        <p class="price"><span class="old">290€</span> → <span class="free">0€</span></p>
-        <p class="muted">Toujours gratuit pendant le lancement (contre avis)</p>
+        <p class="price">290€</p>
         <ul>
           <li>Tous les éléments “Essentiel”</li>
           <li>Calendrier des réservations (vols, hôtels, activités…)</li>
           <li>Liens directs + check-list</li>
         </ul>
-        <a class="btn primary" href="#contact">Choisir</a>
+        <a class="btn primary" href="formulaire.html">Choisir</a>
       </div>
       <div class="card">
         <div class="tag"><i class="fa-solid fa-crown"></i> Sur-mesure +</div>
@@ -248,29 +241,24 @@
           <li>Réservations déléguées (option)</li>
           <li>Assistance pendant le voyage</li>
         </ul>
-        <a class="btn primary" href="#contact">Demander un devis</a>
+        <a class="btn primary" href="formulaire.html">Demander un devis</a>
       </div>
     </div>
   </section>
 
   <!-- Avis -->
-  <section class="section" id="avis">
+  <section class="section">
     <h2>Ils recommandent</h2>
-    <p class="muted">Voici quelques retours. Je peux en afficher d’autres automatiquement si tu ajoutes un fichier <code>reviews.json</code>.</p>
-    <div class="reviews" id="reviews">
-      <!-- Exemples par défaut (fallback si pas de reviews.json) -->
-      <div class="review">
-        <div class="stars">★★★★★</div>
+    <div class="grid-3">
+      <div class="card">
         <p class="quote">“On a tout réservé au bon moment, zéro stress. Kyoto + Osaka parfaits pour 9 jours.”</p>
-        <b>— Léo &amp; Camille</b>
+        <b>— Léo & Camille</b>
       </div>
-      <div class="review">
-        <div class="stars">★★★★★</div>
+      <div class="card">
         <p class="quote">“Ses conseils pour le JR Pass et les temples nous ont fait gagner du temps et de l’argent.”</p>
         <b>— Anaïs</b>
       </div>
-      <div class="review">
-        <div class="stars">★★★★★</div>
+      <div class="card">
         <p class="quote">“Excellent suivi, même pour nos questions de dernière minute. Je recommande.”</p>
         <b>— Mathieu</b>
       </div>
@@ -294,81 +282,10 @@
     </details>
   </section>
 
-  <!-- Contact -->
-  <section class="section" id="contact">
-    <div class="card">
-      <h2>On prépare ton voyage ?</h2>
-      <p class="muted">Réponse sous 24h. Dis-moi destination, dates, envies, budget approx.</p>
-      <form action="https://formspree.io/f/your-id" method="POST">
-        <div style="display:grid; gap:12px; grid-template-columns:1fr; }
-        @media(min-width:720px){grid-template-columns:1fr 1fr}">
-          <div>
-            <label>Prénom</label>
-            <input name="firstname" required />
-          </div>
-          <div>
-            <label>Email</label>
-            <input type="email" name="email" required />
-          </div>
-        </div>
-        <div>
-          <label>Destination(s)</label>
-          <input name="destinations" placeholder="ex. Japon, Corée…" />
-        </div>
-        <div style="display:grid; gap:12px; grid-template-columns:1fr 1fr">
-          <div>
-            <label>Début</label>
-            <input type="date" name="start" />
-          </div>
-          <div>
-            <label>Fin</label>
-            <input type="date" name="end" />
-          </div>
-        </div>
-        <div>
-          <label>Message</label>
-          <textarea name="message" placeholder="Style de voyage, budget, centres d’intérêt…"></textarea>
-        </div>
-        <div class="cta-row">
-          <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
-          <a class="btn ghost" href="mailto:hello@erikaramel.com"><i class="fa-solid fa-envelope"></i> hello@erikaramel.com</a>
-          <a class="btn ghost" target="_blank" href="https://wa.me/XXXXXXXXXXX"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
-        </div>
-      </form>
-    </div>
-  </section>
-
   <footer>
     <div class="small">© <span id="y"></span> Erika Travel Planner — Tous droits réservés.</div>
   </footer>
 
-<script>
-  document.getElementById('y').textContent=new Date().getFullYear();
-
-  // Facultatif : charge des avis depuis reviews.json (si présent)
-  // Format attendu: [{ "name":"Alice", "rating":5, "text":"...", "when":"Mai 2025" }, ...]
-  (async function loadReviews(){
-    try{
-      const res = await fetch('reviews.json', {cache:'no-store'});
-      if(!res.ok) return;
-      const data = await res.json();
-      if(!Array.isArray(data) || data.length===0) return;
-
-      const wrap = document.getElementById('reviews');
-      wrap.innerHTML = '';
-      data.forEach(r=>{
-        const stars = '★'.repeat(+r.rating || 5);
-        const el = document.createElement('div');
-        el.className = 'review';
-        el.innerHTML = `
-          <div class="stars">${stars}</div>
-          <p class="quote">“${(r.text||'').replace(/"/g,'&quot;')}”</p>
-          <b>— ${r.name||'Client·e'}${r.when?` <span class="muted">(${r.when})</span>`:''}</b>
-        `;
-        wrap.appendChild(el);
-      });
-    }catch(e){ /* ignore si fichier absent */ }
-  })();
-</script>
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
 </body>
 </html>
