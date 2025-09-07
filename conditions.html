@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conditions de service — HodoPlanner</title>
+<link rel="icon" href="images/favicon.png" type="image/png" />
+<style>
+  :root{--text:#0f172a;--muted:#5b6476;--bg:#f7f9fc;--card:#fff;--accent:#7e8db0}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--text)}
+  header{background:#fff;border-bottom:1px solid #e9eef6;padding:14px 16px;position:sticky;top:0;z-index:10}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+  h1{margin:0 0 10px} h2{margin:24px 0 8px;font-size:20px}
+  p,.li{color:var(--muted);line-height:1.6}
+  .card{background:var(--card);border:1px solid #e9eef6;border-radius:16px;padding:18px;box-shadow:0 14px 30px rgba(15,23,42,.06)}
+  a{color:var(--accent)}
+  ul{margin:8px 0 0 18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="padding:0 16px">
+    <strong>HodoPlanner — Conditions de service</strong>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h1>Conditions de service</h1>
+    <p>Dernière mise à jour : <span id="d"></span></p>
+
+    <h2>1. Nature du service</h2>
+    <p>HodoPlanner est un service de <strong>conseil et de planification</strong> de voyages. Je fournis des <strong>itinéraires</strong>, des <strong>listes d’activités</strong>, des <strong>liens</strong> vers les plateformes de réservation et des <strong>rappels</strong> (si choisis). <strong>Je ne procède pas aux réservations</strong> : vols, hôtels, trains, activités restent à réserver par le client via les liens fournis.</p>
+
+    <h2>2. Disponibilités & offres</h2>
+    <ul>
+      <li>Les offres évoluent en temps réel (prix/disponibilités). <strong>Je ne garantis pas</strong> la disponibilité au moment où vous réservez.</li>
+      <li>Si une offre n’est plus disponible, je peux proposer des alternatives, selon <strong>mes disponibilités</strong>.</li>
+    </ul>
+
+    <h2>3. Responsabilités & limites</h2>
+    <ul>
+      <li>Je ne suis <strong>pas responsable</strong> des vols annulés/retardés, des annulations d’hôtels/activités, ou de tout incident lié aux prestataires (compagnies aériennes, hôtels, plateformes, etc.). Les réclamations doivent être adressées <strong>directement au prestataire</strong>.</li>
+      <li>Je n’ai <strong>aucun lien juridique</strong> avec les prestataires recommandés.</li>
+      <li>En cas d’imprévu (ex. annulation de vol), je peux <strong>vous aider à identifier</strong> de nouvelles options, sans garantie de résultat.</li>
+    </ul>
+
+    <h2>4. Devis & tarification</h2>
+    <ul>
+      <li>Le devis affiché par l’outil est une <strong>estimation</strong>. Le prix final est confirmé par message avant démarrage.</li>
+      <li>Pendant l’<strong>offre de lancement</strong>, le service peut être proposé <strong>gratuitement contre un avis</strong>. Cette gratuité est indiquée clairement au moment de la demande.</li>
+      <li>Sauf indication contraire, les devis sont valables <strong>7 jours</strong>.</li>
+    </ul>
+
+    <h2>5. Annulation</h2>
+    <ul>
+      <li>Si vous décidez de ne pas réserver à temps et qu’une offre disparaît, <strong>aucun remboursement</strong> ne sera dû pour ce motif.</li>
+      <li>En cas d’annulation de votre part <em>après</em> validation et démarrage d’une prestation payante, des <strong>frais</strong> peuvent s’appliquer selon l’avancement.</li>
+    </ul>
+
+    <h2>6. Propriété intellectuelle</h2>
+    <p>Les guides, cartes, check-lists et livrables restent protégés par le droit d’auteur. Un usage personnel est accordé ; toute <strong>diffusion ou revente</strong> est interdite sans accord écrit.</p>
+
+    <h2>7. Données personnelles</h2>
+    <p>Les informations transmises (contact, préférences, dates) servent à produire le service. Je ne vends pas vos données. Pour toute question : <a href="mailto:hello@erikaramel.com">hello@erikaramel.com</a>.</p>
+
+    <h2>8. Droit applicable</h2>
+    <p>Le service est régi par le droit applicable dans mon pays de résidence. En cas de litige, une solution amiable sera recherchée en priorité.</p>
+
+    <h2>Contact</h2>
+    <p>Email : <a href="mailto:hello@erikaramel.com">hello@erikaramel.com</a></p>
+  </div>
+</div>
+
+<script>document.getElementById('d').textContent=new Date().toLocaleDateString('fr-FR')</script>
+</body>
+</html>
