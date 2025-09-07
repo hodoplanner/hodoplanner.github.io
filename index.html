@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HodoPlanner – Ton assistant de planning voyage</title>
+
+  <!-- Favicon (à placer dans /images/) -->
+  <link rel="icon" href="images/hodoplanner-favicon.png" type="image/png" />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root{
+      --bg: #0e1420;
+      --card: #151923;
+      --muted: #cfd3dc;
+      --text: #ffffff;
+      --accent: #ff4d4d;        /* Couleur HodoPlanner */
+      --accent-2: #ff6b6b;
+      --ring: rgba(255,255,255,.08);
+      --radius: 16px;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing: border-box }
+    html,body{ height:100% }
+    body{
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--text); background: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 50% -10%, #1c2740 0%, #0e1420 55%, #0b0f18 100%),
+        radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.14) 0, rgba(255,255,255,0) 100%),
+        radial-gradient(2px 2px at 70% 60%, rgba(255,255,255,.10) 0, rgba(255,255,255,0) 100%),
+        radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,.08) 0, rgba(255,255,255,0) 100%);
+      background-repeat:no-repeat;
+    }
+
+    a{ color:inherit; text-decoration:none }
+    .wrap{ max-width:1100px; margin:0 auto; padding: 0 20px }
+
+    /* Header */
+    .header{
+      position:sticky; top:0; z-index:50;
+      background: rgba(14,20,32,.65); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--ring);
+    }
+    .header .row{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px; padding:12px 0;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px; }
+    .brand-logo{
+      width:28px; height:28px; border-radius:50%;
+      background:#ff4d4d; display:grid; place-items:center; font-size:16px;
+      box-shadow: 0 6px 18px rgba(255,77,77,.35);
+    }
+    .nav{
+      display:flex; align-items:center; gap:18px;
+      font-weight:600; color:#d7dbe6;
+    }
+    .nav a:hover{ color:#fff }
+    .cta{
+      background:var(--accent); color:#fff; font-weight:700; border:0; cursor:pointer;
+      padding:10px 16px; border-radius:10px; box-shadow:0 8px 24px rgba(255,77,77,.35);
+      transition: transform .08s ease, background .2s ease;
+    }
+    .cta:hover{ background:var(--accent-2) }
+    .cta:active{ transform: translateY(1px) }
+
+    /* Hero */
+    .hero{ padding: 54px 0 18px }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.06); border:1px solid var(--ring);
+      border-radius:999px; padding:8px 14px; color:#e6e9f2; font-weight:600; font-size:14px;
+    }
+    .hero h1{
+      margin:16px 0 12px; font-size: clamp(32px, 6vw, 56px);
+      line-height:1.03; letter-spacing:-.02em; font-weight:800;
+    }
+    .hero p{ color:#cfd3dc; max-width:780px; font-size:18px; }
+
+    /* Grid main (form + preview) */
+    .grid{
+      display:grid; grid-template-columns: 1.2fr .8fr; gap:22px;
+      align-items:start; margin-top:28px;
+    }
+    @media (max-width: 900px){ .grid{ grid-template-columns:1fr } }
+
+    .card{
+      background: var(--card); border:1px solid var(--ring);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .card h3{ margin:0 0 14px; font-size:20px }
+    .field{ margin: 12px 0 }
+    label{ display:block; font-size:13px; color:#aeb6c8; margin-bottom:6px; font-weight:600 }
+    input, select, textarea{
+      width:100%; font: inherit; color:#fff; background:#0f1421;
+      border:1px solid #222a3a; padding:12px 12px; border-radius:12px; outline: none;
+    }
+    input:focus, select:focus, textarea:focus{ border-color:#33415e; box-shadow: 0 0 0 3px rgba(255,255,255,.04) }
+
+    .row-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    .btn{
+      background:#202635; color:#e3e7f0; border:1px solid #2a3347;
+      padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer;
+    }
+    .btn:hover{ background:#243049 }
+    .btn-danger{ background:#26202a; border-color:#3a2a2a; color:#ffb1b1 }
+    .btn-danger:hover{ background:#2e2730 }
+
+    .muted{ color:#9aa4b8; font-size:14px }
+
+    /* Reminders list */
+    .list{ margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+    .item{
+      display:flex; align-items:start; justify-content:space-between; gap:12px;
+      padding:12px; background:#0f1421; border:1px solid #222a3a; border-radius:12px;
+    }
+    .item strong{ display:block }
+    .badge{
+      display:inline-block; padding:4px 8px; font-size:12px; border-radius:999px;
+      background:rgba(255,77,77,.12); color:#ff8b8b; border:1px solid rgba(255,77,77,.25);
+      margin-left:6px;
+    }
+
+    /* Pricing */
+    .pricing{ padding:60px 0 }
+    .pricing h2{ text-align:center; margin:0 0 24px; font-size:30px }
+    .pricing-wrap{
+      display:flex; gap:16px; flex-wrap:wrap; justify-content:center;
+    }
+    .p-card{ width:320px }
+    .old{ text-decoration: line-through; color:#a0a6b4 }
+    .new{ font-size:34px; font-weight:800; color:var(--accent) }
+    .offer{ color:#d8dde9 }
+
+    /* Features */
+    .features{ padding:40px 0 60px }
+    .features h2{ text-align:center; margin:0 0 22px; font-size:28px }
+    .feat-grid{
+      display:grid; grid-template-columns: repeat(3, 1fr); gap:18px;
+    }
+    @media (max-width:900px){ .feat-grid{ grid-template-columns:1fr } }
+    .feat{ display:flex; gap:12px; align-items:flex-start; background:#0f1421; border:1px solid #222a3a; border-radius:12px; padding:14px }
+
+    /* Footer */
+    footer{ padding:28px 0; color:#9aa4b8; border-top:1px solid var(--ring); margin-top:30px }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="wrap row">
+      <a class="brand" href="#">
+        <div class="brand-logo"><i class="fa-solid fa-calendar-check"></i></div>
+        <div>HodoPlanner</div>
+      </a>
+      <nav class="nav">
+        <a href="#features">Fonctionnalités</a>
+        <a href="#pricing">Tarifs</a>
+        <a class="cta" href="#create">Commencer</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="pill"><i class="fa-solid fa-paper-plane"></i> Ton assistant de planning voyage</span>
+      <h1>Tout réserver au bon moment,<br/> sans rien oublier.</h1>
+      <p>Choisis une destination et tes dates : on génère automatiquement les rappels clés
+      (vols, hôtels, pass, parcs, transports, eSIM, etc.). Exporte en <strong>.ics</strong> ou garde tout dans HodoPlanner.</p>
+    </div>
+  </section>
+
+  <!-- Main grid -->
+  <section class="wrap grid" id="create">
+    <!-- Form -->
+    <div class="card">
+      <h3>Créer un plan</h3>
+
+      <div class="field">
+        <label for="dest">Destination</label>
+        <input id="dest" type="text" placeholder="ex. Japan, South Korea…" />
+      </div>
+
+      <div class="field">
+        <label for="trip">Nom du voyage</label>
+        <input id="trip" type="text" placeholder="ex. Automne au Japon" />
+      </div>
+
+      <div class="field">
+        <label for="start">Début</label>
+        <input id="start" type="date" />
+      </div>
+
+      <div class="field">
+        <label for="end">Fin</label>
+        <input id="end" type="date" />
+      </div>
+
+      <div class="row-actions">
+        <button id="gen" class="cta"><i class="fa-solid fa-wand-magic-sparkles"></i> Générer mes rappels</button>
+        <button id="clear" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Vider</button>
+      </div>
+
+      <p class="muted" style="margin-top:10px">Astuce : tu peux aussi ajouter tes propres rappels ci-dessous (date précise + note).</p>
+
+      <hr style="border:none; border-top:1px solid var(--ring); margin:16px 0">
+
+      <!-- Custom reminder -->
+      <div class="field">
+        <label>Ajouter un rappel personnalisé</label>
+        <div style="display:grid; grid-template-columns: 1fr 170px 120px; gap:10px">
+          <input id="r-title" type="text" placeholder="Titre (ex. Tickets Ghibli Park)" />
+          <input id="r-date" type="date" />
+          <button id="add" class="btn"><i class="fa-solid fa-plus"></i> Ajouter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview / Reminders -->
+    <div class="card">
+      <h3>Mes rappels</h3>
+      <div id="list" class="list"></div>
+
+      <div class="row-actions" style="margin-top:14px">
+        <button id="export" class="btn"><i class="fa-solid fa-file-export"></i> Exporter (.ics)</button>
+        <span class="muted" id="count">Aucun rappel pour l’instant.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <h2>Tarifs</h2>
+      <div class="pricing-wrap">
+        <div class="card p-card">
+          <h3>HodoPlanner</h3>
+          <p class="old">19,90 €</p>
+          <p class="new">0 €</p>
+          <p class="offer">Gratuit en échange d’un avis ⭐</p>
+          <button class="cta" onclick="document.querySelector('.cta[href=\'#create\']').click()">Commencer gratuitement</button>
+        </div>
+        <div class="card p-card">
+          <h3>HodoPlanner Pro <span class="badge">Bientôt</span></h3>
+          <p class="new" style="color:#9bd48f">4,99 €/mois</p>
+          <p class="offer">Partage familial, modèles avancés, sync auto.</p>
+          <button class="btn" disabled>Restez informé</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="wrap">
+      <h2>Fonctionnalités</h2>
+      <div class="feat-grid">
+        <div class="feat">
+          <div class="brand-logo" style="background:#5b8def"><i class="fa-solid fa-bell"></i></div>
+          <div><strong>Rappels intelligents</strong><br><span class="muted">Vols, hôtels, pass, eSIM, transports, musées, etc.</span></div>
+        </div>
+        <div class="feat">
+          <div class="brand-logo" style="background:#8bdb6d"><i class="fa-solid fa-calendar-check"></i></div>
+          <div><strong>Export .ics</strong><br><span class="muted">Ajoute tout dans ton calendrier (Google, Apple, Outlook).</span></div>
+        </div>
+        <div class="feat">
+          <div class="brand-logo" style="background:#f7b84b"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div><strong>Modèles par pays</strong><br><span class="muted">Ex. Japon : JR Pass, Suica, Ghibli, Disney, etc.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      © <span id="y"></span> HodoPlanner · Fait avec ❤️ pour faciliter les voyages.
+    </div>
+  </footer>
+
+<script>
+  // Year in footer
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Helpers
+  const byDays = (date, days) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  };
+  const fmt = (d) => d.toISOString().slice(0,10);
+
+  // State
+  let reminders = [];
+
+  const listEl = document.getElementById('list');
+  const countEl = document.getElementById('count');
+
+  function render(){
+    listEl.innerHTML = '';
+    if(reminders.length === 0){
+      countEl.textContent = 'Aucun rappel pour l’instant.';
+      return;
+    }
+    reminders
+      .sort((a,b)=> new Date(a.date) - new Date(b.date))
+      .forEach((r, idx)=>{
+        const row = document.createElement('div');
+        row.className = 'item';
+        row.innerHTML = `
+          <div>
+            <strong>${r.title}</strong>
+            <span class="muted">${new Date(r.date).toLocaleDateString()}</span>
+            ${r.tag ? `<span class="badge">${r.tag}</span>` : ''}
+            ${r.note ? `<div class="muted" style="margin-top:4px">${r.note}</div>` : ''}
+          </div>
+          <button class="btn btn-danger" aria-label="Supprimer" data-i="${idx}">
+            <i class="fa-solid fa-xmark"></i>
+          </button>`;
+        listEl.appendChild(row);
+      });
+    countEl.textContent = `${reminders.length} rappel(s).`;
+    // delete handlers
+    listEl.querySelectorAll('button[data-i]').forEach(b=>{
+      b.addEventListener('click', ()=>{ reminders.splice(+b.dataset.i,1); render(); });
+    });
+  }
+
+  // Generate default reminders based on inputs
+  document.getElementById('gen').addEventListener('click', ()=>{
+    const dest = (document.getElementById('dest').value || '').toLowerCase();
+    const trip = (document.getElementById('trip').value || 'Mon voyage');
+    const start = document.getElementById('start').value;
+    const end   = document.getElementById('end').value;
+    if(!start || !end){
+      alert('Renseigne des dates de début et de fin.');
+      return;
+    }
+
+    reminders = []; // reset
+
+    // Base pack
+    reminders.push(
+      { title:'Réserver les vols', date: fmt(byDays(start, -90)), note:`Pour ${trip}`, tag:'Essentiel' },
+      { title:'Réserver l’hébergement', date: fmt(byDays(start, -60)), note:`Pour ${trip}`, tag:'Essentiel' },
+      { title:'Assurance voyage', date: fmt(byDays(start, -30)), tag:'Check' },
+      { title:'Préparer eSIM / Data', date: fmt(byDays(start, -3)), tag:'Télécom' },
+      { title:'Transfert aéroport', date: fmt(byDays(start, -7)), tag:'Transport' },
+      { title:'Dernier check documents', date: fmt(byDays(start, -2)), tag:'Check' },
+      { title:'Vol retour – check-in', date: fmt(byDays(end, -1)), tag:'Vol' }
+    );
+
+    // Country-specific examples
+    if(dest.includes('japan') || dest.includes('japon')){
+      reminders.push(
+        { title:'JR Pass (si utile)', date: fmt(byDays(start, -30)), tag:'Japon' },
+        { title:'Carte Suica / IC', date: fmt(byDays(start, -7)), tag:'Japon' },
+        { title:'Disney / USJ billets', date: fmt(byDays(start, -45)), tag:'Parcs' }
+      );
+    }
+    if(dest.includes('south korea') || dest.includes('corée')){
+      reminders.push(
+        { title:'T-Money / Cashbee', date: fmt(byDays(start, -7)), tag:'Corée' },
+        { title:'KTX / Korail Pass', date: fmt(byDays(start, -20)), tag:'Corée' }
+      );
+    }
+
+    render();
+    // scroll to list on mobile
+    document.getElementById('create').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  document.getElementById('clear').addEventListener('click', ()=>{
+    reminders = [];
+    render();
+  });
+
+  // Add custom reminder
+  document.getElementById('add').addEventListener('click', ()=>{
+    const title = document.getElementById('r-title').value.trim();
+    const date  = document.getElementById('r-date').value;
+    if(!title || !date){ alert('Titre et date requis.'); return; }
+    reminders.push({ title, date });
+    document.getElementById('r-title').value = '';
+    document.getElementById('r-date').value = '';
+    render();
+  });
+
+  // Export ICS
+  document.getElementById('export').addEventListener('click', ()=>{
+    if(reminders.length === 0){ alert('Aucun rappel à exporter.'); return; }
+    const trip = (document.getElementById('trip').value || 'Voyage');
+    const lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//HodoPlanner//FR',
+      ...reminders.map((r,i)=>{
+        const dt = new Date(r.date+'T09:00:00'); // 9h locale
+        const stamp = dt.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+        const uid = `hodoplanner-${i}-${stamp}@erikaramel`;
+        return [
+          'BEGIN:VEVENT',
+          `UID:${uid}`,
+          `DTSTAMP:${stamp}`,
+          `DTSTART:${stamp}`,
+          `SUMMARY:${escapeICS(r.title)}`,
+          r.note ? `DESCRIPTION:${escapeICS(r.note)}` : '',
+          'END:VEVENT'
+        ].filter(Boolean).join('\n');
+      }),
+      'END:VCALENDAR'
+    ].join('\n');
+
+    const blob = new Blob([lines], {type:'text/calendar'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = slug(trip)+'-rappels.ics';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  function escapeICS(s){
+    return String(s).replace(/\\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
+  }
+  function slug(s){ return String(s).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'').slice(0,60); }
+</script>
+</body>
+</html>
