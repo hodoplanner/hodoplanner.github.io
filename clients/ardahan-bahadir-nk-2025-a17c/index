@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dossier client — Ardahan Bahadir · HodoPlanner</title>
+
+<link rel="icon" href="/images/favicon.png" type="image/png" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+  :root{
+    --accent:#7e8db0;      /* Couleur HodoPlanner */
+    --ink:#0f172a;
+    --muted:#5b6476;
+    --bg:#f7f9fc;
+    --card:#ffffff;
+    --ring:#e9eef6;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    color:var(--ink); background:var(--bg);
+    background-image:
+      radial-gradient(70rem 30rem at 110% 0%, rgba(126,141,176,.14) 0, rgba(126,141,176,0) 55%);
+    background-repeat:no-repeat;
+  }
+
+  /* Header */
+  header{
+    position:sticky; top:0; z-index:30;
+    background:rgba(255,255,255,.85); backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--ring);
+  }
+  .bar{
+    max-width:1100px; margin:0 auto; padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink)}
+  .brand img{width:32px; height:32px}
+  .brand strong{font-size:16px; letter-spacing:.2px}
+  .right a{color:var(--muted); text-decoration:none; font-weight:700; padding:6px 10px; border-radius:10px}
+  .right a:hover{background:#eef3fb; color:#111}
+
+  /* Layout */
+  .wrap{max-width:1100px; margin:0 auto; padding:20px 16px 60px; display:grid; gap:16px}
+  .grid{display:grid; gap:16px}
+  @media(min-width:960px){ .grid{grid-template-columns: 1.15fr .85fr} }
+
+  .card{
+    background:var(--card); border:1px solid var(--ring); border-radius:var(--radius);
+    box-shadow:0 14px 30px rgba(15,23,42,.06); padding:18px;
+  }
+  h1{font-size:26px; margin:0}
+  h2{font-size:20px; margin:0 0 10px}
+  .muted{color:var(--muted)}
+  .pill{
+    display:inline-flex; gap:8px; align-items:center; font-weight:800; font-size:12px;
+    padding:6px 10px; border-radius:999px; background:#eef3fb; color:#2f3e64; border:1px solid #dde7f6;
+  }
+  .warn{background:#fff6f2; color:#7a3b26; border:1px solid #ffe4d6}
+  .ok{color:#16a34a; font-weight:800}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+  .split{display:grid; gap:12px}
+  @media(min-width:620px){ .split{grid-template-columns:1fr 1fr} }
+
+  /* Table-ish */
+  .list{display:grid; gap:10px}
+  .item{
+    border:1px dashed #dbe3ee; border-radius:12px; padding:12px;
+    display:flex; gap:12px; justify-content:space-between; align-items:center;
+  }
+  .item-left{display:flex; gap:10px; align-items:center}
+  .item .k{font-weight:800}
+  .item .v{color:#334155}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex; align-items:center; gap:10px; height:44px;
+    padding:0 16px; border-radius:12px; border:1px solid transparent; cursor:pointer;
+    text-decoration:none; font-weight:800; color:#fff; background:var(--accent);
+  }
+  .btn:hover{filter:brightness(.97)}
+  .btn.ghost{background:#fff; border-color:#e6ecf4; color:#374151}
+  .btn.warn{background:#ef4444}
+  .btn.print{background:#334155}
+  .btn.small{height:36px; font-weight:700}
+
+  /* Password overlay (simple protection, pas de haute sécurité) */
+  .gate{
+    position:fixed; inset:0; background:linear-gradient(180deg, rgba(126,141,176,.18), rgba(247,249,252,.95));
+    display:grid; place-items:center; z-index:100;
+  }
+  .gate .panel{
+    width:min(480px, 92%); background:#fff; border:1px solid var(--ring); border-radius:16px; padding:18px;
+    box-shadow:0 18px 40px rgba(15,23,42,.12);
+  }
+  .gate h3{margin:0 0 6px}
+  .gate input{
+    width:100%; border:1px solid #dbe3ee; border-radius:12px; padding:12px; font-size:15px; outline:none;
+    background:#f8fafc; color:var(--ink);
+  }
+  .gate .err{color:#b91c1c; font-weight:700; display:none}
+
+  /* Footer */
+  footer{padding:24px 16px; text-align:center; color:#64748b; border-top:1px solid var(--ring); background:#fff}
+  .small{font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- Password Gate -->
+<div class="gate" id="gate">
+  <div class="panel">
+    <h3>Dossier protégé</h3>
+    <p class="muted" style="margin:6px 0 12px">Entre le mot de passe pour accéder au dossier d’<b>Ardahan Bahadir</b>.</p>
+    <input id="pwd" type="password" placeholder="Mot de passe" />
+    <div class="row" style="margin-top:10px">
+      <button class="btn small" id="unlock"><i class="fa-solid fa-lock-open"></i> Ouvrir</button>
+      <span class="err" id="err">Mot de passe incorrect</span>
+    </div>
+    <p class="small" style="margin-top:10px">Astuce : change le mot de passe dans le code (variable <code>PASSWORD</code>).</p>
+  </div>
+</div>
+
+<header>
+  <div class="bar">
+    <a class="brand" href="#">
+      <img src="/images/erika-logo.png" alt="HodoPlanner" />
+      <strong>HodoPlanner — Dossier client</strong>
+    </a>
+    <div class="right">
+      <a href="#" id="btnPrint"><i class="fa-solid fa-print"></i> Imprimer / PDF</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- En-tête -->
+  <div class="card">
+    <div class="row" style="justify-content:space-between; align-items:flex-start">
+      <div>
+        <h1>Ardahan Bahadir</h1>
+        <div class="row" style="margin-top:6px">
+          <span class="pill"><i class="fa-solid fa-location-dot"></i> Destination : <b>Corée du Nord</b></span>
+          <span class="pill"><i class="fa-solid fa-calendar-days"></i> Dates : 30–31 février 2025</span>
+          <span class="pill"><i class="fa-solid fa-user"></i> Voyageurs : <b>1</b></span>
+          <span class="pill"><i class="fa-solid fa-receipt"></i> Honoraires dus : <b>200 €</b></span>
+        </div>
+      </div>
+      <div class="row">
+        <a class="btn" id="payBtn" href="PAYMENT_LINK_HERE" target="_blank" rel="noopener">
+          <i class="fa-solid fa-credit-card"></i> Payer 200 €
+        </a>
+        <a class="btn ghost" href="mailto:hello@erikaramel.com?subject=Dossier Ardahan Bahadir — HodoPlanner">
+          <i class="fa-solid fa-envelope"></i> Contacter
+        </a>
+      </div>
+    </div>
+
+    <!-- Alerte dates -->
+    <div class="row" style="margin-top:12px">
+      <span class="pill warn"><i class="fa-solid fa-triangle-exclamation"></i> Les dates indiquées (30–31 février) semblent invalides — merci de confirmer.</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Colonne gauche -->
+    <div class="grid-col">
+      <!-- À faire / tâches -->
+      <div class="card">
+        <h2>À faire</h2>
+        <p class="muted" style="margin-top:0">Ce qu’il reste à valider / réserver.</p>
+        <div class="list">
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-passport"></i>
+              <div>
+                <div class="k">Visa</div>
+                <div class="v muted">Visa nécessaire. Merci de démarrer la procédure. Je fournis les liens et infos.</div>
+              </div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Lien d’instructions visa à insérer');return false;">Instructions</a>
+          </div>
+
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-bed"></i>
+              <div>
+                <div class="k">Hébergements</div>
+                <div class="v muted">À confirmer / réserver. Je t’enverrai les options et les liens directs.</div>
+              </div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Liens d’hébergements à insérer');return false;">Voir options</a>
+          </div>
+
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-taxi"></i>
+              <div>
+                <div class="k">Transferts & itinéraire</div>
+                <div class="v muted">À valider après confirmation des dates.</div>
+              </div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Doc itinéraire à insérer');return false;">Itinéraire</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Réservations existantes -->
+      <div class="card">
+        <h2>Réservations</h2>
+        <p class="muted" style="margin-top:0">Ce qui est déjà booké (par toi ou via mes liens).</p>
+        <div class="list">
+          <!-- Exemples; remplace par les vraies -->
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-hotel"></i>
+              <div>
+                <div class="k">Logement — Pyongyang</div>
+                <div class="v">Statut : <b>en attente</b></div>
+              </div>
+            </div>
+            <span class="pill">N° réservation — à venir</span>
+          </div>
+
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-people-group"></i>
+              <div>
+                <div class="k">Tour guidé</div>
+                <div class="v">Statut : <b>à réserver</b></div>
+              </div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Lien du tour à insérer');return false;">Voir le tour</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="card">
+        <h2>Documents</h2>
+        <div class="list">
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-file-pdf"></i>
+              <div>
+                <div class="k">Brief & conditions</div>
+                <div class="v muted">PDF / Google Doc — à ajouter</div>
+              </div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Lien document à insérer');return false;">Ouvrir</a>
+          </div>
+          <div class="item">
+            <div class="item-left">
+              <i class="fa-solid fa-list-check"></i>
+              <div>
+                <div class="k">Checklist de départ</div>
+                <div class="v muted">Passeport, eSIM, assurances, change…</div>
+              </div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Lien checklist à insérer');return false;">Voir</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite -->
+    <div class="grid-col">
+      <!-- Infos clés -->
+      <div class="card">
+        <h2>Infos clés</h2>
+        <div class="split">
+          <div class="item" style="border-style:solid">
+            <div>
+              <div class="k">Statut paiement</div>
+              <div class="v"><span class="muted">En attente</span></div>
+            </div>
+            <a class="btn small" id="payBtn2" href="PAYMENT_LINK_HERE" target="_blank" rel="noopener">
+              <i class="fa-solid fa-credit-card"></i> Payer 200 €
+            </a>
+          </div>
+          <div class="item" style="border-style:solid">
+            <div>
+              <div class="k">Visa</div>
+              <div class="v">Obligatoire <span class="muted">(détails à venir)</span></div>
+            </div>
+            <span class="pill">Action requise</span>
+          </div>
+        </div>
+        <div class="split" style="margin-top:12px">
+          <div class="item" style="border-style:solid">
+            <div>
+              <div class="k">Dates</div>
+              <div class="v">30–31 février 2025</div>
+            </div>
+            <a class="btn small ghost" href="#" onclick="alert('Confirmer nouvelles dates');return false;">Suggérer un changement</a>
+          </div>
+          <div class="item" style="border-style:solid">
+            <div>
+              <div class="k">Contact direct</div>
+              <div class="v"><a href="mailto:hello@erikaramel.com">hello@erikaramel.com</a></div>
+            </div>
+            <a class="btn small ghost" href="mailto:hello@erikaramel.com?subject=Dossier Ardahan Bahadir — HodoPlanner">
+              <i class="fa-solid fa-envelope"></i> Écrire
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="card">
+        <h2>Messages</h2>
+        <p class="muted" style="margin-top:0">Historique rapide (tu peux aussi répondre par email, je mettrai à jour).</p>
+        <div class="list">
+          <div class="item">
+            <div><div class="k">12 jan</div><div class="v">Brief initial reçu.</div></div>
+            <span class="pill">Erika</span>
+          </div>
+          <div class="item">
+            <div><div class="k">14 jan</div><div class="v">Envoi des premières options d’hôtels.</div></div>
+            <span class="pill">Erika</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="card">
+        <h2>Notes personnelles</h2>
+        <p class="muted" style="margin-top:0">Préférences, contraintes, idées.</p>
+        <ul style="margin:8px 0 0 18px; line-height:1.6">
+          <li>Intérêt pour architecture / photographie.</li>
+          <li>Préférence : hébergements confort, pas de dortoir.</li>
+          <li>Souhaite des visites guidées thématiques.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="small">© <span id="y"></span> HodoPlanner — Dossier client privé.</div>
+</footer>
+
+<script>
+  // === Config rapide ===
+  const PASSWORD = "bahadir-4257";              // <-- change le mot de passe ici
+  const PAYMENT_URL = "PAYMENT_LINK_HERE";      // <-- remplace par ton Payment Link Stripe
+
+  // Year
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Appliquer URL de paiement aux 2 boutons
+  document.getElementById('payBtn').href = PAYMENT_URL;
+  document.getElementById('payBtn2').href = PAYMENT_URL;
+
+  // Impression
+  document.getElementById('btnPrint').addEventListener('click', (e)=>{
+    e.preventDefault(); window.print();
+  });
+
+  // Gate (protection légère)
+  const gate = document.getElementById('gate');
+  const pwd  = document.getElementById('pwd');
+  const err  = document.getElementById('err');
+  const unlock = document.getElementById('unlock');
+
+  // si déjà débloqué pour cette session
+  if (sessionStorage.getItem(location.pathname + ":ok") === "1") {
+    gate.style.display = 'none';
+  }
+
+  unlock.addEventListener('click', tryOpen);
+  pwd.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryOpen(); });
+
+  function tryOpen(){
+    if (pwd.value.trim() === PASSWORD){
+      gate.style.display = 'none';
+      sessionStorage.setItem(location.pathname + ":ok", "1");
+    } else {
+      err.style.display = 'inline-block';
+      gate.querySelector('.panel').animate([{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}], {duration:180});
+    }
+  }
+</script>
+</body>
+</html>
