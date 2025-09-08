@@ -11,8 +11,8 @@
 
 <style>
   :root{
-    --accent:#7e8db0;     /* bleu-gris demandé */
-    --accent-2:#ffd166;   /* touche chaleureuse */
+    --accent:#7e8db0;    /* bleu-gris demandé */
+    --accent-2:#ffd166;  /* touche chaleureuse */
     --text:#0f172a;
     --muted:#5b6476;
     --bg:#f7f9fc;
@@ -23,11 +23,30 @@
   html,body{height:100%}
   body{
     margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
-    color:var(--text); background:var(--bg);
-    background-image:
+    color:var(--text);
+    /* Desktop: nuages + voiles doux pour la lisibilité */
+    background:
       radial-gradient(80rem 40rem at 10% -10%, rgba(126,141,176,.12) 0, rgba(126,141,176,0) 60%),
-      radial-gradient(70rem 30rem at 110% 0%, rgba(255,209,102,.18) 0, rgba(255,209,102,0) 55%);
-    background-repeat:no-repeat;
+      radial-gradient(70rem 30rem at 110% 0%, rgba(255,209,102,.18) 0, rgba(255,209,102,0) 55%),
+      url("images/nuages-pc.png");
+    background-repeat:no-repeat, no-repeat, repeat;
+    background-size: 100% 100%, 100% 100%, cover;
+    background-position: center top, right top, center top;
+    background-color: var(--bg);
+    background-attachment: scroll, scroll, fixed; /* fixe seulement sur desktop */
+  }
+  /* Mobile : image dédiée + pas d’attachement fixe (perf) */
+  @media (max-width: 720px){
+    body{
+      background:
+        radial-gradient(40rem 20rem at 10% -10%, rgba(126,141,176,.12) 0, rgba(126,141,176,0) 60%),
+        radial-gradient(40rem 20rem at 110% 0%, rgba(255,209,102,.18) 0, rgba(255,209,102,0) 55%),
+        url("images/nuages-mobile.png");
+      background-repeat:no-repeat, no-repeat, repeat;
+      background-size: 140% 100%, 120% 100%, cover;
+      background-position: center top, right -10% top, center top;
+      background-attachment: scroll, scroll, scroll;
+    }
   }
 
   /* Header */
@@ -62,11 +81,9 @@
   .btn.ghost{background:#fff; border-color:#e6ecf4; color:#374151}
   .btn.ghost:hover{background:#f7fafc}
 
-  /* Mode mobile : le menu devient une rangée scrollable, sans casser le layout */
+  /* Mobile : nav en bandeau scrollable */
   @media (max-width: 720px){
-    .bar{
-      flex-direction:column; align-items:stretch; gap:10px; padding:10px 12px;
-    }
+    .bar{flex-direction:column; align-items:stretch; gap:10px; padding:10px 12px}
     .brand{min-width:0}
     nav{
       overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px;
