@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Erika Travel Planner — Voyages sur mesure</title>
 
+<!-- Favicon de l’onglet -->
 <link rel="icon" href="images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
   :root{
-    --accent:#7e8db0;      /* bleu-gris demandé */
-    --accent-2:#ffd166;    /* touche chaleureuse */
+    --accent:#7e8db0;     /* bleu-gris demandé */
+    --accent-2:#ffd166;   /* touche chaleureuse */
     --text:#0f172a;
     --muted:#5b6476;
     --bg:#f7f9fc;
@@ -32,7 +33,7 @@
   /* Header */
   header{
     position:sticky; top:0; z-index:40;
-    background:rgba(255,255,255,.85); backdrop-filter: blur(8px);
+    background:rgba(255,255,255,.9); backdrop-filter: blur(8px);
     border-bottom:1px solid #e9eef6;
   }
   .bar{
@@ -40,27 +41,46 @@
     display:flex; gap:16px; align-items:center; justify-content:space-between;
   }
   .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text)}
-  .brand img{width:36px; height:36px}
-  .brand b{font-size:18px; letter-spacing:.2px}
+  .brand img{width:36px; height:36px; object-fit:contain}
+  .brand b{font-size:18px; letter-spacing:.2px; white-space:nowrap}
+
+  nav{display:flex; align-items:center; gap:8px}
   nav a{
     color:var(--muted); text-decoration:none; font-weight:600; font-size:14px;
-    padding:8px 12px; border-radius:12px;
+    padding:8px 12px; border-radius:12px; background:transparent; white-space:nowrap;
+    flex:0 0 auto;
   }
   nav a:hover{background:#eef3fb; color:#111}
 
   .btn{
-    display:inline-flex; align-items:center; gap:10px; height:44px;
-    padding:0 16px; border-radius:12px; border:1px solid transparent; cursor:pointer;
-    text-decoration:none; font-weight:800;
+    display:inline-flex; align-items:center; gap:10px; height:38px;
+    padding:0 14px; border-radius:12px; border:1px solid transparent; cursor:pointer;
+    text-decoration:none; font-weight:800; flex:0 0 auto;
   }
   .btn.primary{background:var(--accent); color:#fff}
   .btn.primary:hover{filter:brightness(.97)}
   .btn.ghost{background:#fff; border-color:#e6ecf4; color:#374151}
   .btn.ghost:hover{background:#f7fafc}
 
+  /* Mode mobile : le menu devient une rangée scrollable, sans casser le layout */
+  @media (max-width: 720px){
+    .bar{
+      flex-direction:column; align-items:stretch; gap:10px; padding:10px 12px;
+    }
+    .brand{min-width:0}
+    nav{
+      overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px;
+      gap:8px; scrollbar-width:none;
+    }
+    nav::-webkit-scrollbar{display:none}
+    nav a{background:#f3f6fc}
+    .btn.primary{height:40px}
+  }
+
   /* Hero */
   .hero{max-width:1100px; margin:0 auto; padding:56px 16px 28px; display:grid; gap:24px}
   .hero h1{font-size:40px; line-height:1.1; margin:8px 0}
+  @media (max-width:720px){ .hero h1{font-size:36px} }
   .sub{color:var(--muted); font-size:18px; max-width:780px}
   .cta-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:8px}
   .kpis{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; color:#475569; font-weight:700}
@@ -123,15 +143,18 @@
   <header>
     <div class="bar">
       <a class="brand" href="#top">
-        <img src="images/favicon.png" alt="Erika Travel Planner" />
+        <!-- Logo de header (pas le favicon) -->
+        <img src="images/erika-logo.png" alt="Erika Travel Planner" />
         <b>Erika Travel Planner</b>
       </a>
-      <nav>
+
+      <!-- Rangée scrollable sur mobile -->
+      <nav aria-label="Navigation principale">
         <a href="#offre">Offre</a>
         <a href="#process">Process</a>
         <a href="#tarifs">Tarifs</a>
         <a href="#faq">FAQ</a>
-        <a href="formulaire.html" class="btn primary" style="height:36px">
+        <a href="formulaire.html" class="btn primary">
           <i class="fa-solid fa-calendar-check"></i> Devis gratuit
         </a>
       </nav>
