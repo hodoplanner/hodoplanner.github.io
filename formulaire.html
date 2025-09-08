@@ -1,106 +1,141 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Devis automatique — HodoPlanner</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Devis automatique — HodoPlanner</title>
 
-  <link rel="icon" href="images/favicon.png" type="image/png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="icon" href="images/favicon.png" type="image/png" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <!-- Police NoyhA -->
-  <style>
-    @font-face {
-      font-family: 'NoyhA';
-      src: url('fonts/NoyhA-Regular.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
-  </style>
+<style>
+  /* ===== POLICE TITRES : NoyhA ===== */
+  @font-face{
+    font-family: "NoyhA";
+    src: url("fonts/NoyhA-Regular.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
 
-  <style>
-    :root{
-      --accent:#7e8db0;
-      --text:#0f172a;
-      --muted:#5b6476;
-      --bg:#f7f9fc;
-      --card:#ffffff;
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+  :root{
+    --accent:#7e8db0;
+    --text:#0f172a;
+    --muted:#5b6476;
+    --bg:#f7f9fc;
+    --card:#ffffff;
+    --radius:16px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+    background:
+      url("images/nuages-pc.png") center top / cover no-repeat fixed,
+      var(--bg);
+    color:var(--text);
+  }
+  @media (max-width: 768px){
     body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
-      background: var(--bg) url("images/nuages-pc.png") no-repeat center/cover fixed;
-      color:var(--text);
+      background:
+        url("images/nuages-mobile.png") center top / cover no-repeat fixed,
+        var(--bg);
     }
-    @media(max-width:720px){
-      body{ background: var(--bg) url("images/nuages-mobile.png") repeat-y top/cover; }
-    }
+  }
 
-    /* Header */
-    header{
-      background:#fff; border-bottom:1px solid #e9eef6;
-      padding:12px 16px; display:flex; align-items:center; gap:10px;
-      position:sticky; top:0; z-index:20;
-    }
-    header img{width:32px; height:32px}
-    header b{font-size:18px; font-family:'NoyhA', sans-serif;}
-    header .spacer{flex:1}
-    header a.back{color:var(--muted); text-decoration:none; font-weight:700}
-    header a.back:hover{color:#111}
+  /* ===== Header ===== */
+  header{
+    background:rgba(255,255,255,.9); backdrop-filter: blur(8px);
+    border-bottom:1px solid #e9eef6;
+    padding:10px 14px; display:flex; align-items:center; gap:12px;
+    position:sticky; top:0; z-index:20;
+  }
+  header img{width:32px; height:32px; object-fit:contain}
+  header b{font-size:18px; white-space:nowrap}
+  header .spacer{flex:1}
+  header a.back{color:var(--muted); text-decoration:none; font-weight:700; white-space:nowrap}
+  header a.back:hover{color:#111}
 
-    /* Layout */
-    .wrap{max-width:900px; margin:0 auto; padding:22px 16px 48px;}
-    h1,h2{font-family:'NoyhA',sans-serif;}
-    h1{font-size:28px; margin:0 0 10px}
-    .muted{color:var(--muted)}
-    .note{
-      margin:16px 0; padding:12px 14px; border-radius:12px;
-      background:#fff6f2; color:#7a3b26; border:1px solid #ffe4d6; font-weight:600;
-    }
+  /* ===== Layout ===== */
+  .wrap{max-width:900px; margin:0 auto; padding:22px 16px 60px;}
+  h1,h2,h3{font-family:"NoyhA", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;}
+  h1{font-size:30px; margin:0 0 10px}
+  h2{font-size:22px; margin:0 0 8px}
+  .muted{color:var(--muted)}
+  .note{
+    margin:16px 0; padding:12px 14px; border-radius:12px;
+    background:#fff6f2; color:#7a3b26; border:1px solid #ffe4d6; font-weight:600;
+  }
 
-    /* Form */
-    form{display:grid; gap:16px}
-    label{font-weight:700; font-size:14px; color:#334155}
-    input, select, textarea{
-      width:100%; border:1px solid #dbe3ee; background:#fff; color:var(--text);
-      border-radius:12px; padding:12px; font-size:14px; outline:none;
-    }
-    textarea{min-height:110px; resize:vertical}
+  /* ===== Form ===== */
+  form{display:grid; gap:16px}
+  label{font-weight:700; font-size:14px; color:#334155}
+  input, select, textarea{
+    width:100%; border:1px solid #dbe3ee; background:#fff; color:var(--text);
+    border-radius:12px; padding:12px; font-size:14px; outline:none;
+  }
+  textarea{min-height:110px; resize:vertical}
 
-    .grid-2{display:grid; gap:14px}
-    @media(min-width:720px){ .grid-2{grid-template-columns:1fr 1fr} }
+  .grid-2{display:grid; gap:14px}
+  @media(min-width:720px){ .grid-2{grid-template-columns:1fr 1fr} }
 
-    .btn{
-      display:inline-flex; align-items:center; gap:10px; height:46px;
-      padding:0 16px; border-radius:12px; border:1px solid transparent;
-      cursor:pointer; text-decoration:none; font-weight:800; font-size:15px;
-    }
-    .btn.primary{background:var(--accent); color:#fff}
-    .btn.primary:hover{filter:brightness(.97)}
-    .btn.ghost{background:#fff; border-color:#e6ecf4; color:#374151}
+  .btn{
+    display:inline-flex; align-items:center; gap:10px; height:46px;
+    padding:0 16px; border-radius:12px; border:1px solid transparent;
+    cursor:pointer; text-decoration:none; font-weight:800; font-size:15px;
+  }
+  .btn.primary{background:var(--accent); color:#fff}
+  .btn.primary:hover{filter:brightness(.97)}
+  .btn.ghost{background:#fff; border-color:#e6ecf4; color:#374151}
+  .btn.ghost:hover{background:#f7fafc}
+  .btn.linklike{background:transparent; border:0; color:#334155; text-decoration:underline; height:auto; padding:0}
 
-    .panel{
-      margin-top:18px; background:#fff; border:1px solid #e9eef6; border-radius:var(--radius);
-      box-shadow:0 14px 30px rgba(15,23,42,.06); padding:18px;
-    }
-    .est-total{font-size:22px; font-weight:900; margin:6px 0 2px}
-    .cross{ text-decoration: line-through; opacity:.6; }
-    .ok{ color:#16a34a; font-weight:800 }
-    .small{font-size:13px; color:var(--muted)}
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  /* ===== Panel / Estimation ===== */
+  .card,
+  .panel{
+    background:#fff; border:1px solid #e9eef6; border-radius:var(--radius);
+    box-shadow:0 14px 30px rgba(15,23,42,.06); padding:18px;
+  }
+  .est-total{font-size:22px; font-weight:900; margin:6px 0 2px}
+  .cross{ text-decoration: line-through; opacity:.6; }
+  .ok{ color:#16a34a; font-weight:800 }
+  .small{font-size:13px; color:var(--muted)}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .between{display:flex; gap:12px; align-items:flex-start; justify-content:space-between}
+  .between > *:first-child{min-width:0}
 
-    .pill{
-      display:inline-flex; gap:6px; align-items:center;
-      background:#eef3fb; color:#2f3e64; border:1px solid #dde7f6;
-      border-radius:999px; padding:6px 10px; font-weight:700; font-size:12px;
-    }
-  </style>
+  .pill{
+    display:inline-flex; gap:6px; align-items:center;
+    background:#eef3fb; color:#2f3e64; border:1px solid #dde7f6;
+    border-radius:999px; padding:6px 10px; font-weight:700; font-size:12px;
+  }
+
+  /* ===== Sticky actions on mobile (conditions + calcul) ===== */
+  .sticky-actions{
+    position:sticky; bottom:0; z-index:10;
+    background:linear-gradient(180deg, rgba(247,249,252,0), rgba(247,249,252,1) 35%);
+    padding-top:10px;
+  }
+
+  /* Align “Conditions” correctement */
+  .tc-line{
+    display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;
+    padding:6px 0 2px;
+  }
+  .tc-line .right{
+    margin-left:auto; display:flex; gap:10px; align-items:center;
+  }
+  @media (max-width: 600px){
+    .tc-line{flex-direction:column; align-items:flex-start}
+    .tc-line .right{margin-left:0}
+  }
+</style>
 </head>
 
 <body>
+
 <header>
   <img src="images/erika-logo.png" alt="logo">
   <b>HodoPlanner</b>
@@ -116,7 +151,7 @@
   </p>
   <div class="note"><i class="fa-solid fa-circle-info"></i> L’estimation dépend du budget total, de la durée et du nombre de voyageurs.</div>
 
-  <div class="panel">
+  <div class="card">
     <h2 style="margin:0 0 6px">Demander un devis</h2>
     <p class="small" style="margin:0 0 12px">Remplis ce formulaire pour obtenir une estimation automatique. À la fin, tu pourras m’envoyer tes infos si tu veux aller plus loin.</p>
 
@@ -201,22 +236,29 @@
         </div>
       </div>
 
-      <label class="small" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px">
-        <input type="checkbox" id="agreeTC" style="margin-top:4px">
-        <span>J’ai lu et j’accepte les <a href="conditions.html" target="_blank">Conditions de service</a>.</span>
-      </label>
-
-      <div class="row">
-        <button type="button" class="btn primary" id="btnCalc">
-          <i class="fa-solid fa-calculator"></i> Calculer l’estimation
-        </button>
-        <a class="btn ghost" href="index.html"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+      <!-- Ligne conditions + boutons alignés correctement -->
+      <div class="sticky-actions">
+        <div class="tc-line">
+          <label class="small" style="display:flex;gap:8px;align-items:flex-start;margin:0">
+            <input type="checkbox" id="agreeTC" style="margin-top:3px">
+            <span>J’ai lu et j’accepte les <a href="conditions.html" target="_blank">Conditions de service</a>.</span>
+          </label>
+          <div class="right">
+            <a class="btn ghost" href="conditions.html" target="_blank">
+              <i class="fa-solid fa-file-contract"></i> Conditions de service
+            </a>
+            <button type="button" class="btn primary" id="btnCalc">
+              <i class="fa-solid fa-calculator"></i> Calculer l’estimation
+            </button>
+            <a class="btn ghost" href="index.html"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+          </div>
+        </div>
       </div>
     </form>
 
     <!-- RÉSULTAT -->
     <div id="result" class="panel" style="display:none">
-      <div class="row" style="justify-content:space-between; width:100%">
+      <div class="between">
         <div>
           <div class="pill"><i class="fa-solid fa-receipt"></i> Estimation de prix public</div>
           <div class="est-total" id="estRange"></div>
@@ -228,99 +270,173 @@
           <div class="small">contre un avis après réalisation</div>
         </div>
       </div>
+
       <hr style="border:none; border-top:1px solid #e9eef6; margin:16px 0">
-      <div class="row">
-        <button class="btn primary" id="btnSend" disabled>
-          <i class="fa-solid fa-paper-plane"></i> Envoyer ma demande
+
+      <!-- Bloc messages variables -->
+      <div id="longTripMsg" class="note" style="display:none">
+        Le voyage est très long. <b>Complète le formulaire détaillé</b> avec un maximum d’informations,
+        et je t’envoie un devis précis au plus vite.
+      </div>
+
+      <div id="okPriceMsg" class="small" style="display:none">
+        Le prix te convient ? <b>Complète ce formulaire plus précis</b> pour me donner un maximum de détails,
+        et je t’envoie le devis exact au plus vite.
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <a class="btn primary" href="detail.html"><i class="fa-solid fa-list-check"></i> Formulaire détaillé</a>
+        <button class="btn ghost" id="btnSend" disabled>
+          <i class="fa-solid fa-paper-plane"></i> Envoyer ma demande simple
         </button>
-        <span class="small">Tu recevras une proposition précise sous 24h.</span>
+        <span class="small">Réponse sous 24h.</span>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+  // ===== Helpers =====
   const round10 = v => Math.round(v/10)*10;
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const daysBetween = (d1, d2) => {
     const a = new Date(d1), b = new Date(d2);
-    return Math.max(0, Math.round((b - a) / 86400000));
+    const ms = b - a;
+    return Math.max(0, Math.round(ms / 86400000));
   };
 
-  const form = document.getElementById('quoteForm');
-  const btnCalc = document.getElementById('btnCalc');
-  const result = document.getElementById('result');
-  const estRange = document.getElementById('estRange');
-  const estExplain = document.getElementById('estExplain');
-  const publicCross = document.getElementById('publicCross');
-  const agreeTC = document.getElementById('agreeTC');
-  const btnSend = document.getElementById('btnSend');
+  // ===== Elements =====
+  const form         = document.getElementById('quoteForm');
+  const btnCalc      = document.getElementById('btnCalc');
+  const result       = document.getElementById('result');
+  const estRange     = document.getElementById('estRange');
+  const estExplain   = document.getElementById('estExplain');
+  const publicCross  = document.getElementById('publicCross');
+  const agreeTC      = document.getElementById('agreeTC');
+  const btnSend      = document.getElementById('btnSend');
+  const longTripMsg  = document.getElementById('longTripMsg');
+  const okPriceMsg   = document.getElementById('okPriceMsg');
 
-  // --- computeQuote corrigé ---
+  // ===== Core pricing =====
+  // Exigence :
+  // - Plancher 10 €, plafond 400 €
+  // - Si budget total <= 50 => 10–15 €
+  // - Si budget total <= 100 => 10–20 €
+  // - Sinon pourcentages (en tenant compte durée/voyageurs/complexité/support), puis clamp [10, 400]
   function computeQuote({flightPP=0, hotel=0, activities=0, people=1, days=0, complexity='normal', support='standard'}){
-    const MIN_FEE = 10;
-    const MAX_FEE = 400;
     const totalBudget = (flightPP||0) * (people||1) + (hotel||0) + (activities||0);
 
+    // Cas spéciaux petits budgets
+    if (totalBudget <= 50){
+      return { totalBudget, estLow: 10, estHigh: 15, special:true };
+    }
+    if (totalBudget <= 100){
+      return { totalBudget, estLow: 10, estHigh: 20, special:true };
+    }
+
+    // % base par tranche
     let pctLow=0.10, pctHigh=0.14;
     if (totalBudget < 1500){ pctLow=0.08; pctHigh=0.10; }
     else if (totalBudget <= 4000){ pctLow=0.10; pctHigh=0.14; }
     else if (totalBudget <= 8000){ pctLow=0.11; pctHigh=0.15; }
     else { pctLow=0.12; pctHigh=0.16; }
 
+    // Ajustement durée (>7 j : +0.2%/jour, max +2%)
     const extraDays = Math.max(0, (days||0) - 7);
     const durAdj = Math.min(0.02, extraDays * 0.002);
     pctLow += durAdj; pctHigh += durAdj;
 
+    // Ajustement voyageurs (>4 => +1%)
     if ((people||1) > 4){ pctLow += 0.01; pctHigh += 0.01; }
+
+    // Complexité
     if (complexity === 'multi'){ pctLow += 0.005; pctHigh += 0.01; }
     if (complexity === 'multi_countries'){ pctLow += 0.01; pctHigh += 0.02; }
+
+    // Support
     if (support === 'plus'){ pctLow += 0.005; pctHigh += 0.01; }
     if (support === 'premium'){ pctLow += 0.015; pctHigh += 0.025; }
 
-    const pctEstLow  = totalBudget * pctLow;
-    const pctEstHigh = totalBudget * pctHigh;
+    // Pas de base fixe ici (plancher déjà géré)
+    let low  = round10(totalBudget * pctLow);
+    let high = round10(totalBudget * pctHigh);
 
-    let floorLow = MIN_FEE, floorHigh = MIN_FEE;
-    if (totalBudget <= 50){ floorHigh = 15; }
-    else if (totalBudget <= 100){ floorHigh = 20; }
+    // Clamp selon consignes : [10, 400]
+    low  = clamp(low, 10, 400);
+    high = clamp(high, 10, 400);
+    if (high < low) high = low; // sécurité
 
-    const estLow  = Math.min(MAX_FEE, round10(Math.max(floorLow,  pctEstLow)));
-    const estHigh = Math.min(MAX_FEE, round10(Math.max(floorHigh, pctEstHigh)));
-
-    return { totalBudget, estLow, estHigh, pctLow, pctHigh };
+    return { totalBudget, estLow: low, estHigh: high, special:false, pctLow, pctHigh };
   }
 
+  // ===== Calcul =====
   btnCalc.addEventListener('click', () => {
     const data = new FormData(form);
     const start = data.get('start'), end = data.get('end');
     const days = daysBetween(start, end) || 0;
     const people = parseInt(data.get('people')||'1',10);
 
-    const {estLow, estHigh, totalBudget, pctLow, pctHigh} = computeQuote({
-      flightPP: parseFloat(data.get('budget_flight')||'0'),
-      hotel: parseFloat(data.get('budget_hotel')||'0'),
-      activities: parseFloat(data.get('budget_activities')||'0'),
-      people, days,
+    const flightPP   = parseFloat(data.get('budget_flight')||'0');
+    const hotel      = parseFloat(data.get('budget_hotel')||'0');
+    const activities = parseFloat(data.get('budget_activities')||'0');
+
+    const res = computeQuote({
+      flightPP, hotel, activities, people, days,
       complexity: data.get('complexity')||'normal',
       support: data.get('support')||'standard'
     });
 
-    estRange.textContent = `${estLow.toLocaleString('fr-FR')}€ – ${estHigh.toLocaleString('fr-FR')}€`;
+    // Affichage estimation
+    estRange.textContent   = `${res.estLow.toLocaleString('fr-FR')}€ – ${res.estHigh.toLocaleString('fr-FR')}€`;
+    estExplain.textContent = `Basé sur un budget total ≈ ${Math.round(res.totalBudget).toLocaleString('fr-FR')}€ pour ${days || 'N/A'} jours.`;
 
-    let note = `Basé sur un budget total ≈ ${Math.round(totalBudget).toLocaleString('fr-FR')}€ pour ${days || 'N/A'} jours, ${(pctLow*100).toFixed(1)}–${(pctHigh*100).toFixed(1)}% + ajustements.`;
-    if (totalBudget <= 100) note += ' (plancher appliqué pour très petit budget)';
-    if (estHigh === 400) note += ' (plafond 400€ atteint)';
-    if (days > 60) note = "⚠️ Le voyage est très long (>2 mois). Merci de compléter le formulaire détaillé, je t’envoie un devis précis au plus vite.";
-    estExplain.textContent = note;
+    publicCross.textContent = `Prix public estimé : ${res.estLow.toLocaleString('fr-FR')}–${res.estHigh.toLocaleString('fr-FR')} €`;
 
-    publicCross.textContent = `Prix public estimé : ${estLow}–${estHigh} €`;
+    // Messages spécifiques
+    const isLong = days > 60; // > 2 mois
+    longTripMsg.style.display = isLong ? 'block' : 'none';
+    okPriceMsg.style.display  = isLong ? 'none' : 'block';
+
     result.style.display = 'block';
     result.scrollIntoView({behavior:'smooth', block:'start'});
   });
 
+  // Activer l’envoi simple si conditions acceptées
   document.addEventListener('change', () => {
     if(agreeTC) btnSend.disabled = !agreeTC.checked;
   });
+
+  // Envoi (Formspree)
+  btnSend.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if(!agreeTC.checked){
+      alert("Merci d’accepter les conditions avant d’envoyer.");
+      return;
+    }
+
+    const data = new FormData(form);
+    const payload = new FormData();
+    for (const [k,v] of data.entries()) payload.append(k, v);
+    payload.append('estimation', document.getElementById('estRange').textContent);
+
+    try{
+      const r = await fetch('https://formspree.io/f/your-id', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: payload
+      });
+      if(r.ok){
+        alert("Merci ! Ta demande a été envoyée. Réponse sous 24h ✈️");
+        form.reset();
+        btnSend.disabled = true;
+      }else{
+        alert("Oups, envoi impossible. Tu peux m’écrire à hello@erikaramel.com");
+      }
+    }catch{
+      alert("Oups, envoi impossible. Tu peux m’écrire à hello@erikaramel.com");
+    }
+  });
 </script>
+
 </body>
 </html>
