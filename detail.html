@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brief détaillé — HodoPlanner</title>
+
+<link rel="icon" href="images/favicon.png" type="image/png" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+  :root{
+    --accent:#7e8db0;
+    --text:#0f172a;
+    --muted:#5b6476;
+    --card:#ffffff;
+    --radius:16px;
+  }
+
+  /* Titres en Noyh A */
+  @font-face{
+    font-family:'NoyhA';
+    src:url('font/NoyhA-Regular.ttf') format('truetype');
+    font-weight:700;
+    font-style:normal;
+    font-display:swap;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+    background:#f3f6fb url('images/nuages-mobile.png') center top/900px auto repeat;
+  }
+  @media(min-width:960px){
+    body{ background:#f3f6fb url('images/nuages-pc.png') center top/1200px auto repeat; }
+  }
+
+  h1,h2,h3{ font-family:'NoyhA',system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial; }
+
+  /* Header */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #e9eef6;
+  }
+  .bar{
+    max-width:980px; margin:0 auto; padding:12px 16px;
+    display:flex; align-items:center; gap:12px;
+  }
+  header img{width:28px; height:28px; object-fit:contain}
+  header b{font-size:18px}
+  .bar .spacer{flex:1}
+  header a.back{color:#334155; text-decoration:none; font-weight:900}
+  header a.back i{margin-right:8px}
+
+  /* Layout */
+  .wrap{max-width:980px; margin:0 auto; padding:22px 16px 48px;}
+  .panel{
+    background:#fff; border:1px solid #e9eef6; border-radius:var(--radius);
+    box-shadow:0 14px 30px rgba(15,23,42,.06); padding:18px; margin-top:16px;
+  }
+  .muted{color:var(--muted)}
+  .note{
+    margin:16px 0; padding:12px 14px; border-radius:12px;
+    background:#eef3fb; border:1px solid #dde7f6; color:#2f3e64; font-weight:800;
+  }
+
+  /* Form */
+  form{display:grid; gap:16px}
+  label{font-weight:900; font-size:14px; color:#334155}
+  .help{font-size:12px; color:var(--muted)}
+  input,select,textarea{
+    width:100%; border:1px solid #dbe3ee; background:#fff; color:var(--text);
+    border-radius:12px; padding:12px; font-size:15px; outline:none;
+  }
+  textarea{min-height:110px; resize:vertical}
+  .grid-2{display:grid; gap:14px}
+  @media(min-width:760px){ .grid-2{grid-template-columns:1fr 1fr} }
+  .grid-3{display:grid; gap:14px}
+  @media(min-width:960px){ .grid-3{grid-template-columns:1fr 1fr 1fr} }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:10px; height:46px;
+    padding:0 18px; border-radius:12px; border:1px solid transparent;
+    cursor:pointer; text-decoration:none; font-weight:900; font-size:15px;
+  }
+  .btn.primary{background:var(--accent); color:#fff}
+  .btn.ghost{background:#fff; border:1px solid #e6ecf4; color:#374151}
+  .btn.slim{height:38px; padding:0 12px; font-weight:800}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+
+  .pill{display:inline-flex; gap:6px; align-items:center;
+    background:#fff6d7; border:1px solid #ffe3a8; color:#6b4a00;
+    border-radius:999px; padding:6px 10px; font-weight:900; font-size:12px;}
+
+  /* Chips input (must-see) */
+  .chips{display:flex; flex-wrap:wrap; gap:8px; border:1px solid #dbe3ee; background:#fff; border-radius:12px; padding:8px}
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    background:#f2f5fb; border:1px solid #e1e8f8; color:#2f3e64;
+    border-radius:999px; padding:6px 10px; font-weight:800; font-size:12px;
+  }
+  .chip button{border:none; background:transparent; cursor:pointer; font-size:14px; line-height:1; color:#475569}
+  .chips input{flex:1; border:none; outline:none; min-width:160px; padding:6px 8px}
+  .hidden{display:none !important}
+  .danger{color:#b91c1c}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="bar">
+    <img src="images/erika-logo.png" alt="logo">
+    <b>HodoPlanner</b>
+    <div class="spacer"></div>
+    <a class="back" href="index.html"><i class="fa-solid fa-arrow-left"></i> Retour au site</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Brief détaillé</h1>
+  <p class="muted">Dis-moi tout pour que je te prépare un programme aux petits oignons ✨</p>
+
+  <div class="panel">
+    <div class="row">
+      <span class="pill"><i class="fa-solid fa-calculator"></i> Estimation reçue</span>
+      <b id="estimationText"></b>
+    </div>
+
+    <form id="detailForm" novalidate>
+      <!-- Identité / contact -->
+      <div class="grid-2">
+        <div>
+          <label>Prénom</label>
+          <input name="firstname" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" name="email" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label>WhatsApp (optionnel)</label>
+          <input name="whatsapp" placeholder="+33 6 12 34 56 78" />
+          <div class="help">Pratique pour les échanges rapides</div>
+        </div>
+        <div>
+          <label>Nombre de voyageurs</label>
+          <input type="number" name="people" min="1" value="1" />
+        </div>
+      </div>
+
+      <!-- Itinéraire global -->
+      <div>
+        <label>Où souhaitez-vous aller ?</label>
+        <input name="destinations" placeholder="ex. Japon, Corée…" />
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label>Date de début</label>
+          <input type="date" name="start" />
+        </div>
+        <div>
+          <label>Date de fin</label>
+          <input type="date" name="end" />
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="row" style="gap:8px;">
+          <input type="checkbox" name="dates_flexible">
+          <span>Mes dates sont flexibles</span>
+        </label>
+        <label class="row" style="gap:8px;">
+          <input type="checkbox" name="budget_flexible">
+          <span>Mon budget est flexible</span>
+        </label>
+      </div>
+
+      <!-- Étapes -->
+      <div class="note"><i class="fa-solid fa-route"></i> Vous avez déjà une idée précise ? Ajoutez vos étapes (pays/ville + dates).</div>
+      <div id="legs"></div>
+      <button type="button" class="btn slim ghost" id="addLeg"><i class="fa-solid fa-plus"></i> Ajouter une étape</button>
+
+      <!-- Must-see -->
+      <div>
+        <label>Lieux que vous voulez absolument voir</label>
+        <div class="chips" id="mustSee">
+          <input id="mustSeeInput" placeholder="Tapez un lieu puis Entrée…">
+        </div>
+        <input type="hidden" name="must_see" id="mustSeeHidden">
+      </div>
+
+      <!-- Styles / préférences -->
+      <div class="grid-3">
+        <div>
+          <label>Rythme de voyage</label>
+          <select name="pace">
+            <option value="">Choisir…</option>
+            <option value="cool">Tranquille</option>
+            <option value="balanced">Équilibré</option>
+            <option value="intense">Intensif (beaucoup de choses)</option>
+          </select>
+        </div>
+        <div>
+          <label>Type d’hébergements</label>
+          <select name="stay">
+            <option value="">Peu importe</option>
+            <option>Hôtels 2–3★</option>
+            <option>Hôtels 4–5★</option>
+            <option>Ryokan / maisons d’hôtes</option>
+            <option>Appartements</option>
+            <option>Mix</option>
+          </select>
+        </div>
+        <div>
+          <label>Centres d’intérêt principaux</label>
+          <select name="interest">
+            <option value="">Choisir…</option>
+            <option>Culture & musées</option>
+            <option>Nourriture & cafés</option>
+            <option>Nature & randos</option>
+            <option>Parcs à thème</option>
+            <option>Shopping</option>
+            <option>Photo / spots</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label>Contraintes / infos utiles</label>
+          <textarea name="constraints" placeholder="Enfants, poussettes, allergies, mobilité réduite, horaires de travail…"></textarea>
+        </div>
+        <div>
+          <label>Envies précises</label>
+          <textarea name="wishes" placeholder="Ex : Onsen privé, Ghibli Park, café à chats, cours de cuisine, match de baseball…"></textarea>
+        </div>
+      </div>
+
+      <!-- Aide Visa / Passeport -->
+      <div class="panel" style="margin-top:0">
+        <div class="row" style="justify-content:space-between">
+          <label class="row" style="gap:10px; font-weight:900;">
+            <input type="checkbox" id="needVisaHelp">
+            <span>Besoin d’aide pour visa / passeport ?</span>
+          </label>
+          <span class="help">Je te guide selon ta/tes nationalités et tes dates</span>
+        </div>
+
+        <div id="visaBlock" class="hidden" style="margin-top:12px">
+          <div class="grid-3">
+            <div>
+              <label>Avez-vous un passeport en cours de validité ?</label>
+              <select name="has_passport">
+                <option value="">Choisir…</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label>Nationalité principale</label>
+              <input name="nationality_main" placeholder="ex. Française" />
+            </div>
+            <div>
+              <label>Autre(s) nationalité(s) (facultatif)</label>
+              <input name="nationality_other" placeholder="ex. Canadienne" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label>Date d’expiration du passeport</label>
+              <input type="date" name="passport_expiry" />
+              <div class="help">Beaucoup de pays exigent 6 mois de validité après la date de retour</div>
+            </div>
+            <div>
+              <label>Visa(s) déjà obtenus pour ce voyage ?</label>
+              <select name="has_visa">
+                <option value="">Choisir…</option>
+                <option value="none">Aucun</option>
+                <option value="some">En cours / partiel</option>
+                <option value="all">Tous obtenus</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label>Questions / précisions sur visa & passeport</label>
+            <textarea name="visa_notes" placeholder="Ex : PVT, transit en Chine, ESTA, eTA, délais…"></textarea>
+          </div>
+          <div id="expiryWarn" class="help danger hidden"><i class="fa-solid fa-triangle-exclamation"></i> Passeport potentiellement trop proche de l’expiration pour le voyage (règle des 6 mois). Je te conseillerai la meilleure option.</div>
+        </div>
+      </div>
+
+      <!-- Envoi -->
+      <div class="row">
+        <button class="btn primary" id="btnSend" type="button">
+          <i class="fa-solid fa-paper-plane"></i> Envoyer ma demande détaillée
+        </button>
+        <a class="btn ghost" href="index.html"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+      </div>
+      <div class="help">En cliquant sur “Envoyer”, tu acceptes nos <a href="conditions.html" target="_blank">Conditions de service</a>. Réponse sous 24h.</div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ----------- Prefill from URL -----------
+  const params = new URLSearchParams(location.search);
+  const estimation = params.get('estimation');
+  if(estimation){
+    document.getElementById('estimationText').textContent = estimation.replace('-', ' € – ') + ' €';
+  }else{
+    document.getElementById('estimationText').textContent = '—';
+  }
+
+  const form = document.getElementById('detailForm');
+  // Prefill known fields
+  ['firstname','email','destinations','start','end','people'].forEach(k=>{
+    if(params.get(k)) form.elements[k].value = params.get(k);
+  });
+
+  // ----------- Legs (steps) -----------
+  const legsEl = document.getElementById('legs');
+  const addLegBtn = document.getElementById('addLeg');
+
+  function legRow(data={}){
+    const wrap = document.createElement('div');
+    wrap.className = 'grid-3';
+    wrap.style.marginBottom = '8px';
+    wrap.innerHTML = `
+      <div>
+        <label>Étape — Pays / Ville</label>
+        <input name="leg_place" placeholder="ex. Tokyo" value="${data.place||''}">
+      </div>
+      <div>
+        <label>Du</label>
+        <input type="date" name="leg_start" value="${data.start||''}">
+      </div>
+      <div>
+        <label>Au</label>
+        <input type="date" name="leg_end" value="${data.end||''}">
+      </div>
+      <div style="grid-column:1/4">
+        <label>Notes (quartier, ambiance, visites souhaitées…)</label>
+        <input name="leg_notes" placeholder="facultatif" value="${data.notes||''}">
+      </div>
+      <div style="grid-column:1/4; display:flex; justify-content:flex-end;">
+        <button type="button" class="btn slim ghost removeLeg"><i class="fa-solid fa-trash"></i> Retirer cette étape</button>
+      </div>
+    `;
+    wrap.querySelector('.removeLeg').addEventListener('click', ()=>wrap.remove());
+    return wrap;
+  }
+  addLegBtn.addEventListener('click', ()=>legsEl.appendChild(legRow()));
+  // Si des étapes sont passées dans l’URL (facultatif)
+  // Exemple: ?leg1_place=Tokyo&leg1_start=2025-05-01&leg1_end=2025-05-24
+  const leg1 = params.get('leg1_place');
+  if(leg1){
+    legsEl.appendChild(legRow({
+      place: params.get('leg1_place'),
+      start: params.get('leg1_start'),
+      end: params.get('leg1_end'),
+      notes: params.get('leg1_notes') || ''
+    }));
+  }
+
+  // ----------- Must-see chips -----------
+  const chipsBox = document.getElementById('mustSee');
+  const chipsInput = document.getElementById('mustSeeInput');
+  const chipsHidden = document.getElementById('mustSeeHidden');
+  const chips = [];
+
+  function renderChips(){
+    // remove all current chips except input
+    [...chipsBox.querySelectorAll('.chip')].forEach(c=>c.remove());
+    chips.forEach((txt,i)=>{
+      const c = document.createElement('span');
+      c.className='chip';
+      c.innerHTML = `${txt} <button title="Supprimer" data-i="${i}">&times;</button>`;
+      c.querySelector('button').addEventListener('click', (e)=>{
+        const idx = parseInt(e.target.dataset.i,10);
+        chips.splice(idx,1); renderChips();
+      });
+      chipsBox.insertBefore(c, chipsInput);
+    });
+    chipsHidden.value = chips.join(', ');
+  }
+
+  chipsInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && chipsInput.value.trim()){
+      e.preventDefault();
+      chips.push(chipsInput.value.trim());
+      chipsInput.value='';
+      renderChips();
+    }
+  });
+
+  // Prefill must_see from URL
+  if(params.get('must_see')){
+    params.get('must_see').split(',').map(s=>s.trim()).filter(Boolean).forEach(v=>chips.push(v));
+    renderChips();
+  }
+
+  // ----------- Visa / Passport block -----------
+  const needVisa = document.getElementById('needVisaHelp');
+  const visaBlock = document.getElementById('visaBlock');
+  const expiryWarn = document.getElementById('expiryWarn');
+
+  needVisa.addEventListener('change', ()=>{
+    visaBlock.classList.toggle('hidden', !needVisa.checked);
+  });
+
+  // Alerte "6 mois"
+  form.elements['passport_expiry'].addEventListener('change', ()=>{
+    const start = form.elements['start'].value;
+    const exp = form.elements['passport_expiry'].value;
+    if(!start || !exp){ expiryWarn.classList.add('hidden'); return; }
+    const startDate = new Date(start);
+    const expDate = new Date(exp);
+    const sixMonthsAfterTrip = new Date(startDate);
+    sixMonthsAfterTrip.setMonth(sixMonthsAfterTrip.getMonth()+6);
+    expiryWarn.classList.toggle('hidden', expDate > sixMonthsAfterTrip);
+  });
+
+  // ----------- Submit -----------
+  document.getElementById('btnSend').addEventListener('click', async ()=>{
+    // Construire un payload propre (incluant les étapes)
+    const fd = new FormData(form);
+
+    // Étapes multiples : regrouper
+    const legs = [];
+    const legRows = legsEl.querySelectorAll('.grid-3');
+    legRows.forEach(r=>{
+      legs.push({
+        place: r.querySelector('input[name="leg_place"]').value,
+        start: r.querySelector('input[name="leg_start"]').value,
+        end:   r.querySelector('input[name="leg_end"]').value,
+        notes: r.querySelector('input[name="leg_notes"]').value
+      });
+    });
+    fd.append('legs_json', JSON.stringify(legs));
+    fd.append('estimation', estimation || '');
+
+    try{
+      const res = await fetch('https://formspree.io/f/your-id', {
+        method:'POST',
+        headers:{'Accept':'application/json'},
+        body: fd
+      });
+      if(res.ok){
+        alert('Merci ! Je reviens vers toi sous 24h avec une proposition détaillée ✨');
+        form.reset();
+        chips.length = 0; renderChips();
+        legsEl.innerHTML = '';
+        visaBlock.classList.add('hidden');
+        window.scrollTo({top:0, behavior:'smooth'});
+      }else{
+        alert("Oups, l'envoi a échoué. Tu peux m’écrire à hello@erikaramel.com");
+      }
+    }catch{
+      alert("Oups, l'envoi a échoué. Tu peux m’écrire à hello@erikaramel.com");
+    }
+  });
+</script>
+</body>
+</html>
