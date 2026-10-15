@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Maquette de l’app · HodoPlanner</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="../images/brand/lapin-icone.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/planner.css" />
+  <style>
+    /* ---------- Cadre : plein écran sur mobile, téléphone sur ordinateur ---------- */
+    html, body{height:100%}
+    body{background:var(--paper)}
+    .stage{min-height:100%; display:grid; place-items:center}
+    .demo-tag{position:fixed; z-index:100; top:8px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:700; color:#8a6a1f; background:var(--yellow-soft); border:1.5px dashed var(--yellow); border-radius:99px; padding:2px 10px; white-space:nowrap}
+    .demo-tag button{border:0; background:none; font-weight:800; text-decoration:underline; padding:0 0 0 6px; font-size:11px; color:inherit}
+    .phone{position:relative; width:100%; height:100dvh; height:100vh; display:flex; flex-direction:column; background:var(--paper); overflow:hidden}
+    @supports (height:100dvh){ .phone{height:100dvh} }
+    @media (min-width:700px){
+      body{background:linear-gradient(180deg, var(--blue-soft), var(--paper))}
+      .stage{padding:44px 0 30px}
+      .phone{width:390px; height:800px; max-height:calc(100vh - 80px); border:var(--line); border-radius:40px; box-shadow:8px 8px 0 var(--lav)}
+    }
+    .screen{flex:1; overflow-y:auto; overscroll-behavior:contain; padding:16px 16px 24px}
+    .screen.center{display:grid; align-content:center; gap:14px; text-align:center; justify-items:center}
+
+    /* ---------- En-tête et navigation ---------- */
+    .app-top{display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top,0px) + 34px) 16px 10px; border-bottom:2px solid var(--ink); background:#fff}
+    @media (min-width:700px){ .app-top{padding-top:16px} }
+    .app-top b{font-size:16px; line-height:1.2}
+    .app-top small{display:block; font-size:11.5px; color:var(--ink-2); font-weight:600}
+    .app-top .sp{flex:1}
+    .icon-btn{width:36px; height:36px; border-radius:11px; border:2px solid var(--ink); background:#fff; font-weight:800; display:grid; place-items:center}
+    .tabs{display:grid; grid-template-columns:repeat(4,1fr); border-top:2px solid var(--ink); background:#fff; padding-bottom:var(--safe-b)}
+    .tabs button{border:0; background:none; padding:7px 2px 8px; display:grid; justify-items:center; gap:1px; font-size:10.5px; font-weight:700; color:var(--ink-3)}
+    .tabs button span{font-size:19px; filter:grayscale(1); opacity:.6}
+    .tabs button.on{color:var(--ink)}
+    .tabs button.on span{filter:none; opacity:1}
+
+    /* ---------- Blocs ---------- */
+    h1.big{font-size:30px; letter-spacing:-.8px}
+    .sub{color:var(--ink-2); font-size:14px}
+    .btn.block{width:100%}
+    .stack{display:grid; gap:12px}
+    .card{padding:14px}
+    .sec-t{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:20px 0 10px}
+    .sec-t h2{font-size:18px}
+    .sec-t a, .sec-t button{font-size:12.5px; font-weight:700; border:0; background:none; text-decoration:underline; text-underline-offset:3px}
+
+    .hello{background:linear-gradient(180deg, var(--blue-soft), #fff); --sh:var(--blue)}
+    .hello h2{font-size:22px}
+    .count{display:flex; gap:10px; margin-top:10px}
+    .count div{flex:1; background:#fff; border:2px solid var(--ink); border-radius:14px; padding:8px; text-align:center}
+    .count b{display:block; font-size:22px; line-height:1.1}
+    .count small{font-size:10.5px; color:var(--ink-2); font-weight:600}
+
+    .bar{height:12px; border:2px solid var(--ink); border-radius:99px; background:#fff; overflow:hidden}
+    .bar i{display:block; height:100%; background:var(--mint); border-right:2px solid var(--ink)}
+
+    /* ligne de réservation */
+    .item{display:flex; gap:11px; align-items:center; padding:10px 12px; width:100%; text-align:left; background:#fff; border:2px solid var(--ink); border-radius:16px; box-shadow:3px 3px 0 var(--sh, var(--pink))}
+    .item + .item{margin-top:10px}
+    .item .ic{flex:0 0 40px; width:40px; height:40px; display:grid; place-items:center; background:var(--tint); border-radius:12px}
+    .item .tx{flex:1; min-width:0}
+    .item .tx b{display:block; font-size:14px; line-height:1.25}
+    .item .tx small{display:block; font-size:11.5px; color:var(--ink-2); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .item .pill{font-size:10.5px; padding:2px 8px}
+    .item.done{--sh:var(--mint); background:#fbfffd}
+    .item.done .tx b{color:var(--ink-2)}
+    .tick{flex:0 0 26px; width:26px; height:26px; border:2px solid var(--ink); border-radius:8px; display:grid; place-items:center; font-weight:800; font-size:14px; background:#fff}
+    .item.done .tick{background:var(--mint)}
+
+    .filters{display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none}
+    .filters button{flex:0 0 auto; border:2px solid var(--ink); background:#fff; border-radius:12px; padding:5px 12px; font-weight:700; font-size:12.5px}
+    .filters button.on{background:var(--ink); color:#fff}
+
+    .totals{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .totals div{border:2px solid var(--ink); border-radius:14px; padding:10px; text-align:center; background:var(--mint-soft)}
+    .totals div + div{background:var(--pink-soft)}
+    .totals small{display:block; font-size:10.5px; font-weight:700; color:var(--ink-2)}
+    .totals b{font-size:15px}
+
+    .day{display:flex; gap:12px; align-items:flex-start}
+    .day + .day{margin-top:10px}
+    .day .d{flex:0 0 52px; text-align:center; border:2px solid var(--ink); border-radius:12px; background:var(--c, #fff); padding:4px 0}
+    .day .d b{display:block; font-size:18px; line-height:1.1}
+    .day .d small{font-size:10px; font-weight:700; color:var(--ink-2); text-transform:uppercase}
+    .day .tx{flex:1; padding-top:2px}
+    .day .tx b{font-size:14.5px}
+    .day .tx p{font-size:12.5px; color:var(--ink-2)}
+    .day .tx .pill{font-size:10px; padding:1px 7px; margin-top:4px}
+
+    /* ---------- Fiche (bottom sheet) ---------- */
+    .sheet-bg{position:absolute; inset:0; z-index:20; background:rgba(59,58,94,.3); opacity:0; pointer-events:none; transition:opacity .2s}
+    .sheet-bg.show{opacity:1; pointer-events:auto}
+    .sheet{position:absolute; z-index:21; left:0; right:0; bottom:0; max-height:88%; overflow-y:auto; background:var(--paper); border-top:var(--line); border-radius:24px 24px 0 0; box-shadow:0 -5px 0 var(--pink); padding:8px 16px calc(var(--safe-b) + 18px); transform:translateY(105%); transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+    .sheet.open{transform:none}
+    .grip{width:44px; height:5px; border-radius:3px; background:#c9c6da; margin:4px auto 12px}
+    .sheet h2{font-size:21px}
+    .kv{display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13px; margin:12px 0}
+    .kv span{color:var(--ink-2); font-weight:600}
+    .switch{display:flex; align-items:center; justify-content:space-between; gap:12px; border:2px solid var(--ink); border-radius:16px; padding:12px 14px; background:#fff; font-weight:700; cursor:pointer}
+    .switch input{position:absolute; opacity:0}
+    .switch i{position:relative; width:48px; height:28px; border:2px solid var(--ink); border-radius:99px; background:#eee8f3; transition:background .15s; flex:0 0 auto}
+    .switch i::after{content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; border:2px solid var(--ink); transition:left .15s}
+    .switch input:checked + i{background:var(--mint)}
+    .switch input:checked + i::after{left:22px}
+    .file{display:flex; gap:10px; align-items:center; border:2px dashed var(--ink-3); border-radius:14px; padding:10px 12px; font-size:13px; font-weight:600; color:var(--ink-2); cursor:pointer; background:#fff}
+    .file input{display:none}
+
+    .code{font-family:ui-monospace, Menlo, monospace; font-weight:800; letter-spacing:.12em; font-size:22px; background:#fff; border:2px dashed var(--ink); border-radius:14px; padding:10px 14px; text-align:center}
+    input.code-in{text-transform:uppercase; letter-spacing:.12em; font-weight:700; text-align:center}
+
+    /* vue Erika */
+    .client{display:grid; gap:8px; width:100%; text-align:left}
+    .client + .client{margin-top:12px}
+    .client .row{justify-content:space-between}
+    .client small{color:var(--ink-2); font-size:12px; font-weight:600}
+    .erika-top{background:var(--ink); color:#fff}
+    .erika-top small{color:#d9d6ec}
+    .erika-top .icon-btn{color:var(--ink)}
+  </style>
+</head>
+<body data-no-banner>
+  <div class="demo-tag">Maquette · données fictives <button type="button" id="reset">tout remettre à zéro</button></div>
+  <div class="stage"><div class="phone" id="phone"></div></div>
+
+  <script src="../assets/icons.js"></script>
+  <script>
+  (() => {
+    "use strict";
+    const $phone = document.getElementById("phone");
+    const icon = (n, s = 32) => (window.HodoIcons ? HodoIcons.icon(n, s) : "");
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fmtDate = (iso, opt = { day: "numeric", month: "short" }) => iso ? new Date(iso + "T12:00").toLocaleDateString("fr-FR", opt) : "";
+    const TODAY = new Date(); TODAY.setHours(12, 0, 0, 0);
+    const daysUntil = (iso) => Math.round((new Date(iso + "T12:00") - TODAY) / 86400000);
+
+    // ============ Données fictives ============
+    const TYPES = {
+      flight: { label: "Vol", icon: "ticket" }, hotel: { label: "Hébergement", icon: "house" },
+      activity: { label: "Activité", icon: "star" }, transport: { label: "Transport", icon: "train" },
+      food: { label: "Restaurant / café", icon: "cup" }, admin: { label: "Démarche", icon: "gem" },
+    };
+    const SEED = () => ({
+      trips: [{
+        code: "HODO-7K2F", title: "Japon", emoji: "🌸", start: "2027-04-03", end: "2027-04-16",
+        travelers: ["Léa", "Tom"], fee: { label: "Ma prestation", amount: "0 € · offert (lancement)" },
+        items: [
+          { id: 1, type: "flight", title: "Vols Bruxelles ⇄ Tokyo", where: "Skyscanner / site de la compagnie", link: "https://www.skyscanner.fr", date: "2027-04-03", deadline: "2026-11-30", price: "≈ 900 € / pers.", status: "done", ref: "XK7L2P", paid: "1 780 €", note: "", file: "" },
+          { id: 2, type: "admin", title: "Assurance voyage", where: "comparateur ou ta banque", link: "", date: "", deadline: "2027-03-01", price: "≈ 60 €", status: "todo", ref: "", paid: "", note: "", file: "" },
+          { id: 3, type: "activity", title: "Ghibli Park · billets Grand Warehouse", where: "ghibli-park.jp", link: "https://ghibli-park.jp/en/", date: "2027-04-11", deadline: "2027-02-10", price: "2 × 3 500 ¥", status: "todo", urgent: true, ref: "", paid: "", note: "Ouverture des ventes le 10 du mois, 14:00 heure japonaise.", file: "" },
+          { id: 4, type: "hotel", title: "Hôtel à Shinjuku · 4 nuits", where: "Booking", link: "https://www.booking.com", date: "2027-04-03", deadline: "2027-01-15", price: "≈ 520 €", status: "done", ref: "4821 339 610", paid: "498 €", note: "Annulation gratuite jusqu’au 27 mars.", file: "confirmation-shinjuku.pdf" },
+          { id: 5, type: "food", title: "Pokémon Café Tokyo", where: "pokemoncafe.jp", link: "https://www.pokemoncafe.jp", date: "2027-04-05", deadline: "2027-03-05", price: "≈ 30 € / pers.", status: "todo", ref: "", paid: "", note: "Réservations 31 jours avant, à 18:00 heure japonaise.", file: "" },
+          { id: 6, type: "activity", title: "teamLab Planets", where: "teamlab.art", link: "https://www.teamlab.art", date: "2027-04-06", deadline: "2027-03-20", price: "2 × 4 200 ¥", status: "todo", ref: "", paid: "", note: "", file: "" },
+          { id: 7, type: "hotel", title: "Ryokan à Hakone · 1 nuit, dîner inclus", where: "Japanican", link: "https://www.japanican.com", date: "2027-04-07", deadline: "2027-01-31", price: "≈ 38 000 ¥", status: "todo", urgent: true, ref: "", paid: "", note: "Les ryokans avec onsen privé partent vite au printemps.", file: "" },
+          { id: 8, type: "transport", title: "Shinkansen Odawara → Kyoto", where: "SmartEX (appli)", link: "https://smart-ex.jp/en/", date: "2027-04-08", deadline: "2027-04-07", price: "2 × 12 000 ¥", status: "todo", ref: "", paid: "", note: "Côté E pour voir le Fuji.", file: "" },
+          { id: 9, type: "hotel", title: "Machiya à Kyoto · 4 nuits", where: "Airbnb", link: "https://www.airbnb.fr", date: "2027-04-08", deadline: "2027-02-01", price: "≈ 640 €", status: "todo", ref: "", paid: "", note: "", file: "" },
+          { id: 10, type: "hotel", title: "Hôtel à Namba (Osaka) · 4 nuits", where: "Booking", link: "https://www.booking.com", date: "2027-04-12", deadline: "2027-02-15", price: "≈ 480 €", status: "todo", ref: "", paid: "", note: "", file: "" },
+          { id: 11, type: "admin", title: "eSIM Japon", where: "Ubigi / Airalo", link: "", date: "2027-04-03", deadline: "2027-04-01", price: "≈ 15 €", status: "done", ref: "", paid: "14 €", note: "", file: "" },
+        ],
+        days: [
+          ["2027-04-03", "Départ", "Vol de nuit vers Tokyo", "var(--yellow-soft)", "ticket"],
+          ["2027-04-04", "Arrivée à Tokyo", "Shinjuku, Omoide Yokocho le soir", "var(--mint-soft)", "tower"],
+          ["2027-04-05", "Shibuya & Harajuku", "Pokémon Café à 11:30", "var(--mint-soft)", "crossing"],
+          ["2027-04-06", "Asakusa & Odaiba", "teamLab Planets en fin de journée", "var(--mint-soft)", "temple"],
+          ["2027-04-07", "Hakone", "Bateau pirate, téléphérique, onsen", "var(--blue-soft)", "onsen"],
+          ["2027-04-08", "→ Kyoto", "Shinkansen, Gion au coucher du soleil", "var(--blue-soft)", "train"],
+          ["2027-04-09", "Fushimi Inari tôt", "puis Tofuku-ji et Nishiki", "var(--blue-soft)", "senbon"],
+          ["2027-04-10", "Arashiyama", "Bambouseraie, Okochi Sanso", "var(--blue-soft)", "bamboo"],
+          ["2027-04-11", "Ghibli Park", "Aller-retour Nagoya", "var(--pink-soft)", "star"],
+          ["2027-04-12", "Nara → Osaka", "Daims et Todai-ji, Dotonbori le soir", "var(--lav-soft)", "deer"],
+          ["2027-04-13", "Osaka", "Château, Shinsekai, takoyaki", "var(--lav-soft)", "castle"],
+          ["2027-04-14", "Universal Studios", "Super Nintendo World", "var(--lav-soft)", "gamepad"],
+          ["2027-04-15", "Journée libre", "Shopping à Den Den Town", "var(--lav-soft)", "shop"],
+          ["2027-04-16", "Retour", "Kansai → Bruxelles", "var(--yellow-soft)", "ticket"],
+        ],
+      }],
+      others: [
+        { name: "Camille & Inès", title: "Corée du Sud", start: "2027-05-20", done: 2, total: 9 },
+        { name: "Famille Martin", title: "Islande", start: "2027-07-02", done: 7, total: 8 },
+      ],
+    });
+
+    let db, ui;
+    const KEY = "hodo-maquette-v1";
+    function load() {
+      try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.trips) return s; } catch (_) {}
+      return SEED();
+    }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (_) {} }
+    db = load();
+    ui = { screen: "welcome", tab: "home", filter: "todo", sheet: null, admin: null };
+
+    const trip = () => db.trips[0];
+    const stats = (t) => {
+      const done = t.items.filter((i) => i.status === "done").length;
+      return { done, total: t.items.length, pct: Math.round((done / Math.max(1, t.items.length)) * 100) };
+    };
+    const deadlinePill = (it) => {
+      if (it.status === "done") return `<span class="pill p-mint">réservé</span>`;
+      if (!it.deadline) return `<span class="pill p-yellow">à faire</span>`;
+      const d = daysUntil(it.deadline);
+      if (it.urgent || d <= 30) return `<span class="pill p-pink">${d < 0 ? "en retard" : "avant le " + fmtDate(it.deadline)}</span>`;
+      return `<span class="pill p-yellow">avant le ${fmtDate(it.deadline)}</span>`;
+    };
+    const itemRow = (it, clickable = true) => `
+      <button type="button" class="item ${it.status === "done" ? "done" : ""}" ${clickable ? `data-open="${it.id}"` : "disabled"} style="${it.urgent && it.status !== "done" ? "--sh:var(--red)" : ""}">
+        <span class="ic">${icon(TYPES[it.type]?.icon || "star", 30)}</span>
+        <span class="tx"><b>${esc(it.title)}</b><small>${it.date ? fmtDate(it.date, { weekday: "short", day: "numeric", month: "short" }) + " · " : ""}${esc(it.where)}</small>
+          <span style="display:inline-block;margin-top:4px">${deadlinePill(it)}</span></span>
+        <span class="tick">${it.status === "done" ? "✓" : ""}</span>
+      </button>`;
+
+    // ============ Écrans ============
+    const SCREENS = {
+      welcome: () => `
+        <div class="screen center">
+          <img src="../images/brand/lapin-carte.svg" alt="" width="150" height="150" />
+          <div><span class="jp" style="font-size:16px;letter-spacing:.3em">旅の計画</span></div>
+          <h1 class="big">HodoPlanner</h1>
+          <p class="sub" style="max-width:280px">Ton voyage sur mesure, préparé par Erika, toujours dans ta poche.</p>
+          <div class="stack" style="width:100%;max-width:310px;margin-top:10px">
+            <button class="btn dark block" data-go="code">🎒 J’ai un voyage avec Erika</button>
+            <a class="btn block" href="../devis.html">✈️ Je prépare un voyage</a>
+          </div>
+          <p class="small" style="margin-top:6px">Déjà inscrit·e ? <button class="linklike" data-go="email">Me connecter</button></p>
+          <p class="small" style="margin-top:18px"><button class="linklike" data-go="admin">Démo : vue d’Erika →</button></p>
+        </div>`,
+
+      code: () => `
+        <div class="app-top"><button class="icon-btn" data-go="welcome" aria-label="Retour">←</button><div><b>Mon voyage</b><small>première connexion</small></div></div>
+        <div class="screen">
+          <div class="stack">
+            <p class="sub">Entre le code qu’Erika t’a envoyé, puis ton email. Tu recevras un lien pour te connecter, sans mot de passe.</p>
+            <div class="field"><label for="c">Code du voyage</label><input id="c" class="code-in" placeholder="HODO-XXXX" autocomplete="off" /><span class="help">Pour la démo : <button class="linklike" data-fill="HODO-7K2F">HODO-7K2F</button></span></div>
+            <div class="field"><label for="m">Ton email</label><input id="m" type="email" placeholder="toi@exemple.com" autocomplete="email" /></div>
+            <div class="note warn hidden" id="err"><span class="ico">!</span><span id="errTx"></span></div>
+            <button class="btn dark block" data-action="code">Recevoir mon lien</button>
+            <div class="note"><span class="ico">🔒</span><span>Le code relie ton compte au voyage. Il faut aussi accéder à ta boîte mail : si quelqu’un d’autre voit le code, il ne peut pas ouvrir ton voyage.</span></div>
+          </div>
+        </div>`,
+
+      email: () => `
+        <div class="app-top"><button class="icon-btn" data-go="welcome" aria-label="Retour">←</button><div><b>Me connecter</b></div></div>
+        <div class="screen"><div class="stack">
+          <div class="field"><label for="m">Ton email</label><input id="m" type="email" placeholder="toi@exemple.com" /></div>
+          <button class="btn dark block" data-go="sent">Recevoir mon lien</button>
+        </div></div>`,
+
+      sent: () => `
+        <div class="screen center">
+          <span>${icon("bunnypaws", 120)}</span>
+          <h1 class="big" style="font-size:26px">Regarde tes mails !</h1>
+          <p class="sub" style="max-width:290px">Je t’ai envoyé un lien de connexion. Clique dessus depuis ce téléphone pour ouvrir ton voyage.</p>
+          <button class="btn dark" data-go="app" style="margin-top:8px">Démo : j’ai cliqué sur le lien</button>
+        </div>`,
+
+      app: () => {
+        const t = trip();
+        const body = { home: tabHome, book: tabBook, days: tabDays, me: tabMe }[ui.tab](t);
+        return `
+          <div class="app-top"><span>${icon("bunny", 36)}</span><div><b>${esc(t.title)} ${t.emoji}</b><small>${fmtDate(t.start, { day: "numeric", month: "long" })} → ${fmtDate(t.end, { day: "numeric", month: "long", year: "numeric" })}</small></div><span class="sp"></span><button class="btn small" data-go="welcome" aria-label="Se déconnecter">Quitter</button></div>
+          <div class="screen" id="scr">${body}</div>
+          <nav class="tabs">
+            ${[["home", "🏠", "Accueil"], ["book", "✅", "Réserver"], ["days", "🗓️", "Jour par jour"], ["me", "🎒", "Moi"]]
+              .map(([k, e, l]) => `<button class="${ui.tab === k ? "on" : ""}" data-tab="${k}"><span>${e}</span>${l}</button>`).join("")}
+          </nav>`;
+      },
+
+      admin: () => {
+        const t = trip(), s = stats(t);
+        if (ui.admin === "trip") return adminTrip(t);
+        if (ui.admin === "new") return adminNew();
+        const all = [{ name: t.travelers.join(" & "), title: t.title, start: t.start, done: s.done, total: s.total, mine: true }, ...db.others];
+        return `
+          <div class="app-top erika-top"><span>${icon("bunnymap", 36)}</span><div><b>Bonjour Erika</b><small>${all.length} voyages en cours</small></div><span class="sp"></span><button class="btn small" data-go="welcome" style="color:var(--ink)">Quitter</button></div>
+          <div class="screen">
+            <div class="sec-t" style="margin-top:4px"><h2>Mes voyageurs</h2><button data-admin="new">+ Nouveau voyage</button></div>
+            ${all.map((c) => {
+              const pct = Math.round((c.done / c.total) * 100), left = c.total - c.done;
+              return `<button type="button" class="card client" ${c.mine ? 'data-admin="trip"' : ""} style="--sh:${c.mine ? "var(--pink)" : "var(--blue)"}">
+                <div class="row"><b>${esc(c.name)}</b><span class="pill strong">${esc(c.title)}</span></div>
+                <small>départ le ${fmtDate(c.start, { day: "numeric", month: "long" })} · dans ${daysUntil(c.start)} jours</small>
+                <div class="bar"><i style="width:${pct}%"></i></div>
+                <small>${c.done}/${c.total} réservés${left ? ` · <b style="color:var(--red)">${left} à faire</b>` : " · tout est prêt 🎉"}</small>
+              </button>`;
+            }).join("")}
+            <div class="sec-t"><h2>Échéances proches</h2></div>
+            ${t.items.filter((i) => i.status !== "done" && i.deadline).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 3)
+              .map((i) => `<div class="item" style="--sh:var(--yellow)"><span class="ic">${icon(TYPES[i.type].icon, 28)}</span><span class="tx"><b>${esc(i.title)}</b><small>${esc(t.travelers.join(" & "))} · avant le ${fmtDate(i.deadline)}</small></span><button class="btn small" data-action="remind">Rappel</button></div>`).join("")}
+          </div>`;
+      },
+    };
+
+    function tabHome(t) {
+      const s = stats(t), d = daysUntil(t.start);
+      const next = t.items.filter((i) => i.status !== "done").sort((a, b) => (a.deadline || "9").localeCompare(b.deadline || "9")).slice(0, 3);
+      return `
+        <div class="card hello">
+          <span class="label" style="--lb:var(--yellow)">Bonjour ${esc(t.travelers.join(" & "))}</span>
+          <h2 style="margin-top:8px">${d > 0 ? `Plus que ${d} jours avant le départ !` : "Bon voyage !"}</h2>
+          <div class="count"><div><b>${dayCount(t)}</b><small>jours</small></div><div><b>${s.done}/${s.total}</b><small>réservés</small></div><div><b>${s.total - s.done}</b><small>à faire</small></div></div>
+          <div class="bar" style="margin-top:12px"><i style="width:${s.pct}%"></i></div>
+        </div>
+        <div class="sec-t"><h2>À réserver bientôt</h2><button data-tab="book">tout voir</button></div>
+        ${next.map((i) => itemRow(i)).join("") || `<p class="sub">Tout est réservé, bravo !</p>`}
+        <div class="sec-t"><h2>Le programme</h2><button data-tab="days">programme</button></div>
+        <div class="card" style="--sh:var(--mint)">${dayRow(t.days[1])}</div>`;
+    }
+
+    function tabBook(t) {
+      const list = t.items.filter((i) => ui.filter === "all" || (ui.filter === "done" ? i.status === "done" : i.status !== "done"))
+        .sort((a, b) => (a.deadline || "9").localeCompare(b.deadline || "9"));
+      const s = stats(t);
+      return `
+        <div class="filters">
+          ${[["todo", `À faire (${s.total - s.done})`], ["done", `Réservé (${s.done})`], ["all", "Tout"]].map(([k, l]) => `<button class="${ui.filter === k ? "on" : ""}" data-filter="${k}">${l}</button>`).join("")}
+        </div>
+        <p class="small" style="margin-bottom:12px">Erika a préparé cette liste. Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs.</p>
+        ${list.map((i) => itemRow(i)).join("") || `<p class="sub">Rien ici pour l’instant.</p>`}
+        <div class="sec-t"><h2>Récap</h2></div>
+        <div class="totals"><div><small>Réservé</small><b>${s.done} sur ${s.total}</b></div><div><small>Encore à réserver</small><b>${s.total - s.done}</b></div></div>
+        <p class="small" style="margin-top:8px">Vols, hôtels et activités se paient directement chez les prestataires.</p>`;
+    }
+
+    const dayCount = (t) => Math.round((new Date(t.end) - new Date(t.start)) / 86400000) + 1;
+    function dayRow([iso, title, txt, c, ic]) {
+      const its = trip().items.filter((i) => i.date === iso);
+      return `<div class="day"><div class="d" style="--c:${c}"><small>${fmtDate(iso, { weekday: "short" })}</small><b>${new Date(iso + "T12:00").getDate()}</b></div>
+        <div class="tx"><b>${esc(title)}</b><p>${esc(txt)}</p>${its.map((i) => `<span class="pill ${i.status === "done" ? "p-mint" : "p-yellow"}">${i.status === "done" ? "✓" : "○"} ${esc(i.title.split(" · ")[0])}</span>`).join(" ")}</div>
+        <span>${icon(ic, 34)}</span></div>`;
+    }
+    function tabDays(t) {
+      return `<div class="stack">${t.days.map((d) => `<div class="card" style="--sh:${d[3].replace("-soft", "")}">${dayRow(d)}</div>`).join("")}</div>`;
+    }
+
+    function tabMe(t) {
+      return `
+        <div class="sec-t" style="margin-top:4px"><h2>Voyageurs</h2></div>
+        <div class="card" style="--sh:var(--lav)">
+          <div class="row">${t.travelers.map((n) => `<span class="pill strong">${esc(n)}</span>`).join("")}</div>
+          <p class="small" style="margin:10px 0 8px">Invite un compagnon de voyage : il entre ce code dans l’app avec son propre email.</p>
+          <div class="code">${t.code}</div>
+          <button class="btn small" style="margin-top:10px" data-action="share">Partager le code</button>
+        </div>
+        <div class="sec-t"><h2>Ma prestation</h2></div>
+        <div class="card" style="--sh:var(--yellow)"><div class="row" style="justify-content:space-between"><b>Planification du voyage</b><span class="pill p-mint">offert</span></div><p class="small" style="margin-top:6px">Offre de lancement : gratuit, contre un avis après le voyage. Plus tard, le paiement et la facture seront ici.</p></div>
+        <div class="sec-t"><h2>Mon carnet en PDF</h2></div>
+        <div class="card" style="--sh:var(--blue)"><p class="small">Tu préfères aussi l’avoir hors de l’app ? Erika peut te préparer le carnet en PDF (option). Les mises à jour du PDF peuvent prendre quelques jours.</p><button class="btn small" style="margin-top:10px" data-action="pdf">Demander le PDF</button></div>
+        <div class="sec-t"><h2>Besoin d’aide ?</h2></div>
+        <a class="btn block" href="mailto:hello@erikaramel.com">✉️ Écrire à Erika</a>`;
+    }
+
+    // --- vue Erika : un voyage ---
+    function adminTrip(t) {
+      return `
+        <div class="app-top erika-top"><button class="icon-btn" data-admin="" aria-label="Retour">←</button><div><b>${esc(t.travelers.join(" & "))}</b><small>${esc(t.title)} · code ${t.code}</small></div></div>
+        <div class="screen">
+          <div class="sec-t" style="margin-top:4px"><h2>À réserver</h2><button data-action="add">+ Ajouter une ligne</button></div>
+          <form class="card hidden" id="addForm" style="--sh:var(--yellow);margin-bottom:14px">
+            <div class="field"><label>Type</label><select name="type">${Object.entries(TYPES).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("")}</select></div>
+            <div class="field"><label>Quoi *</label><input name="title" required placeholder="ex. Hôtel à Kanazawa · 2 nuits" /></div>
+            <div class="field"><label>Où réserver</label><input name="where" placeholder="ex. Booking" /></div>
+            <div class="field"><label>Lien</label><input name="link" type="url" placeholder="https://…" /></div>
+            <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="field"><label>Pour le</label><input name="date" type="date" /></div>
+              <div class="field"><label>Avant le</label><input name="deadline" type="date" /></div>
+            </div>
+            <div class="field"><label>Prix indicatif</label><input name="price" placeholder="ex. ≈ 180 €" /></div>
+            <div class="field"><label>Conseil</label><textarea name="note" style="min-height:70px" placeholder="ex. demander une chambre côté mer"></textarea></div>
+            <label class="check"><input type="checkbox" name="urgent" /> Urgent</label>
+            <button class="btn dark" type="submit">Ajouter au voyage</button>
+          </form>
+          ${t.items.slice().sort((a, b) => (a.deadline || "9").localeCompare(b.deadline || "9")).map((i) => `
+            <div class="item ${i.status === "done" ? "done" : ""}">
+              <span class="ic">${icon(TYPES[i.type].icon, 28)}</span>
+              <span class="tx"><b>${esc(i.title)}</b><small>${i.status === "done" ? `réservé${i.ref ? " · n° " + esc(i.ref) : ""}${i.file ? " · 📎" : ""}` : i.deadline ? "avant le " + fmtDate(i.deadline) : "à faire"}</small></span>
+              <span class="tick">${i.status === "done" ? "✓" : ""}</span>
+            </div>`).join("")}
+        </div>`;
+    }
+    function adminNew() {
+      const code = "HODO-" + Math.random().toString(36).slice(2, 6).toUpperCase().replace(/[0O1IL]/g, "X");
+      return `
+        <div class="app-top erika-top"><button class="icon-btn" data-admin="" aria-label="Retour">←</button><div><b>Nouveau voyage</b></div></div>
+        <div class="screen"><div class="stack">
+          <div class="field"><label>Voyageurs</label><input placeholder="ex. Camille & Inès" /></div>
+          <div class="field"><label>Destination</label><input placeholder="ex. Corée du Sud" /></div>
+          <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>Départ</label><input type="date" /></div><div class="field"><label>Retour</label><input type="date" /></div></div>
+          <div class="card" style="--sh:var(--mint);text-align:center"><p class="small" style="margin-bottom:8px">Code à envoyer à tes voyageurs :</p><div class="code">${code}</div></div>
+          <button class="btn dark block" data-admin="">Créer (démo)</button>
+        </div></div>`;
+    }
+
+    // --- fiche d'une réservation ---
+    function openSheet(id) {
+      const it = trip().items.find((i) => i.id === +id);
+      if (!it) return;
+      ui.sheet = it.id;
+      const el = document.createElement("div");
+      el.innerHTML = `<div class="sheet-bg" id="sbg"></div>
+        <div class="sheet" id="sheet" role="dialog" aria-label="${esc(it.title)}">
+          <div class="grip"></div>
+          <div class="row" style="gap:12px;flex-wrap:nowrap"><span class="ic" style="flex:0 0 auto">${icon(TYPES[it.type].icon, 44)}</span><div><span class="small">${TYPES[it.type].label}</span><h2>${esc(it.title)}</h2></div></div>
+          <div class="kv">
+            ${it.date ? `<span>Pour le</span><b>${fmtDate(it.date, { weekday: "long", day: "numeric", month: "long" })}</b>` : ""}
+            ${it.deadline ? `<span>Avant le</span><b>${fmtDate(it.deadline, { day: "numeric", month: "long", year: "numeric" })}</b>` : ""}
+            <span>Où</span><b>${esc(it.where)}</b>
+            ${it.price ? `<span>Prix indicatif</span><b>${esc(it.price)}</b>` : ""}
+          </div>
+          ${it.note ? `<div class="note tip" style="margin-bottom:12px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${esc(it.note)}</span></div>` : ""}
+          ${it.link ? `<a class="btn block" href="${esc(it.link)}" target="_blank" rel="noopener" style="margin-bottom:14px">Réserver sur ${esc(it.where.split(" ")[0])} ↗</a>` : ""}
+          <form id="itemForm" class="stack" style="gap:12px">
+            <label class="switch">C’est réservé !<input type="checkbox" name="done" ${it.status === "done" ? "checked" : ""} /><i></i></label>
+            <div class="field"><label>N° de réservation <span class="small">(facultatif)</span></label><input name="ref" value="${esc(it.ref)}" placeholder="ex. 4821 339 610" /></div>
+            <div class="field"><label>Prix payé <span class="small">(facultatif)</span></label><input name="paid" value="${esc(it.paid)}" placeholder="ex. 498 €" /></div>
+            <label class="file"><input type="file" name="file" accept="application/pdf,image/*" /><span>📎</span><span id="fname">${it.file ? esc(it.file) : "Joindre la confirmation (PDF ou capture) · facultatif"}</span></label>
+            <div class="field"><label>Note pour moi</label><textarea name="mynote" style="min-height:70px" placeholder="ex. chambre 2 lits, check-in 15:00">${esc(it.mynote || "")}</textarea></div>
+            <button class="btn dark block" type="submit">Enregistrer</button>
+          </form>
+        </div>`;
+      $phone.append(...el.children);
+      requestAnimationFrame(() => { document.getElementById("sbg").classList.add("show"); document.getElementById("sheet").classList.add("open"); });
+      document.getElementById("sbg").onclick = closeSheet;
+      const form = document.getElementById("itemForm");
+      form.file.onchange = () => { if (form.file.files[0]) document.getElementById("fname").textContent = form.file.files[0].name; };
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        it.status = form.done.checked ? "done" : "todo";
+        it.ref = form.ref.value.trim(); it.paid = form.paid.value.trim(); it.mynote = form.mynote.value.trim();
+        if (form.file.files[0]) it.file = form.file.files[0].name; // la maquette ne garde que le nom du fichier
+        save(); closeSheet(); render();
+        toast(it.status === "done" ? "Bien joué, c’est coché ✓" : "Enregistré");
+      };
+    }
+    function closeSheet() {
+      const s = document.getElementById("sheet"), bg = document.getElementById("sbg");
+      if (!s) return;
+      s.classList.remove("open"); bg.classList.remove("show");
+      setTimeout(() => { s.remove(); bg.remove(); }, 280);
+      ui.sheet = null;
+    }
+
+    function toast(msg) {
+      let el = document.querySelector(".toast");
+      if (!el) { el = document.createElement("div"); el.className = "toast"; document.body.appendChild(el); }
+      el.textContent = msg; el.classList.add("show");
+      clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2200);
+    }
+
+    function render() {
+      const top = document.getElementById("scr")?.scrollTop || 0;
+      $phone.innerHTML = SCREENS[ui.screen]();
+      if (ui.keepScroll && document.getElementById("scr")) document.getElementById("scr").scrollTop = top;
+      ui.keepScroll = false;
+    }
+
+    // ============ Interactions ============
+    $phone.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-go],[data-tab],[data-filter],[data-open],[data-action],[data-admin],[data-fill]");
+      if (!t) return;
+      if (t.dataset.go) { ui.screen = t.dataset.go; ui.admin = null; if (t.dataset.go === "app") ui.tab = "home"; render(); }
+      else if (t.dataset.tab) { ui.tab = t.dataset.tab; render(); }
+      else if (t.dataset.filter) { ui.filter = t.dataset.filter; ui.keepScroll = true; render(); }
+      else if (t.dataset.open) openSheet(t.dataset.open);
+      else if (t.dataset.fill) document.getElementById("c").value = t.dataset.fill;
+      else if (t.dataset.admin !== undefined) { ui.screen = "admin"; ui.admin = t.dataset.admin || null; render(); }
+      else if (t.dataset.action === "code") {
+        const c = document.getElementById("c").value.trim().toUpperCase(), m = document.getElementById("m").value.trim();
+        const err = (msg) => { document.getElementById("errTx").textContent = msg; document.getElementById("err").classList.remove("hidden"); };
+        if (c !== trip().code) return err("Ce code ne correspond à aucun voyage. Vérifie le message d’Erika.");
+        if (!/^\S+@\S+\.\S+$/.test(m)) return err("Indique ton email pour recevoir le lien de connexion.");
+        ui.screen = "sent"; render();
+      }
+      else if (t.dataset.action === "share") toast("Code copié : " + trip().code);
+      else if (t.dataset.action === "pdf") toast("Demande envoyée à Erika (démo)");
+      else if (t.dataset.action === "remind") toast("Rappel envoyé par mail (démo)");
+      else if (t.dataset.action === "add") document.getElementById("addForm").classList.toggle("hidden");
+    });
+    $phone.addEventListener("submit", (e) => {
+      if (e.target.id !== "addForm") return;
+      e.preventDefault();
+      const f = e.target, t = trip();
+      if (!f.title.value.trim()) { f.title.classList.add("invalid"); return; }
+      t.items.push({ id: Math.max(...t.items.map((i) => i.id)) + 1, type: f.type.value, title: f.title.value.trim(), where: f.where.value.trim() || "—",
+        link: f.link.value.trim(), date: f.date.value, deadline: f.deadline.value, price: f.price.value.trim(), note: f.note.value.trim(),
+        urgent: f.urgent.checked, status: "todo", ref: "", paid: "", file: "" });
+      save(); render(); toast("Ajouté : le voyageur le voit tout de suite");
+    });
+    document.getElementById("reset").onclick = () => { db = SEED(); save(); ui = { screen: "welcome", tab: "home", filter: "todo" }; render(); toast("Maquette remise à zéro"); };
+
+    render();
+  })();
+  </script>
+</body>
+</html>
