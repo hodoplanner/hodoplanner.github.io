@@ -46,6 +46,10 @@
     .stepper input{width:64px !important; border:0 !important; text-align:center; min-height:42px !important; border-radius:0 !important; box-shadow:none !important; font-weight:700}
 
     .computed{font-size:13px; color:var(--ink-2); font-weight:600}
+    .included{display:grid; gap:6px; border:2px solid var(--ink); border-radius:16px; padding:12px 14px; background:var(--mint-soft); font-size:13px}
+    .included b{font-size:14px}
+    details.more{border:2px dashed var(--ink-3); border-radius:14px; padding:10px 14px; background:#fff}
+    details.more summary{cursor:pointer; font-weight:700; font-size:14px}
     .poste{display:grid; gap:10px; border:2px solid var(--ink); border-radius:16px; padding:12px 14px; background:#fff}
     .poste-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
     .poste-head b{font-size:16px}
@@ -139,50 +143,52 @@
 
         <!-- 2. Le budget -->
         <section class="card part" style="--sh:var(--yellow)">
-          <div class="part-head"><span class="num" style="--nb:var(--yellow)">2</span><div><h2>Le budget</h2><small>tes plafonds, poste par poste : je m’y tiens pour mes recherches</small></div></div>
-
-          <div class="poste">
-            <div class="poste-head"><span data-icon="ticket" data-size="34"></span><b>Les vols</b></div>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="flight_mode" value="find" checked /><span>Trouve-moi les vols</span></label>
-              <label class="choice"><input type="radio" name="flight_mode" value="have" /><span>J’ai déjà mes vols</span></label>
-              <label class="choice"><input type="radio" name="flight_mode" value="none" /><span>Pas d’avion</span></label>
-            </div>
-            <div class="field" id="flightField">
-              <label for="flight_pp">Jusqu’à combien par personne, aller-retour (€) *</label>
-              <input id="flight_pp" name="flight_pp" type="number" inputmode="numeric" min="0" step="10" placeholder="ex. 900" required />
-            </div>
-          </div>
-
-          <div class="poste">
-            <div class="poste-head"><span data-icon="house" data-size="34"></span><b>Les nuits</b></div>
-            <div class="field">
-              <label for="night_max" id="nightLabel">Jusqu’à combien par nuit, pour vous tous (€) *</label>
-              <input id="night_max" name="night_max" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 120" required />
-              <span class="computed" id="nightHelp"></span>
-            </div>
-          </div>
-
-          <div class="poste">
-            <div class="poste-head"><span data-icon="ramen" data-size="34"></span><b>Sur place</b><small>repas, transports, activités, petits achats</small></div>
+          <div class="part-head"><span class="num" style="--nb:var(--yellow)">2</span><div><h2>Le budget</h2><small>une estimation suffit, on l’affinera ensemble</small></div></div>
+          <div class="field">
+            <span class="lbl">Tu préfères l’indiquer…</span>
             <div class="choices">
               <label class="choice"><input type="radio" name="budget_mode" value="day" checked /><span>par jour et par personne</span></label>
               <label class="choice"><input type="radio" name="budget_mode" value="trip" /><span>pour tout le voyage</span></label>
             </div>
-            <div class="field">
-              <label for="budget_input" id="budgetLabel">Par jour et par personne (€) *</label>
-              <input id="budget_input" name="budget_input" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 60" required />
-              <span class="computed" id="budgetHelp"></span>
+          </div>
+          <div class="field">
+            <label for="budget_input" id="budgetLabel">Budget par jour et par personne (€) *</label>
+            <input id="budget_input" name="budget_input" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 120" required />
+            <span class="computed" id="budgetHelp"></span>
+          </div>
+          <div class="field">
+            <span class="lbl">Et les vols ?</span>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="flight_mode" value="separate" checked /><span>À part, en plus de ce budget</span></label>
+              <label class="choice"><input type="radio" name="flight_mode" value="included" /><span>Compris dans ce budget</span></label>
+              <label class="choice"><input type="radio" name="flight_mode" value="none" /><span>Pas besoin (déjà réservés, train…)</span></label>
             </div>
           </div>
-
-          <div class="sum" id="sum"></div>
+          <details class="more">
+            <summary>Je précise mes plafonds <span class="small">(facultatif)</span></summary>
+            <div class="two" style="margin-top:12px">
+              <div class="field"><label for="flight_pp">Vol : max par personne, A/R (€)</label><input id="flight_pp" name="flight_pp" type="number" inputmode="numeric" min="0" step="10" placeholder="ex. 900" /></div>
+              <div class="field"><label for="night_max">Nuit : max pour vous tous (€)</label><input id="night_max" name="night_max" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 120" /></div>
+            </div>
+          </details>
           <span class="help" id="costHint"></span>
-          <label class="check"><input type="checkbox" name="budget_flexible" value="oui" /> Mon budget est flexible</label>
           <div class="field">
-            <span class="lbl">Options</span>
-            <label class="check"><input type="checkbox" name="reminders" value="oui" /> <span>Rappels de réservation par mail, au bon moment <span class="small" id="optRem"></span></span></label>
-            <label class="check"><input type="checkbox" name="on_trip" value="oui" /> <span>Je reste dispo pendant le voyage (WhatsApp) <span class="small" id="optTrip"></span></span></label>
+            <span class="lbl">Des réductions possibles ? <span class="small">pour que je cherche les meilleurs prix</span></span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="discounts" value="Étudiant·e" /><span>🎓 Étudiant·e</span></label>
+              <label class="choice"><input type="checkbox" name="discounts" value="Moins de 26 ans" /><span>Moins de 26 ans</span></label>
+              <label class="choice"><input type="checkbox" name="discounts" value="Enfants" /><span>👶 Enfants</span></label>
+              <label class="choice"><input type="checkbox" name="discounts" value="Plus de 60 ans" /><span>Plus de 60 ans</span></label>
+              <label class="choice"><input type="checkbox" name="discounts" value="Miles / points de fidélité" /><span>✈️ Miles / points</span></label>
+              <label class="choice"><input type="checkbox" name="discounts" value="Carte bancaire avec avantages voyage" /><span>💳 Carte avec avantages</span></label>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" name="budget_flexible" value="oui" /> Mon budget est flexible</label>
+          <div class="included">
+            <b>Toujours inclus</b>
+            <span>🔔 Les rappels HodoReminder : un mail quand une réservation ouvre (Ghibli Park, PokéPark…)</span>
+            <span>💬 WhatsApp en cas de souci pendant le voyage (je réponds dès que possible, sans délai garanti)</span>
+            <span>🆘 Numéros d’urgence, ambassade et conseils pratiques du pays</span>
           </div>
         </section>
 
@@ -271,6 +277,7 @@
           <div class="breakdown" id="pRows"></div>
           <div class="price-foot"><a class="btn small" href="#contact">Envoyer ma demande →</a></div>
         </div>
+        <div class="note"><span class="ico">→</span><span><b>Et ensuite ?</b> Je t’envoie ton brief à compléter (incontournables, plafonds). Tu le valides, tu paies, et je commence les recherches : rien n’est payé avant.</span></div>
         <div class="note tip"><span class="ico">✳</span><span>Ce prix couvre la planification et le carnet. Vols, hôtels et activités sont réservés et payés par toi, directement chez les prestataires.</span></div>
       </aside>
     </div>
@@ -305,8 +312,6 @@
       document.querySelector('#contact .part-head small').textContent = "pour te prévenir à l’ouverture";
     }
 
-    $("optRem").textContent = `(+${P.REMINDERS} €)`;
-    $("optTrip").textContent = `(+${P.ON_TRIP_PER_DAY} € / jour)`;
 
     // ----- durée depuis les dates (jour de départ et de retour compris) -----
     function syncDays() {
@@ -326,46 +331,33 @@
     }
     f.end.min = f.start.value;
 
-    // ----- budget : vols / nuits / sur place -----
-    const nights = () => Math.max(1, (+f.days.value || 1) - 1);
-    const hotelTotal = () => (+f.night_max.value || 0) * nights();
-    function onsiteTotal() {
+    // ----- budget : un montant global (par jour/pers. ou total), vols à part ou compris -----
+    function budgetTotal() {
       const v = +f.budget_input.value || 0;
       return f.budget_mode.value === "day" ? v * (+f.days.value || 1) * (+f.people.value || 1) : v;
     }
-    const flightTotal = () => f.flight_mode.value === "find" ? (+f.flight_pp.value || 0) * (+f.people.value || 1) : 0;
-    // Le prix de la planification se base sur le budget sur place (nuits + reste), hors vols.
-    const groupBudget = () => hotelTotal() + onsiteTotal();
-
+    // Le prix de la planification se base sur le budget hors vols internationaux.
+    // Si les vols sont compris, on retire le plafond vol indiqué (sinon ~25 % du budget).
+    function groupBudget() {
+      const b = budgetTotal();
+      if (f.flight_mode.value !== "included") return b;
+      const fl = (+f.flight_pp.value || 0) * (+f.people.value || 1);
+      return Math.max(0, fl ? b - fl : b * 0.75);
+    }
     function syncBudget() {
-      const days = +f.days.value || 1, people = +f.people.value || 1, n = nights();
-      const findFlights = f.flight_mode.value === "find";
-      $("flightField").classList.toggle("hidden", !findFlights);
-      f.flight_pp.required = findFlights;
-
-      $("nightLabel").textContent = people > 1 ? `Jusqu’à combien par nuit, pour vous ${people} (€) *` : "Jusqu’à combien par nuit (€) *";
-      const night = +f.night_max.value || 0;
-      $("nightHelp").innerHTML = night ? `${n} nuit${n > 1 ? "s" : ""} × ${euro(night)} = <b>${euro(night * n)}</b>${people > 1 ? ` · ≈ ${euro(night / people)} par personne et par nuit` : ""}` : "Hôtel, ryokan, appartement… pour la chambre ou le logement entier.";
-
+      const days = +f.days.value || 1, people = +f.people.value || 1;
       const perDay = f.budget_mode.value === "day";
-      $("budgetLabel").textContent = perDay ? "Par jour et par personne (€) *" : `Pour tout le voyage${people > 1 ? `, pour vous ${people}` : ""} (€) *`;
-      f.budget_input.placeholder = perDay ? "ex. 60" : "ex. 1500";
+      $("budgetLabel").textContent = perDay ? "Budget par jour et par personne (€) *" : `Budget pour tout le voyage${people > 1 ? `, pour vous ${people}` : ""} (€) *`;
+      f.budget_input.placeholder = perDay ? "ex. 120" : "ex. 4000";
       f.budget_input.step = perDay ? 5 : 50;
-      const o = onsiteTotal();
-      $("budgetHelp").innerHTML = !o ? "" : perDay ? `Soit <b>${euro(o)}</b> pour tout le voyage.` : `Soit environ <b>${euro(o / days / people)}</b> par jour et par personne.`;
-
-      const fl = flightTotal(), h = hotelTotal(), total = fl + h + o;
-      const rows = [];
-      if (findFlights) rows.push(["Vols", fl ? euro(fl) : "—"]);
-      rows.push(["Nuits", h ? euro(h) : "—"], ["Sur place", o ? euro(o) : "—"]);
-      $("sum").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join("")
-        + `<div class="tot"><span>Budget total${findFlights ? "" : " (sans les vols)"}</span><b>${total ? "≈ " + euro(total) : "—"}</b></div>`;
-
+      const b = budgetTotal();
+      $("budgetHelp").innerHTML = !b ? "Hébergement, repas, transports, activités et petits achats."
+        : perDay ? `Soit <b>${euro(b)}</b> pour tout le voyage${people > 1 ? ` (${people} voyageurs)` : ""}.`
+        : `Soit environ <b>${euro(b / days / people)}</b> par jour et par personne.`;
       const cost = Planner.costFor(f.destinations.value);
-      const perPersonDay = (h + o) / days / people;
-      $("costHint").textContent = (h + o) && cost.known
-        ? `Sur place, ça fait ≈ ${euro(perPersonDay)} par jour et par personne, nuits comprises. Pour ${cost.name}, on compte souvent de ${cost.eco} € (petit budget) à ${cost.plaisir} € (confort ++).`
-        : (h + o) ? `Sur place, ça fait ≈ ${euro(perPersonDay)} par jour et par personne, nuits comprises.` : "";
+      $("costHint").textContent = cost.known
+        ? `Pour info, pour ${cost.name} on compte souvent de ${cost.eco} € (petit budget) à ${cost.plaisir} € (confort ++) par jour et par personne, sans les vols.`
+        : "";
     }
     // en changeant de mode, on convertit le montant déjà tapé
     f.querySelectorAll('input[name="budget_mode"]').forEach((r) => r.addEventListener("change", () => {
@@ -377,7 +369,7 @@
     function current() {
       return Planner.estimate({
         days: +f.days.value, people: +f.people.value, budget: groupBudget(),
-        complexity: f.complexity.value, reminders: f.reminders.checked, onTrip: f.on_trip.checked,
+        complexity: f.complexity.value,
       });
     }
 
@@ -391,8 +383,6 @@
         [`${r.days} jour${r.days > 1 ? "s" : ""} × ${r.dayRate.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} €${tiers}`, euro(r.dayRate * r.wDays)],
       ];
       if (pct) rows.push([[f.complexity.value !== "simple" ? COMPLEXITY_NAMES[f.complexity.value] : "", r.people >= P.BIG_GROUP.from ? "groupe" : ""].filter(Boolean).join(" + "), `+${pct} %`]);
-      if (f.reminders.checked) rows.push(["Rappels de réservation", euro(P.REMINDERS)]);
-      if (f.on_trip.checked) rows.push([`Dispo pendant le voyage (${r.days} j.)`, euro(P.ON_TRIP_PER_DAY * r.days)]);
       $("pRows").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join("")
         + `<div class="tot"><span>Valeur du service</span><b>${euro(r.total)}</b></div>`;
 
@@ -464,12 +454,12 @@
       add("Voyageurs", r.people);
       add("Dates flexibles", f.dates_flexible.checked ? "oui" : "");
       add("Parcours", COMPLEXITY_NAMES[f.complexity.value]);
-      add("Vols", { find: `à trouver · max ${euro(+f.flight_pp.value || 0)} / pers. A/R`, have: "déjà réservés", none: "pas d’avion" }[f.flight_mode.value]);
-      add("Nuits", `max ${euro(+f.night_max.value || 0)} / nuit pour le groupe (${nights()} nuits ≈ ${euro(hotelTotal())})`);
-      add("Sur place", `${euro(onsiteTotal())} pour le voyage (≈ ${euro(onsiteTotal() / r.days / r.people)} / pers. / jour)`);
-      add("Budget total", `≈ ${euro(flightTotal() + hotelTotal() + onsiteTotal())}`);
+      add("Budget", `${euro(budgetTotal())} pour tout le voyage (≈ ${euro(budgetTotal() / r.days / r.people)} / pers. / jour)`);
+      add("Vols", { separate: "à part, en plus du budget", included: "compris dans le budget", none: "pas besoin" }[f.flight_mode.value]);
+      add("Plafond vol", f.flight_pp.value ? `${euro(+f.flight_pp.value)} / pers. A/R` : "");
+      add("Plafond nuit", f.night_max.value ? `${euro(+f.night_max.value)} / nuit pour le groupe` : "");
+      add("Réductions", [...f.querySelectorAll('input[name="discounts"]:checked')].map((i) => i.value).join(", "));
       add("Budget flexible", f.budget_flexible.checked ? "oui" : "");
-      add("Options", [f.reminders.checked && "rappels", f.on_trip.checked && "dispo pendant le voyage"].filter(Boolean).join(", "));
       add("Estimation", priceTxt);
       lines.push("");
       add("Rythme", f.pace.value);
