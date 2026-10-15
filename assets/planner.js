@@ -165,7 +165,7 @@
     if (!OPEN && !document.body.hasAttribute("data-no-banner")) {
       const b = document.createElement("div");
       b.className = "soon-banner";
-      b.innerHTML = `🌱 HodoPlanner ouvre en ${OPENING} · <a href="devis.html#contact">préviens-moi au lancement</a>`;
+      b.innerHTML = `🌱 HodoPlanner ouvre en ${OPENING} · <a href="/devis.html#contact">préviens-moi au lancement</a>`;
       document.body.prepend(b);
     }
     const y = document.getElementById("y");

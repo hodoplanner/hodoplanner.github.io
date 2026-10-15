@@ -109,6 +109,9 @@ input:not([type="checkbox"]):not([type="radio"]), select, textarea{
   width:100%; border:2px solid var(--ink); background:#fff; color:var(--ink);
   border-radius:14px; padding:11px 13px; font:inherit; font-size:16px; outline:none; min-height:46px;
 }
+.field{min-width:0}
+input, select, textarea{max-width:100%; min-width:0}
+input[type="date"]{-webkit-appearance:none; appearance:none; display:block}
 input:focus, select:focus, textarea:focus{box-shadow:3px 3px 0 var(--blue)}
 input::placeholder, textarea::placeholder{color:var(--ink-3)}
 textarea{min-height:110px; resize:vertical}

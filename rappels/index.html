@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>HodoReminder · réserve au bon moment</title>
+  <meta name="description" content="Ghibli Park, Pokémon Café, PokéPark… Calcule quand les réservations ouvrent et ajoute le rappel à ton agenda." />
+  <link rel="icon" href="../images/brand/lapin-icone.svg" type="image/svg+xml" />
+  <link rel="icon" href="../images/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/planner.css" />
+  <style>
+    .hero{background:linear-gradient(180deg, var(--yellow-soft), var(--paper)); border-bottom:var(--line)}
+    .hero-in{display:grid; gap:14px; padding:40px 18px 34px; max-width:1120px; margin:0 auto; align-items:center}
+    @media (min-width:860px){ .hero-in{grid-template-columns:1.3fr 1fr} }
+    .hero h1{font-size:clamp(32px, 6vw, 54px); letter-spacing:-1px}
+    .hero h1 em{font-style:normal; color:var(--red)}
+    .hero p{color:var(--ink-2); max-width:560px}
+    .hero-art{display:flex; gap:10px; justify-content:center; align-items:flex-end}
+    .bell{font-size:64px; filter:drop-shadow(3px 3px 0 var(--ink))}
+
+    .tool{display:grid; gap:16px; padding:20px}
+    .tool .two{display:grid; gap:14px}
+    @media (min-width:640px){ .tool .two{grid-template-columns:1.3fr 1fr} }
+    .result{display:grid; gap:12px; border:var(--line); border-radius:18px; background:#fff; padding:16px; box-shadow:4px 4px 0 var(--mint)}
+    .result .when{font-size:clamp(20px, 3.4vw, 26px); font-weight:800; line-height:1.2}
+    .result .there{font-size:13px; color:var(--ink-2); font-weight:600}
+
+    .mine .r{display:flex; gap:12px; align-items:center; padding:10px 12px; border:2px solid var(--ink); border-radius:14px; background:#fff}
+    .mine .r + .r{margin-top:10px}
+    .mine .r div{flex:1; min-width:0}
+    .mine .r small{display:block; color:var(--ink-2); font-size:12px}
+    .mine .r .pill{font-size:11px}
+    .x{width:32px; height:32px; border-radius:10px; border:2px solid var(--ink); background:#fff; font-weight:800}
+
+    .rule{display:grid; gap:8px; align-content:start}
+    .rule h3{font-size:17px}
+    .rule p{font-size:13.5px; color:var(--ink-2)}
+    .rule .row{justify-content:space-between}
+
+    .planner-cta{display:grid; gap:10px; background:var(--ink); color:#fff; padding:24px; position:relative; overflow:hidden}
+    .planner-cta h3{font-size:clamp(21px, 3.2vw, 26px); max-width:520px}
+    .planner-cta p{opacity:.88; max-width:560px; font-size:14.5px}
+    .planner-cta .btn{justify-self:start; color:var(--ink); border-color:#fff}
+    .planner-cta img{display:none}
+    @media (min-width:700px){ .planner-cta{padding:28px 200px 28px 28px} .planner-cta img{display:block; position:absolute; right:24px; bottom:12px; width:150px} }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="../"><img src="../images/brand/lapin-logo.svg" alt="" /><b>HodoReminder</b></a>
+      <div class="top-actions">
+        <a class="back-link" href="../">HodoPlanner →</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-in">
+      <div style="display:grid;gap:12px;justify-items:start">
+        <span class="kicker">Un outil HodoPlanner · gratuit</span>
+        <span class="jp" style="font-size:18px;letter-spacing:.25em">予約リマインダー</span>
+        <h1>Réserve au bon moment.<br /><em>Ne rate plus rien.</em></h1>
+        <p>Ghibli Park, Pokémon Café, PokéPark… certaines réservations ouvrent des semaines ou des mois avant, à une heure précise du pays, et partent en quelques minutes. Indique ta date de visite : je te dis quand réserver et je l’ajoute à ton agenda.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span data-icon="pokeball" data-size="70"></span>
+        <img src="../images/brand/lapin-pattes.svg" alt="" width="150" height="150" />
+        <span data-icon="star" data-size="70"></span>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="sec">
+      <form class="card tool" id="f" style="--sh:var(--pink)" novalidate>
+        <div class="part-head" style="display:flex;gap:12px;align-items:center"><span class="num">1</span><h2 style="font-size:21px">Mon rappel</h2></div>
+        <div class="two">
+          <div class="field"><label for="rule">Le lieu</label><select id="rule" name="rule" required></select></div>
+          <div class="field"><label for="visit">Date de ma visite</label><input type="date" id="visit" name="visit" required /></div>
+        </div>
+        <div id="out"></div>
+      </form>
+    </section>
+
+    <section class="sec mine hidden" id="mineSec">
+      <div class="sec-head"><div><span class="label" style="--lb:var(--mint)">Mes rappels</span></div><h2>Sur ce téléphone <span class="jp">メモ</span></h2><p>Gardés dans ce navigateur seulement. Ajoute-les à ton agenda pour être sûr·e d’être prévenu·e.</p></div>
+      <div id="mine"></div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-head">
+        <div><span class="label" style="--lb:var(--blue)">Les lieux</span></div>
+        <h2>Ce que je surveille <span class="jp">リスト</span></h2>
+        <p>Les règles changent parfois : celles marquées « à vérifier » sont approximatives. Confirme toujours sur le site officiel.</p>
+      </div>
+      <div class="grid-3" id="rules"></div>
+    </section>
+
+    <section class="sec">
+      <div class="card planner-cta" style="--sh:var(--pink)">
+        <img src="../images/brand/lapin-carte.svg" alt="" width="150" height="150" />
+        <div><span class="label" style="--lb:var(--yellow)">Inclus dans HodoPlanner</span></div>
+        <h3>Tout ton voyage, avec les rappels automatiques</h3>
+        <p>Avec HodoPlanner, je prépare ton voyage sur mesure et chaque réservation importante arrive avec son rappel, par mail, au bon moment. Tu n’as rien à calculer.</p>
+        <a class="btn" href="../devis.html">Calculer mon devis</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <nav><a href="../">HodoPlanner</a><a href="https://guides.erikaramel.com/">HodoGuides</a><a href="../conditions.html">Conditions</a><a href="mailto:hello@erikaramel.com">Contact</a></nav>
+    © <span id="y"></span> HodoReminder · by Erika
+  </footer>
+
+  <script src="../assets/icons.js"></script>
+  <script src="../assets/planner.js"></script>
+  <script src="../assets/rules.js"></script>
+  <script>
+  (() => {
+    const f = document.getElementById("f");
+    const R = HodoRules;
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const KEY = "hodo-rappels";
+    let mine = [];
+    try { mine = JSON.parse(localStorage.getItem(KEY)) || []; } catch (_) {}
+    const saveMine = () => { try { localStorage.setItem(KEY, JSON.stringify(mine)); } catch (_) {} };
+
+    f.rule.innerHTML = `<option value="">Choisis…</option>` + R.RULES.map((r) => `<option value="${r.id}">${esc(r.name)} · ${esc(r.place)}</option>`).join("");
+    const pre = new URLSearchParams(location.search);
+    if (pre.get("lieu")) f.rule.value = pre.get("lieu");
+    if (pre.get("date")) f.visit.value = pre.get("date");
+    f.visit.min = new Date().toISOString().slice(0, 10);
+
+    const badge = (r) => r.verified ? `<span class="pill p-mint">règle vérifiée</span>` : `<span class="pill p-yellow">à vérifier</span>`;
+
+    function show() {
+      const out = document.getElementById("out");
+      const res = R.compute(f.rule.value, f.visit.value);
+      if (!res) { out.innerHTML = ""; return; }
+      const d = R.describe(res.opens), past = res.opens < new Date();
+      out.innerHTML = `<div class="result">
+        <div class="row" style="justify-content:space-between"><span class="label" style="--lb:var(--mint)">Les réservations ouvrent</span>${badge(res.rule)}</div>
+        <div class="when">${esc(d.local)}</div>
+        <div class="there">chez toi · soit le ${esc(d.there)} au Japon</div>
+        <p class="small">${esc(res.rule.how)}</p>
+        ${past ? `<div class="note warn"><span class="ico">!</span><span>C’est déjà ouvert (ou passé) : va vite voir s’il reste des places !</span></div>` : ""}
+        <div class="row">
+          <button type="button" class="btn dark small" id="cal">📅 Ajouter à mon agenda</button>
+          <button type="button" class="btn small" id="keep">🔔 Garder ce rappel</button>
+          <a class="btn small" href="${esc(res.rule.link)}" target="_blank" rel="noopener">Site officiel ↗</a>
+        </div>
+      </div>`;
+      document.getElementById("cal").onclick = () => { R.downloadIcs(res, f.visit.value); Planner.toast("Rappel téléchargé : ouvre-le pour l’ajouter à ton agenda"); };
+      document.getElementById("keep").onclick = () => {
+        if (!mine.some((m) => m.rule === res.rule.id && m.visit === f.visit.value)) mine.push({ rule: res.rule.id, visit: f.visit.value });
+        saveMine(); renderMine(); Planner.toast("Rappel gardé ✓");
+      };
+    }
+    f.addEventListener("change", show);
+
+    function renderMine() {
+      document.getElementById("mineSec").classList.toggle("hidden", !mine.length);
+      mine.sort((a, b) => R.compute(a.rule, a.visit).opens - R.compute(b.rule, b.visit).opens);
+      document.getElementById("mine").innerHTML = mine.map((m, i) => {
+        const res = R.compute(m.rule, m.visit); if (!res) return "";
+        const days = Math.ceil((res.opens - new Date()) / 86400000);
+        return `<div class="r"><span data-icon="${res.rule.icon}" data-size="38"></span>
+          <div><b>${esc(res.rule.name)}</b><small>visite le ${new Date(m.visit + "T12:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · ouverture ${esc(R.describe(res.opens).local)}</small></div>
+          <span class="pill ${days <= 7 ? "p-pink" : "p-yellow"}">${days > 0 ? `J-${days}` : "ouvert"}</span>
+          <button type="button" class="x" data-ics="${i}" aria-label="Ajouter à l’agenda">📅</button>
+          <button type="button" class="x" data-del="${i}" aria-label="Supprimer">×</button></div>`;
+      }).join("");
+      Planner.drawIcons(document.getElementById("mine"));
+    }
+    document.getElementById("mine").addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (b.dataset.del) { mine.splice(+b.dataset.del, 1); saveMine(); renderMine(); }
+      if (b.dataset.ics) { const m = mine[+b.dataset.ics]; R.downloadIcs(R.compute(m.rule, m.visit), m.visit); }
+    });
+
+    document.getElementById("rules").innerHTML = R.RULES.map((r, i) => `
+      <div class="card rule" style="--sh:${["var(--pink)", "var(--blue)", "var(--yellow)", "var(--mint)", "var(--lav)", "var(--pink)"][i % 6]}">
+        <div class="row"><span data-icon="${r.icon}" data-size="44"></span>${badge(r)}</div>
+        <h3>${esc(r.name)}</h3><span class="small">${esc(r.place)} · ${esc(r.country)}</span>
+        <p>${esc(r.how)}</p>
+        <button type="button" class="btn small" data-pick="${r.id}" style="justify-self:start">Calculer mon rappel</button>
+      </div>`).join("");
+    document.getElementById("rules").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-pick]"); if (!b) return;
+      f.rule.value = b.dataset.pick; show();
+      f.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!f.visit.value) setTimeout(() => f.visit.focus({ preventScroll: true }), 400);
+    });
+
+    renderMine(); show();
+  })();
+  </script>
+</body>
+</html>

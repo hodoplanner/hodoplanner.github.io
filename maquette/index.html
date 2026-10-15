@@ -44,7 +44,7 @@
     h1.big{font-size:30px; letter-spacing:-.8px}
     .sub{color:var(--ink-2); font-size:14px}
     .btn.block{width:100%}
-    .stack{display:grid; gap:12px}
+    .stack, form{display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
     .card{padding:14px}
     .sec-t{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:20px 0 10px}
     .sec-t h2{font-size:18px}
@@ -366,7 +366,7 @@
             <div class="field"><label>Quoi *</label><input name="title" required placeholder="ex. Hôtel à Kanazawa · 2 nuits" /></div>
             <div class="field"><label>Où réserver</label><input name="where" placeholder="ex. Booking" /></div>
             <div class="field"><label>Lien</label><input name="link" type="url" placeholder="https://…" /></div>
-            <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
               <div class="field"><label>Pour le</label><input name="date" type="date" /></div>
               <div class="field"><label>Avant le</label><input name="deadline" type="date" /></div>
             </div>
@@ -390,7 +390,7 @@
         <div class="screen"><div class="stack">
           <div class="field"><label>Voyageurs</label><input placeholder="ex. Camille & Inès" /></div>
           <div class="field"><label>Destination</label><input placeholder="ex. Corée du Sud" /></div>
-          <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>Départ</label><input type="date" /></div><div class="field"><label>Retour</label><input type="date" /></div></div>
+          <div class="two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"><div class="field"><label>Départ</label><input type="date" /></div><div class="field"><label>Retour</label><input type="date" /></div></div>
           <div class="card" style="--sh:var(--mint);text-align:center"><p class="small" style="margin-bottom:8px">Code à envoyer à tes voyageurs :</p><div class="code">${code}</div></div>
           <button class="btn dark block" data-admin="">Créer (démo)</button>
         </div></div>`;
