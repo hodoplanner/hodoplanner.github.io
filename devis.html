@@ -46,6 +46,14 @@
     .stepper input{width:64px !important; border:0 !important; text-align:center; min-height:42px !important; border-radius:0 !important; box-shadow:none !important; font-weight:700}
 
     .computed{font-size:13px; color:var(--ink-2); font-weight:600}
+    .poste{display:grid; gap:10px; border:2px solid var(--ink); border-radius:16px; padding:12px 14px; background:#fff}
+    .poste-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+    .poste-head b{font-size:16px}
+    .poste-head small{width:100%; margin-top:-6px; padding-left:44px; font-size:12px; color:var(--ink-2)}
+    .sum{display:grid; gap:6px; border:2px dashed var(--ink); border-radius:16px; padding:12px 14px; background:var(--yellow-soft); font-size:13.5px}
+    .sum div{display:flex; justify-content:space-between; gap:10px}
+    .sum div span:first-child{color:var(--ink-2)}
+    .sum .tot{border-top:2px dashed #e9b84d; padding-top:6px; font-size:15px}
     .computed b{color:var(--ink)}
 
     /* ---------- carte du prix ---------- */
@@ -131,20 +139,45 @@
 
         <!-- 2. Le budget -->
         <section class="card part" style="--sh:var(--yellow)">
-          <div class="part-head"><span class="num" style="--nb:var(--yellow)">2</span><div><h2>Le budget</h2><small>sur place, hors vols internationaux</small></div></div>
-          <div class="field">
-            <span class="lbl">Tu préfères l’indiquer…</span>
+          <div class="part-head"><span class="num" style="--nb:var(--yellow)">2</span><div><h2>Le budget</h2><small>tes plafonds, poste par poste : je m’y tiens pour mes recherches</small></div></div>
+
+          <div class="poste">
+            <div class="poste-head"><span data-icon="ticket" data-size="34"></span><b>Les vols</b></div>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="flight_mode" value="find" checked /><span>Trouve-moi les vols</span></label>
+              <label class="choice"><input type="radio" name="flight_mode" value="have" /><span>J’ai déjà mes vols</span></label>
+              <label class="choice"><input type="radio" name="flight_mode" value="none" /><span>Pas d’avion</span></label>
+            </div>
+            <div class="field" id="flightField">
+              <label for="flight_pp">Jusqu’à combien par personne, aller-retour (€) *</label>
+              <input id="flight_pp" name="flight_pp" type="number" inputmode="numeric" min="0" step="10" placeholder="ex. 900" required />
+            </div>
+          </div>
+
+          <div class="poste">
+            <div class="poste-head"><span data-icon="house" data-size="34"></span><b>Les nuits</b></div>
+            <div class="field">
+              <label for="night_max" id="nightLabel">Jusqu’à combien par nuit, pour vous tous (€) *</label>
+              <input id="night_max" name="night_max" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 120" required />
+              <span class="computed" id="nightHelp"></span>
+            </div>
+          </div>
+
+          <div class="poste">
+            <div class="poste-head"><span data-icon="ramen" data-size="34"></span><b>Sur place</b><small>repas, transports, activités, petits achats</small></div>
             <div class="choices">
               <label class="choice"><input type="radio" name="budget_mode" value="day" checked /><span>par jour et par personne</span></label>
               <label class="choice"><input type="radio" name="budget_mode" value="trip" /><span>pour tout le voyage</span></label>
             </div>
+            <div class="field">
+              <label for="budget_input" id="budgetLabel">Par jour et par personne (€) *</label>
+              <input id="budget_input" name="budget_input" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 60" required />
+              <span class="computed" id="budgetHelp"></span>
+            </div>
           </div>
-          <div class="field">
-            <label for="budget_input" id="budgetLabel">Budget par jour et par personne (€) *</label>
-            <input id="budget_input" name="budget_input" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 100" required />
-            <span class="computed" id="budgetHelp"></span>
-            <span class="help" id="costHint"></span>
-          </div>
+
+          <div class="sum" id="sum"></div>
+          <span class="help" id="costHint"></span>
           <label class="check"><input type="checkbox" name="budget_flexible" value="oui" /> Mon budget est flexible</label>
           <div class="field">
             <span class="lbl">Options</span>
@@ -293,26 +326,46 @@
     }
     f.end.min = f.start.value;
 
-    // ----- budget : saisi par jour et par personne, ou pour tout le voyage -----
-    function groupBudget() {
+    // ----- budget : vols / nuits / sur place -----
+    const nights = () => Math.max(1, (+f.days.value || 1) - 1);
+    const hotelTotal = () => (+f.night_max.value || 0) * nights();
+    function onsiteTotal() {
       const v = +f.budget_input.value || 0;
-      const days = +f.days.value || 1, people = +f.people.value || 1;
-      return f.budget_mode.value === "day" ? v * days * people : v;
+      return f.budget_mode.value === "day" ? v * (+f.days.value || 1) * (+f.people.value || 1) : v;
     }
+    const flightTotal = () => f.flight_mode.value === "find" ? (+f.flight_pp.value || 0) * (+f.people.value || 1) : 0;
+    // Le prix de la planification se base sur le budget sur place (nuits + reste), hors vols.
+    const groupBudget = () => hotelTotal() + onsiteTotal();
+
     function syncBudget() {
-      const days = +f.days.value || 1, people = +f.people.value || 1;
+      const days = +f.days.value || 1, people = +f.people.value || 1, n = nights();
+      const findFlights = f.flight_mode.value === "find";
+      $("flightField").classList.toggle("hidden", !findFlights);
+      f.flight_pp.required = findFlights;
+
+      $("nightLabel").textContent = people > 1 ? `Jusqu’à combien par nuit, pour vous ${people} (€) *` : "Jusqu’à combien par nuit (€) *";
+      const night = +f.night_max.value || 0;
+      $("nightHelp").innerHTML = night ? `${n} nuit${n > 1 ? "s" : ""} × ${euro(night)} = <b>${euro(night * n)}</b>${people > 1 ? ` · ≈ ${euro(night / people)} par personne et par nuit` : ""}` : "Hôtel, ryokan, appartement… pour la chambre ou le logement entier.";
+
       const perDay = f.budget_mode.value === "day";
-      $("budgetLabel").textContent = perDay ? "Budget par jour et par personne (€) *" : `Budget pour tout le voyage${people > 1 ? `, pour les ${people}` : ""} (€) *`;
-      f.budget_input.placeholder = perDay ? "ex. 100" : "ex. 3000";
+      $("budgetLabel").textContent = perDay ? "Par jour et par personne (€) *" : `Pour tout le voyage${people > 1 ? `, pour vous ${people}` : ""} (€) *`;
+      f.budget_input.placeholder = perDay ? "ex. 60" : "ex. 1500";
       f.budget_input.step = perDay ? 5 : 50;
-      const b = groupBudget();
-      $("budgetHelp").innerHTML = !b ? "Hébergements, transports sur place, activités et repas. Sans les vols internationaux."
-        : perDay ? `Soit <b>${euro(b)}</b> pour tout le voyage${people > 1 ? ` (${people} voyageurs)` : ""}.`
-        : `Soit environ <b>${euro(b / days / people)}</b> par jour et par personne.`;
+      const o = onsiteTotal();
+      $("budgetHelp").innerHTML = !o ? "" : perDay ? `Soit <b>${euro(o)}</b> pour tout le voyage.` : `Soit environ <b>${euro(o / days / people)}</b> par jour et par personne.`;
+
+      const fl = flightTotal(), h = hotelTotal(), total = fl + h + o;
+      const rows = [];
+      if (findFlights) rows.push(["Vols", fl ? euro(fl) : "—"]);
+      rows.push(["Nuits", h ? euro(h) : "—"], ["Sur place", o ? euro(o) : "—"]);
+      $("sum").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join("")
+        + `<div class="tot"><span>Budget total${findFlights ? "" : " (sans les vols)"}</span><b>${total ? "≈ " + euro(total) : "—"}</b></div>`;
+
       const cost = Planner.costFor(f.destinations.value);
-      $("costHint").textContent = cost.known
-        ? `Pour info, pour ${cost.name} on compte souvent de ${cost.eco} € (petit budget) à ${cost.plaisir} € (confort ++) par jour et par personne.`
-        : "";
+      const perPersonDay = (h + o) / days / people;
+      $("costHint").textContent = (h + o) && cost.known
+        ? `Sur place, ça fait ≈ ${euro(perPersonDay)} par jour et par personne, nuits comprises. Pour ${cost.name}, on compte souvent de ${cost.eco} € (petit budget) à ${cost.plaisir} € (confort ++).`
+        : (h + o) ? `Sur place, ça fait ≈ ${euro(perPersonDay)} par jour et par personne, nuits comprises.` : "";
     }
     // en changeant de mode, on convertit le montant déjà tapé
     f.querySelectorAll('input[name="budget_mode"]').forEach((r) => r.addEventListener("change", () => {
@@ -411,7 +464,10 @@
       add("Voyageurs", r.people);
       add("Dates flexibles", f.dates_flexible.checked ? "oui" : "");
       add("Parcours", COMPLEXITY_NAMES[f.complexity.value]);
-      add("Budget sur place", `${euro(r.budget)} pour tout le voyage (≈ ${euro(r.budget / r.days / r.people)} / pers. / jour, indiqué ${f.budget_mode.value === "day" ? "par jour" : "pour le voyage"})`);
+      add("Vols", { find: `à trouver · max ${euro(+f.flight_pp.value || 0)} / pers. A/R`, have: "déjà réservés", none: "pas d’avion" }[f.flight_mode.value]);
+      add("Nuits", `max ${euro(+f.night_max.value || 0)} / nuit pour le groupe (${nights()} nuits ≈ ${euro(hotelTotal())})`);
+      add("Sur place", `${euro(onsiteTotal())} pour le voyage (≈ ${euro(onsiteTotal() / r.days / r.people)} / pers. / jour)`);
+      add("Budget total", `≈ ${euro(flightTotal() + hotelTotal() + onsiteTotal())}`);
       add("Budget flexible", f.budget_flexible.checked ? "oui" : "");
       add("Options", [f.reminders.checked && "rappels", f.on_trip.checked && "dispo pendant le voyage"].filter(Boolean).join(", "));
       add("Estimation", priceTxt);
