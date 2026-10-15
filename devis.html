@@ -134,10 +134,11 @@
           <div class="part-head"><span class="num" style="--nb:var(--yellow)">2</span><div><h2>Le budget</h2><small>sur place, hors vols internationaux</small></div></div>
           <div class="field">
             <span class="lbl">Ton style de budget</span>
+            <span class="help" id="costHint"></span>
             <div class="choices">
-              <label class="choice lvl"><input type="radio" name="level" value="eco" /><span>Petit budget<small>~80 € / pers. / jour</small></span></label>
-              <label class="choice lvl"><input type="radio" name="level" value="confort" checked /><span>Confort<small>~150 € / pers. / jour</small></span></label>
-              <label class="choice lvl"><input type="radio" name="level" value="plaisir" /><span>Se faire plaisir<small>~300 € / pers. / jour</small></span></label>
+              <label class="choice lvl"><input type="radio" name="level" value="eco" /><span>Petit budget<small id="lvl-eco"></small></span></label>
+              <label class="choice lvl"><input type="radio" name="level" value="confort" checked /><span>Confort<small id="lvl-confort"></small></span></label>
+              <label class="choice lvl"><input type="radio" name="level" value="plaisir" /><span>Se faire plaisir<small id="lvl-plaisir"></small></span></label>
               <label class="choice lvl"><input type="radio" name="level" value="custom" /><span>Je connais mon budget<small>je l’indique</small></span></label>
             </div>
           </div>
@@ -295,7 +296,12 @@
     function syncBudget() {
       const lvl = f.level.value;
       const days = +f.days.value || 1, people = +f.people.value || 1;
-      if (lvl !== "custom") f.budget.value = Planner.BUDGET_LEVELS[lvl] * days * people;
+      const cost = Planner.costFor(f.destinations.value);
+      ["eco", "confort", "plaisir"].forEach((k) => { $("lvl-" + k).textContent = `~${cost[k]} € / pers. / jour`; });
+      $("costHint").textContent = cost.known
+        ? `Repères pour ${cost.name}, hébergement, repas, transports et activités compris.`
+        : "Repères moyens : ils s’adaptent quand tu indiques la destination.";
+      if (lvl !== "custom") f.budget.value = cost[lvl] * days * people;
       const b = +f.budget.value || 0;
       $("budgetHelp").innerHTML = b
         ? `≈ <b>${euro(b / days / people)}</b> par personne et par jour`

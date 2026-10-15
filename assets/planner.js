@@ -32,8 +32,40 @@
     QUOTE_ABOVE: 490,     // au-delà : devis personnalisé
   };
 
-  // Niveaux de budget proposés (€ par personne et par jour, sur place, hors vols)
-  const BUDGET_LEVELS = { eco: 80, confort: 150, plaisir: 300 };
+  // Repères de budget sur place (€ par personne et par jour, hors vols internationaux),
+  // par groupe de pays : [petit budget, confort, se faire plaisir].
+  // « words » = mots reconnus dans le champ destination (sans accents, en minuscules).
+  const COST_ZONES = [
+    { name: "l’Asie du Sud-Est", eco: 30, confort: 60, plaisir: 130,
+      words: ["vietnam", "viet nam", "thailande", "indonesie", "bali", "cambodge", "laos", "philippines", "malaisie", "sri lanka", "inde", "nepal"] },
+    { name: "le Japon", eco: 60, confort: 120, plaisir: 250, words: ["japon", "tokyo", "kyoto", "osaka", "hokkaido", "okinawa"] },
+    { name: "la Corée du Sud", eco: 50, confort: 100, plaisir: 200, words: ["coree", "seoul", "busan", "jeju"] },
+    { name: "la Chine et Taïwan", eco: 45, confort: 90, plaisir: 190, words: ["chine", "pekin", "shanghai", "taiwan", "taipei"] },
+    { name: "Singapour et Hong Kong", eco: 70, confort: 140, plaisir: 280, words: ["singapour", "hong kong", "hongkong", "macao"] },
+    { name: "l’Europe de l’Ouest", eco: 70, confort: 130, plaisir: 250,
+      words: ["france", "belgique", "italie", "espagne", "portugal", "allemagne", "pays-bas", "pays bas", "luxembourg", "autriche", "irlande", "royaume-uni", "angleterre", "ecosse", "londres", "paris", "rome", "barcelone", "grece", "chypre", "malte"] },
+    { name: "le Nord de l’Europe et la Suisse", eco: 100, confort: 180, plaisir: 330,
+      words: ["suisse", "islande", "norvege", "suede", "danemark", "finlande", "laponie"] },
+    { name: "l’Europe de l’Est et la Turquie", eco: 40, confort: 80, plaisir: 160,
+      words: ["roumanie", "pologne", "hongrie", "turquie", "croatie", "tchequie", "prague", "bulgarie", "albanie", "georgie", "istanbul"] },
+    { name: "le Maghreb, l’Égypte et la Jordanie", eco: 35, confort: 75, plaisir: 160, words: ["maroc", "tunisie", "egypte", "jordanie"] },
+    { name: "l’Afrique australe", eco: 60, confort: 130, plaisir: 280, words: ["afrique du sud", "namibie", "botswana", "lesotho", "zimbabwe", "tanzanie", "kenya"] },
+    { name: "l’Amérique du Nord", eco: 90, confort: 170, plaisir: 320, words: ["etats-unis", "etats unis", "usa", "canada", "new york", "californie", "hawai"] },
+    { name: "l’Amérique latine", eco: 40, confort: 85, plaisir: 180, words: ["mexique", "perou", "bolivie", "colombie", "argentine", "chili", "bresil", "costa rica", "guatemala", "cuba"] },
+    { name: "l’Océanie", eco: 80, confort: 150, plaisir: 290, words: ["australie", "nouvelle-zelande", "nouvelle zelande"] },
+  ];
+  const DEFAULT_COST = { name: "", eco: 60, confort: 110, plaisir: 230 };
+
+  const norm = (t) => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  /** Repères de budget pour le texte de destination (moyenne si plusieurs zones). */
+  function costFor(destText) {
+    const t = norm(destText);
+    const found = COST_ZONES.filter((z) => z.words.some((w) => t.includes(w)));
+    if (!found.length) return { ...DEFAULT_COST, known: false };
+    const avg = (k) => round5(found.reduce((s, z) => s + z[k], 0) / found.length);
+    return { name: found.map((z) => z.name).join(" + "), eco: avg("eco"), confort: avg("confort"), plaisir: avg("plaisir"), known: true };
+  }
 
   // ============================================================
 
@@ -136,6 +168,6 @@
 
   window.Planner = {
     estimate, weightedDays, euro, drawIcons, toast, send, destinationFromUrl,
-    PRICING, BUDGET_LEVELS, LAUNCH_FREE, CONTACT_EMAIL, hasForm: !!FORMSPREE_ID,
+    PRICING, costFor, COST_ZONES, LAUNCH_FREE, CONTACT_EMAIL, hasForm: !!FORMSPREE_ID,
   };
 })();

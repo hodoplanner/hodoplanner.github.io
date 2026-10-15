@@ -335,13 +335,13 @@
   <script>
     // Exemples de prix calculés avec la vraie formule (assets/planner.js)
     const EXAMPLES = [
-      { title: "City trip", meta: "5 jours · 1 voyageur · budget éco", sh: "var(--blue)", icon: "tower", days: 5, people: 1, level: "eco", complexity: "simple" },
-      { title: "Deux semaines au Japon", meta: "14 jours · 2 voyageurs · budget confort", sh: "var(--pink)", icon: "torii", days: 14, people: 2, level: "confort", complexity: "multi" },
-      { title: "Le grand voyage", meta: "1 mois · 2 voyageurs · confort · 2 pays", sh: "var(--mint)", icon: "mountain", days: 30, people: 2, level: "confort", complexity: "countries" },
+      { title: "Week-end prolongé à Rome", meta: "5 jours · 1 voyageur · petit budget", sh: "var(--blue)", icon: "tower", dest: "Italie", days: 5, people: 1, level: "eco", complexity: "simple" },
+      { title: "Deux semaines au Japon", meta: "14 jours · 2 voyageurs · budget confort", sh: "var(--pink)", icon: "torii", days: 14, people: 2, dest: "Japon", level: "confort", complexity: "multi" },
+      { title: "Viêt Nam & Cambodge", meta: "1 mois · 2 voyageurs · confort · 2 pays", sh: "var(--mint)", icon: "mountain", dest: "Vietnam, Cambodge", days: 30, people: 2, level: "confort", complexity: "countries" },
     ];
     const box = document.getElementById("examples");
     box.innerHTML = EXAMPLES.map((e) => {
-      const budget = Planner.BUDGET_LEVELS[e.level] * e.people * e.days;
+      const budget = Planner.costFor(e.dest)[e.level] * e.people * e.days;
       const r = Planner.estimate({ days: e.days, people: e.people, budget, complexity: e.complexity });
       return `<div class="card ex" style="--sh:${e.sh}">
         <div class="between"><h3>${e.title}</h3><span data-icon="${e.icon}" data-size="44"></span></div>
