@@ -1,78 +1,105 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Conditions de service — HodoPlanner</title>
-<link rel="icon" href="images/favicon.png" type="image/png" />
-<style>
-  :root{--text:#0f172a;--muted:#5b6476;--bg:#f7f9fc;--card:#fff;--accent:#7e8db0}
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--text)}
-  header{background:#fff;border-bottom:1px solid #e9eef6;padding:14px 16px;position:sticky;top:0;z-index:10}
-  .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}
-  h1{margin:0 0 10px} h2{margin:24px 0 8px;font-size:20px}
-  p,.li{color:var(--muted);line-height:1.6}
-  .card{background:var(--card);border:1px solid #e9eef6;border-radius:16px;padding:18px;box-shadow:0 14px 30px rgba(15,23,42,.06)}
-  a{color:var(--accent)}
-  ul{margin:8px 0 0 18px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Conditions de service · HodoPlanner</title>
+  <link rel="icon" href="images/brand/lapin-icone.svg" type="image/svg+xml" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/planner.css" />
+  <style>
+    .page-head{display:grid; gap:8px; padding:34px 0 20px}
+    .page-head h1{font-size:clamp(30px, 5.6vw, 44px); display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+    .page-head h1 .jp{font-size:16px}
+    .terms{display:grid; gap:16px}
+    .term{display:flex; gap:14px; align-items:flex-start}
+    .term h2{font-size:18px; margin:4px 0 8px}
+    .term p, .term li{color:var(--ink-2); font-size:14.5px; line-height:1.65}
+    .term ul{margin:0; padding-left:18px; display:grid; gap:4px}
+    .term b{color:var(--ink)}
+  </style>
 </head>
 <body>
-<header>
-  <div class="wrap" style="padding:0 16px">
-    <strong>HodoPlanner — Conditions de service</strong>
-  </div>
-</header>
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="./"><img src="images/brand/lapin-logo.svg" alt="" /><b>HodoPlanner</b></a>
+      <a class="back-link" href="./">← Retour au site</a>
+    </div>
+  </header>
 
-<div class="wrap">
-  <div class="card">
-    <h1>Conditions de service</h1>
-    <p>Dernière mise à jour : <span id="d"></span></p>
+  <main class="wrap narrow">
+    <div class="page-head">
+      <div><span class="label" style="--lb:var(--blue)">Conditions</span></div>
+      <h1>Conditions de service <span class="jp">規約</span></h1>
+      <p class="muted">Dernière mise à jour : 15 octobre 2026. En bref : je planifie, tu réserves, et pendant le lancement c’est gratuit.</p>
+    </div>
 
-    <h2>1. Nature du service</h2>
-    <p>HodoPlanner est un service de <strong>conseil et de planification</strong> de voyages. Je fournis des <strong>itinéraires</strong>, des <strong>listes d’activités</strong>, des <strong>liens</strong> vers les plateformes de réservation et des <strong>rappels</strong> (si choisis). <strong>Je ne procède pas aux réservations</strong> : vols, hôtels, trains, activités restent à réserver par le client via les liens fournis.</p>
+    <div class="terms">
+      <section class="card term" style="--sh:var(--pink)"><span class="num" style="--nb:var(--pink)">1</span><div>
+        <h2>Le service</h2>
+        <p>HodoPlanner est un service de <b>conseil et de planification</b> de voyages. Je fournis un itinéraire, un carnet de voyage, des listes d’activités, des liens vers les sites de réservation et, si l’option est choisie, des rappels. <b>Je ne réserve rien à ta place</b> : vols, hôtels, trains et activités sont réservés et payés par toi, directement auprès des prestataires.</p>
+      </div></section>
 
-    <h2>2. Disponibilités & offres</h2>
-    <ul>
-      <li>Les offres évoluent en temps réel (prix/disponibilités). <strong>Je ne garantis pas</strong> la disponibilité au moment où vous réservez.</li>
-      <li>Si une offre n’est plus disponible, je peux proposer des alternatives, selon <strong>mes disponibilités</strong>.</li>
-    </ul>
+      <section class="card term" style="--sh:var(--yellow)"><span class="num" style="--nb:var(--yellow)">2</span><div>
+        <h2>Prix et offre de lancement</h2>
+        <ul>
+          <li>Le prix affiché par le devis est une <b>estimation</b> calculée selon la durée du voyage, le budget sur place, le nombre de voyageurs et les options. Le prix final est confirmé par message avant de commencer.</li>
+          <li>Pendant l’<b>offre de lancement</b>, la planification est <b>gratuite</b>, en échange d’un avis honnête après le voyage. Tu acceptes que cet avis soit publié avec ton prénom ; tu peux demander à tout moment qu’il soit retiré.</li>
+          <li>Ma prestation est la seule chose que tu me paies. Je ne touche aucune commission sur tes réservations.</li>
+          <li>Quand le paiement en ligne sera disponible (espace client), il servira uniquement à régler ma prestation, avec facture.</li>
+        </ul>
+      </div></section>
 
-    <h2>3. Responsabilités & limites</h2>
-    <ul>
-      <li>Je ne suis <strong>pas responsable</strong> des vols annulés/retardés, des annulations d’hôtels/activités, ou de tout incident lié aux prestataires (compagnies aériennes, hôtels, plateformes, etc.). Les réclamations doivent être adressées <strong>directement au prestataire</strong>.</li>
-      <li>Je n’ai <strong>aucun lien juridique</strong> avec les prestataires recommandés.</li>
-      <li>En cas d’imprévu (ex. annulation de vol), je peux <strong>vous aider à identifier</strong> de nouvelles options, sans garantie de résultat.</li>
-    </ul>
+      <section class="card term" style="--sh:var(--blue)"><span class="num" style="--nb:var(--blue)">3</span><div>
+        <h2>Disponibilités et prix des prestataires</h2>
+        <ul>
+          <li>Les prix et disponibilités évoluent en permanence. <b>Je ne garantis pas</b> qu’une offre sera encore disponible au moment où tu réserves.</li>
+          <li>Le carnet indique quand réserver : si une réservation n’est pas faite à temps et qu’une offre disparaît, je peux proposer des alternatives selon mes disponibilités, mais aucun remboursement n’est dû pour ce motif.</li>
+        </ul>
+      </div></section>
 
-    <h2>4. Devis & tarification</h2>
-    <ul>
-      <li>Le devis affiché par l’outil est une <strong>estimation</strong>. Le prix final est confirmé par message avant démarrage.</li>
-      <li>Pendant l’<strong>offre de lancement</strong>, le service peut être proposé <strong>gratuitement contre un avis</strong>. Cette gratuité est indiquée clairement au moment de la demande.</li>
-      <li>Sauf indication contraire, les devis sont valables <strong>7 jours</strong>.</li>
-    </ul>
+      <section class="card term" style="--sh:var(--mint)"><span class="num" style="--nb:var(--mint)">4</span><div>
+        <h2>Responsabilités</h2>
+        <ul>
+          <li>Je ne suis pas responsable des retards, annulations, fermetures ou incidents liés aux prestataires (compagnies aériennes, hôtels, plateformes…). Les réclamations se font <b>directement auprès du prestataire</b>.</li>
+          <li>Je n’ai aucun lien juridique avec les prestataires recommandés.</li>
+          <li>Les informations du carnet (horaires, prix, règles d’entrée, visas) sont vérifiées avec soin au moment de la rédaction, mais peuvent changer : vérifie-les avant le départ, surtout les formalités d’entrée.</li>
+          <li>En cas d’imprévu, je peux t’aider à trouver une solution, sans garantie de résultat.</li>
+        </ul>
+      </div></section>
 
-    <h2>5. Annulation</h2>
-    <ul>
-      <li>Si vous décidez de ne pas réserver à temps et qu’une offre disparaît, <strong>aucun remboursement</strong> ne sera dû pour ce motif.</li>
-      <li>En cas d’annulation de votre part <em>après</em> validation et démarrage d’une prestation payante, des <strong>frais</strong> peuvent s’appliquer selon l’avancement.</li>
-    </ul>
+      <section class="card term" style="--sh:var(--lav)"><span class="num" style="--nb:var(--lav)">5</span><div>
+        <h2>Modifications et annulation</h2>
+        <ul>
+          <li>Les ajustements de l’itinéraire sont inclus jusqu’à ce que le carnet te convienne.</li>
+          <li>Pour une prestation payante, si tu annules après le début du travail, une partie du prix peut rester due selon l’avancement. Je te le dis toujours avant.</li>
+        </ul>
+      </div></section>
 
-    <h2>6. Propriété intellectuelle</h2>
-    <p>Les guides, cartes, check-lists et livrables restent protégés par le droit d’auteur. Un usage personnel est accordé ; toute <strong>diffusion ou revente</strong> est interdite sans accord écrit.</p>
+      <section class="card term" style="--sh:var(--pink)"><span class="num" style="--nb:var(--pink)">6</span><div>
+        <h2>Le carnet t’appartient… pour ton usage</h2>
+        <p>Les carnets, cartes, illustrations et check-lists restent protégés par le droit d’auteur. Tu peux les utiliser et les partager avec tes compagnons de voyage ; leur revente ou diffusion publique demande mon accord écrit.</p>
+      </div></section>
 
-    <h2>7. Données personnelles</h2>
-    <p>Les informations transmises (contact, préférences, dates) servent à produire le service. Je ne vends pas vos données. Pour toute question : <a href="mailto:hello@erikaramel.com">hello@erikaramel.com</a>.</p>
+      <section class="card term" style="--sh:var(--yellow)"><span class="num" style="--nb:var(--yellow)">7</span><div>
+        <h2>Tes données</h2>
+        <p>Les informations que tu m’envoies (contact, dates, préférences) servent uniquement à préparer ton voyage. Je ne les vends pas et ne les partage pas, sauf avec les outils nécessaires à l’envoi des messages. Tu peux demander à les consulter ou à les supprimer en m’écrivant.</p>
+      </div></section>
 
-    <h2>8. Droit applicable</h2>
-    <p>Le service est régi par le droit applicable dans mon pays de résidence. En cas de litige, une solution amiable sera recherchée en priorité.</p>
+      <section class="card term" style="--sh:var(--blue)"><span class="num" style="--nb:var(--blue)">8</span><div>
+        <h2>Litiges et contact</h2>
+        <p>En cas de désaccord, on cherche d’abord une solution à l’amiable. Pour toute question : <a href="mailto:hello@erikaramel.com">hello@erikaramel.com</a>.</p>
+      </div></section>
+    </div>
+  </main>
 
-    <h2>Contact</h2>
-    <p>Email : <a href="mailto:hello@erikaramel.com">hello@erikaramel.com</a></p>
-  </div>
-</div>
-
-<script>document.getElementById('d').textContent=new Date().toLocaleDateString('fr-FR')</script>
+  <footer class="foot">
+    <nav><a href="./">Accueil</a><a href="devis.html">Devis</a><a href="mailto:hello@erikaramel.com">Contact</a></nav>
+    © <span id="y"></span> HodoPlanner by Erika
+  </footer>
+  <script src="assets/planner.js"></script>
 </body>
 </html>

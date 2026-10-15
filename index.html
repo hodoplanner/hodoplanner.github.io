@@ -2,321 +2,354 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Erika Travel Planner — Voyages sur mesure</title>
-
-  <!-- Favicon -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>HodoPlanner · ton voyage sur mesure, by Erika</title>
+  <meta name="description" content="Je prépare ton voyage sur mesure et je te livre un carnet de voyage illustré : itinéraire jour par jour, réservations au bon moment, budget. Gratuit pendant le lancement." />
+  <meta property="og:title" content="HodoPlanner by Erika" />
+  <meta property="og:description" content="Tu choisis, je planifie. Un carnet de voyage illustré, jour par jour." />
+  <link rel="icon" href="images/brand/lapin-icone.svg" type="image/svg+xml" />
   <link rel="icon" href="images/favicon.png" type="image/png" />
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <!-- Police NoyhA -->
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/planner.css" />
   <style>
-    @font-face {
-      font-family: 'NoyhA';
-      src: url('font/NoyhA-Regular.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
+    /* ---------- Hero : couverture du carnet ---------- */
+    .hero{position:relative; overflow:hidden; background:linear-gradient(180deg, var(--blue-soft) 0%, #eef5fd 55%, var(--paper) 100%); border-bottom:var(--line)}
+    .hero-in{position:relative; z-index:1; display:grid; gap:18px; justify-items:center; text-align:center; padding:52px 18px 0; max-width:900px; margin:0 auto}
+    .hero .jp-big{font-family:var(--font-jp); color:#7fa9dc; font-size:clamp(26px, 5vw, 36px); letter-spacing:.35em; margin-right:-.35em}
+    .hero h1{font-size:clamp(38px, 7.6vw, 72px); letter-spacing:-1.5px}
+    .hero h1 em{font-style:normal; color:var(--red)}
+    .hero .sub{color:var(--ink-2); font-size:clamp(15px, 2.2vw, 17px); max-width:620px}
+    .hero .row{justify-content:center}
+    .scene{position:relative; height:clamp(170px, 26vw, 250px); margin-top:26px}
+    .scene svg.mnt{position:absolute; left:0; right:0; bottom:0; width:100%; height:100%}
+    .scene .bun{position:absolute; left:50%; bottom:10px; transform:translateX(-50%); width:clamp(110px, 16vw, 150px)}
+    .scene .ic{position:absolute; bottom:22px}
 
-    :root{
-      --accent:#7e8db0;     /* bleu-gris */
-      --accent-2:#ffd166;   /* jaune chaleureux */
-      --text:#0f172a;
-      --muted:#5b6476;
-      --bg:#f7f9fc;
-      --card:#ffffff;
-      --radius:18px;
-    }
+    /* ---------- Sommaire : ce qu'il y a dans le carnet ---------- */
+    .toc{display:grid; gap:12px}
+    @media (min-width:760px){ .toc{grid-template-columns:1fr 1fr} }
+    .toc-row{display:flex; gap:14px; align-items:center; padding:12px 16px; border-radius:18px}
+    .toc-row b{display:block; font-size:15.5px}
+    .toc-row small{display:block; font-size:12.5px; color:var(--ink-2)}
+    .toc-row .ill{margin-left:auto; flex:0 0 auto}
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:'NoyhA', system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
-      color:var(--text); background:var(--bg);
-      background-image: url("images/nuages-pc.png");
-      background-size:cover; background-attachment: fixed;
-    }
+    /* ---------- Aperçu du carnet (mini pages) ---------- */
+    .preview{display:grid; gap:20px}
+    @media (min-width:900px){ .preview{grid-template-columns:1fr 1fr 1fr; align-items:start} }
+    .page{background:var(--paper); border:var(--line); border-radius:16px; box-shadow:5px 5px 0 var(--sh, var(--blue)); padding:16px; display:grid; gap:10px; font-size:12px}
+    .page .label{font-size:9px; padding:3px 9px}
+    .page h4{margin:0; font-size:19px; font-weight:800; letter-spacing:-.3px; display:flex; gap:6px; align-items:baseline}
+    .page h4 .jp{font-size:11px}
+    .page-cap{text-align:center; font-size:13px; font-weight:600; color:var(--ink-2); margin-top:10px}
+    .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
+    .cal i{font-style:normal; font-size:8.5px; color:var(--ink-3); text-align:center; font-weight:600}
+    .cal span{aspect-ratio:1/1.05; border:1.6px solid var(--ink); border-radius:7px; padding:3px; font-weight:800; font-size:10px; background:var(--c, #fff); display:flex; flex-direction:column; justify-content:space-between; overflow:hidden}
+    .cal span em{font-style:normal; font-size:7px; font-weight:600; line-height:1.1}
+    .cal span.off{border:1.4px dashed #dcd6e4; background:none; color:#d4cfe0}
+    .fly{background:#fff; border:2px solid var(--ink); border-radius:12px; display:grid; grid-template-columns:1fr auto; overflow:hidden}
+    .fly-main{padding:9px 10px; display:grid; gap:2px}
+    .fly-main .codes{display:flex; justify-content:space-between; align-items:center; font-size:22px; font-weight:800}
+    .fly-main .codes::before{content:""; order:2; flex:1; margin:0 8px; border-top:2.5px dotted var(--ink)}
+    .fly-main .codes b:last-child{order:3}
+    .fly-main .t{display:flex; justify-content:space-between; font-weight:700}
+    .fly-side{background:var(--blue-soft); border-left:2px dashed var(--blue); padding:9px; font-size:9.5px; color:var(--ink-2); width:92px}
+    .fly-side b{display:block; color:var(--ink); font-size:11px}
+    .todo{display:grid; gap:6px}
+    .todo div{display:flex; gap:8px; align-items:center; background:#fff; border-radius:8px; padding:6px 8px; border:1px solid #efe9f4}
+    .todo div::before{content:""; width:11px; height:11px; border:2px solid var(--ink); border-radius:3px; flex:0 0 auto}
+    .todo div .pill{margin-left:auto; font-size:9px; padding:1px 7px}
 
-    @media(max-width:720px){
-      body{background-image: url("images/nuages-mobile.png");}
-    }
+    /* ---------- Étapes ---------- */
+    .step{display:flex; gap:14px; align-items:flex-start; padding:16px}
+    .step b{display:block; font-size:16px}
+    .step p{font-size:13.5px; color:var(--ink-2); margin-top:2px}
 
-    /* Header */
-    header{
-      position:sticky; top:0; z-index:100;
-      background:rgba(255,255,255,.9); backdrop-filter: blur(8px);
-      border-bottom:1px solid #e9eef6;
-    }
-    .bar{
-      max-width:1100px; margin:0 auto; padding:10px 14px;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-    }
-    .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text)}
-    .brand img{width:36px; height:36px; object-fit:contain}
-    .brand b{font-size:18px; letter-spacing:.2px; white-space:nowrap}
+    /* ---------- Prix ---------- */
+    .ex{display:grid; gap:8px; align-content:start}
+    .ex h3{font-size:17px}
+    .ex .meta{font-size:12.5px; color:var(--ink-2)}
+    .ex .val{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-top:4px}
+    .ex .val s{color:var(--ink-3); font-weight:600}
+    .ex .val b{font-size:30px; font-weight:800; letter-spacing:-1px}
+    .formula{margin-top:18px}
+    .formula code{font-family:inherit; font-weight:700; background:var(--yellow-soft); border-radius:6px; padding:1px 6px}
 
-    .btn{
-      display:inline-flex; align-items:center; gap:10px; height:38px;
-      padding:0 14px; border-radius:12px; border:1px solid transparent; cursor:pointer;
-      text-decoration:none; font-weight:800; flex:0 0 auto;
-    }
-    .btn.primary{background:var(--accent); color:#fff}
-    .btn.primary:hover{filter:brightness(.97)}
-    .btn.ghost{background:#fff; border-color:#e6ecf4; color:#374151}
-    .btn.ghost:hover{background:#f7fafc}
+    .launch{display:grid; gap:12px; background:var(--ink); color:#fff; position:relative; overflow:hidden; padding:24px}
+    .launch h3{font-size:clamp(22px, 3.4vw, 28px); max-width:520px}
+    .launch p{opacity:.88; max-width:540px; font-size:14.5px}
+    .launch .btn{justify-self:start; color:var(--ink); border-color:#fff}
+    .launch .mascot{display:none}
+    @media (min-width:700px){ .launch{padding:30px 220px 30px 30px} .launch .mascot{display:block; position:absolute; right:30px; bottom:14px; width:160px} }
 
-    .navlinks{
-      max-width:1100px; margin:0 auto;
-      display:flex; gap:8px; overflow-x:auto;
-      padding:8px 14px;
-      scrollbar-width:none;
-    }
-    .navlinks::-webkit-scrollbar{display:none;}
-    .navlinks a{
-      color:var(--muted); text-decoration:none; font-weight:600; font-size:14px;
-      padding:8px 12px; border-radius:12px; white-space:nowrap;
-      background:#f3f6fc;
-    }
-    .navlinks a:hover{background:#eef3fb; color:#111}
+    /* ---------- Espace client (bientôt) ---------- */
+    .app{display:grid; gap:20px; align-items:center}
+    @media (min-width:860px){ .app{grid-template-columns:1fr 1.1fr} }
+    .app ul{margin:12px 0 0; padding:0; list-style:none; display:grid; gap:8px; font-size:14.5px}
+    .app li{display:flex; gap:10px; align-items:flex-start}
+    .phone{justify-self:center; width:min(300px, 86vw); background:#fff; border:var(--line); border-radius:34px; padding:14px; box-shadow:6px 6px 0 var(--lav)}
+    .phone-in{background:var(--paper); border:2px solid var(--ink); border-radius:24px; padding:14px; display:grid; gap:10px; font-size:12px}
+    .phone-in .hd{display:flex; justify-content:space-between; align-items:center}
+    .phone-in .hd b{font-size:15px}
+    .mini{background:#fff; border:2px solid var(--ink); border-radius:12px; padding:8px 10px; display:flex; gap:8px; align-items:center}
+    .mini .pill{margin-left:auto; font-size:9.5px; padding:1px 8px}
+    .mini small{display:block; color:var(--ink-3); font-size:10px}
 
-    @media(min-width:821px){
-      .navlinks{justify-content:flex-end; overflow:visible;}
-      .navlinks a{background:transparent;}
-      .mobile-cta{margin-left:20px;}
-    }
-
-    /* Hero */
-    .hero{max-width:1100px; margin:0 auto; padding:56px 16px 28px; display:grid; gap:24px}
-    .hero h1{font-size:40px; line-height:1.1; margin:8px 0}
-    @media (max-width:720px){ .hero h1{font-size:32px} }
-    .sub{color:var(--muted); font-size:18px; max-width:780px}
-    .cta-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:8px}
-    .kpis{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; color:#475569; font-weight:700}
-    .kpis span{background:#fff; border:1px solid #e9eef6; border-radius:999px; padding:8px 12px}
-
-    /* Sections */
-    .section{max-width:1100px; margin:0 auto; padding:24px 16px 60px}
-    h2{font-size:28px; margin:0 0 12px}
-    .muted{color:var(--muted)}
-    .grid-3{display:grid; gap:14px}
-    @media(min-width:820px){ .grid-3{grid-template-columns: repeat(3, 1fr)} }
-    .card{
-      background:var(--card); border:1px solid #e9eef6; border-radius:var(--radius);
-      box-shadow:0 14px 30px rgba(15,23,42,.06); padding:18px;
-    }
-    .card h3{margin:6px 0 8px}
-    .icon{
-      width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
-      background: #eef3fb; color:#2f3e64;
-    }
-
-    /* Process */
-    .steps{display:grid; gap:14px}
-    @media(min-width:820px){ .steps{grid-template-columns:repeat(4,1fr)} }
-    .step{background:#fff; border:1px dashed #dbe3ee; border-radius:16px; padding:16px}
-
-    /* Tarifs */
-    .plans{display:grid; gap:14px}
-    @media(min-width:960px){ .plans{grid-template-columns:1fr 1fr 1fr} }
-    .price{font-size:28px; font-weight:900}
-    .tag{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#fff6d7; color:#6b4a00; font-weight:800; font-size:12px; border:1px solid #ffe8a6}
-
-    /* Avis */
-    .quote{font-style:italic; color:#334155}
-
-    /* FAQ */
-    details{
-      background:#fff; border:1px solid #e9eef6; border-radius:14px; padding:12px 14px;
-    }
-    details+details{margin-top:12px}
-    summary{cursor:pointer; font-weight:800; color:#111}
-
-    /* Contact */
-    form{display:grid; gap:12px}
-    label{font-weight:700; font-size:14px; color:#334155}
-    input, textarea, select{
-      width:100%; border:1px solid #dbe3ee; background:#f8fafc; color:var(--text);
-      border-radius:12px; padding:12px; font-size:14px; outline:none;
-    }
-    textarea{min-height:120px; resize:vertical}
-
-    /* Footer */
-    footer{padding:24px 16px; text-align:center; color:#64748b; border-top:1px solid #e9eef6; background:#fff}
-    .small{font-size:13px}
+    details.card{padding:0; box-shadow:3px 3px 0 var(--sh, var(--blue))}
+    details + details{margin-top:12px}
+    summary{cursor:pointer; list-style:none; padding:14px 16px; font-weight:700; display:flex; justify-content:space-between; gap:12px}
+    summary::-webkit-details-marker{display:none}
+    summary::after{content:"+"; font-weight:800; font-size:18px; line-height:1}
+    details[open] summary::after{content:"–"}
+    details p{padding:0 16px 16px; color:var(--ink-2); font-size:14px}
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="bar">
-      <a class="brand" href="#top">
-        <img src="images/favicon.png" alt="Erika Travel Planner" />
-        <b>Erika Travel Planner</b>
-      </a>
-      <a href="formulaire.html" class="btn primary mobile-cta">
-        <i class="fa-solid fa-calendar-check"></i> Devis gratuit
-      </a>
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="./"><img src="images/brand/lapin-logo.svg" alt="" /><b>HodoPlanner</b></a>
+      <div class="top-actions">
+        <nav class="nav-links" aria-label="Navigation principale">
+          <a href="#carnet">Le carnet</a>
+          <a href="#etapes">Comment ça marche</a>
+          <a href="#prix">Prix</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <a href="devis.html" class="btn dark small" data-keep-query>Mon devis</a>
+      </div>
     </div>
-    <nav class="navlinks" aria-label="Navigation principale">
-      <a href="#offre">Offre</a>
-      <a href="#process">Process</a>
-      <a href="#tarifs">Tarifs</a>
-      <a href="#faq">FAQ</a>
-    </nav>
   </header>
 
-  <!-- Hero -->
-  <section class="hero" id="top">
-    <div>
-      <h1>Voyage sur mesure, sans stress.<br/>Tu choisis, je planifie.</h1>
-      <p class="sub">
-        Itinéraires personnalisés, réservations au bon moment, astuces locales
-        (transports, eSIM, pass, restos, activités). Tu gagnes du temps, tu évites
-        les pièges, et tu profites.
-      </p>
-      <div class="cta-row">
-        <a href="formulaire.html" class="btn primary"><i class="fa-solid fa-paper-plane"></i> Demander un devis</a>
-        <a href="https://wa.me/XXXXXXXXXXX" target="_blank" class="btn ghost"><i class="fa-brands fa-whatsapp"></i> Discuter sur WhatsApp</a>
+  <main>
+    <!-- ===== Couverture ===== -->
+    <section class="hero">
+      <div class="flakes" aria-hidden="true">
+        <span style="top:9%;left:7%">✳</span><span style="top:16%;right:9%;font-size:24px">✳</span>
+        <span style="top:44%;left:13%;font-size:13px">✳</span><span style="top:38%;right:15%;font-size:14px">✳</span>
+        <span style="top:3%;left:52%;font-size:12px">✳</span>
       </div>
-      <div class="kpis">
-        <span><i class="fa-solid fa-star"></i> 100% sur-mesure</span>
-        <span><i class="fa-solid fa-earth-asia"></i> Japon · Corée · Asie & +</span>
-        <span><i class="fa-solid fa-clock"></i> Réponse sous 24h</span>
+      <div class="hero-in">
+        <span class="kicker">Planification de voyage · by Erika</span>
+        <span class="jp-big" aria-hidden="true">旅の計画</span>
+        <h1>Tu rêves.<br />Je <em>planifie.</em></h1>
+        <p class="sub">Je prépare ton voyage sur mesure et je te livre un <b>carnet de voyage illustré</b> : itinéraire jour par jour, ce qu’il faut réserver et quand, hébergements, transports et budget.</p>
+        <div class="row">
+          <a href="devis.html" class="btn dark" data-keep-query>Calculer mon devis</a>
+          <a href="#carnet" class="btn">Voir le carnet</a>
+        </div>
+        <div class="row">
+          <span class="pill dark">🎁 Gratuit pendant le lancement</span>
+          <span class="pill p-pink">100 % sur mesure</span>
+          <span class="pill p-yellow">Réponse sous 48 h</span>
+        </div>
       </div>
+      <div class="scene" aria-hidden="true">
+        <svg class="mnt" viewBox="0 0 1200 250" preserveAspectRatio="none">
+          <path d="M0 250 L0 150 L160 60 L300 170 L470 30 L640 160 L820 70 L1000 170 L1200 90 L1200 250 Z" fill="#cfe3f8"/>
+          <path d="M140 72 L160 60 L182 74 L168 82 L158 76 Z M448 44 L470 30 L494 46 L478 56 L468 48 Z M800 82 L820 70 L842 84 L828 92 L818 86 Z" fill="#fff"/>
+          <path d="M0 250 L0 200 C200 170 380 215 600 195 C820 175 1000 210 1200 185 L1200 250 Z" fill="#fff"/>
+        </svg>
+        <span class="ic" style="left:9%" data-icon="pagoda" data-size="64"></span>
+        <span class="ic" style="right:10%" data-icon="mountain" data-size="64"></span>
+        <span class="ic" style="left:26%;bottom:14px" data-icon="train" data-size="54"></span>
+        <span class="ic" style="right:27%;bottom:16px" data-icon="onsen" data-size="54"></span>
+        <img class="bun" src="images/brand/lapin-carte.svg" alt="" />
+      </div>
+    </section>
+
+    <div class="wrap">
+      <!-- ===== Le carnet ===== -->
+      <section class="sec" id="carnet">
+        <div class="sec-head">
+          <div><span class="label">Le carnet</span></div>
+          <h2>Ce que tu reçois <span class="jp">目次</span></h2>
+          <p>Un PDF illustré et cliquable, pensé pour être ouvert sur ton téléphone pendant le voyage. Chaque carnet est fait main pour toi.</p>
+        </div>
+        <div class="toc">
+          <div class="card toc-row" style="--sh:var(--pink)"><span class="num" style="--nb:var(--pink)">1</span><div><b>À ne pas rater</b><small>les échéances de réservation et de paiement, dans l’ordre</small></div><span class="ill" data-icon="ticket" data-size="40"></span></div>
+          <div class="card toc-row" style="--sh:var(--blue)"><span class="num" style="--nb:var(--blue)">2</span><div><b>Le voyage en un coup d’œil</b><small>carte du parcours, bases nuit par nuit, calendrier</small></div><span class="ill" data-icon="wheel" data-size="40"></span></div>
+          <div class="card toc-row" style="--sh:var(--yellow)"><span class="num" style="--nb:var(--yellow)">3</span><div><b>Vols, hébergements, transports</b><small>horaires, liens, conseils de siège, location de voiture</small></div><span class="ill" data-icon="train" data-size="40"></span></div>
+          <div class="card toc-row" style="--sh:var(--mint)"><span class="num" style="--nb:var(--mint)">4</span><div><b>Jour par jour</b><small>le programme de chaque journée, avec ses lieux sur la carte</small></div><span class="ill" data-icon="torii" data-size="40"></span></div>
+          <div class="card toc-row" style="--sh:var(--lav)"><span class="num" style="--nb:var(--lav)">5</span><div><b>À goûter &amp; à rapporter</b><small>spécialités locales, adresses testées, petites envies à cocher</small></div><span class="ill" data-icon="ramen" data-size="40"></span></div>
+          <div class="card toc-row" style="--sh:var(--pink)"><span class="num" style="--nb:var(--pink)">6</span><div><b>Budget &amp; pratique</b><small>enveloppes, météo, urgences, phrases utiles</small></div><span class="ill" data-icon="gem" data-size="40"></span></div>
+        </div>
+
+        <div class="preview" style="margin-top:30px" aria-label="Aperçu de pages du carnet">
+          <div>
+            <div class="page" style="--sh:var(--mint)">
+              <div><span class="label">Calendrier</span></div>
+              <h4>Nos 14 jours <span class="jp">カレンダー</span></h4>
+              <div class="cal">
+                <i>lun</i><i>mar</i><i>mer</i><i>jeu</i><i>ven</i><i>sam</i><i>dim</i>
+                <span class="off">1</span><span class="off">2</span><span class="off">3</span><span class="off">4</span>
+                <span style="--c:var(--yellow-soft)">5<em>Vol</em></span><span style="--c:var(--mint-soft)">6<em>Tokyo</em></span><span style="--c:var(--mint-soft)">7<em>Asakusa</em></span>
+                <span style="--c:var(--mint-soft)">8<em>Nikko</em></span><span style="--c:var(--mint-soft)">9<em>Shibuya</em></span><span style="--c:var(--blue-soft)">10<em>→ Kyoto</em></span><span style="--c:var(--blue-soft)">11<em>Fushimi</em></span><span style="--c:var(--blue-soft)">12<em>Arashi­yama</em></span><span style="--c:var(--blue-soft)">13<em>Nara</em></span><span style="--c:var(--lav-soft)">14<em>Osaka</em></span>
+                <span style="--c:var(--lav-soft)">15<em>USJ</em></span><span style="--c:var(--lav-soft)">16<em>Kobe</em></span><span style="--c:var(--lav-soft)">17<em>Libre</em></span><span style="--c:var(--yellow-soft)">18<em>Retour</em></span><span class="off">19</span><span class="off">20</span><span class="off">21</span>
+              </div>
+            </div>
+            <p class="page-cap">Le calendrier du voyage</p>
+          </div>
+          <div>
+            <div class="page" style="--sh:var(--blue)">
+              <div><span class="label">Vols &amp; sièges</span></div>
+              <h4>En l’air <span class="jp">フライト</span></h4>
+              <div class="fly">
+                <div class="fly-main"><span class="pill p-blue" style="justify-self:start;font-size:9px;padding:1px 8px">5 avril · sam</span><div class="codes"><b>CDG</b><b>HND</b></div><div class="t"><span>10:55</span><span>06:40 <sup>+1</sup></span></div></div>
+                <div class="fly-side">Siège / vue<b>Côté droit (K)</b>vue sur le Fuji à l’approche</div>
+              </div>
+              <div class="fly">
+                <div class="fly-main"><span class="pill p-blue" style="justify-self:start;font-size:9px;padding:1px 8px">10 avril · jeu</span><div class="codes"><b>TYO</b><b>KYO</b></div><div class="t"><span>09:03</span><span>11:15</span></div></div>
+                <div class="fly-side">Shinkansen<b>Siège E</b>côté Fuji, voiture 7</div>
+              </div>
+            </div>
+            <p class="page-cap">Tes trajets, avec les bons conseils</p>
+          </div>
+          <div>
+            <div class="page" style="--sh:var(--pink)">
+              <div><span class="label">Réservations</span></div>
+              <h4>Encore à réserver <span class="jp">予約</span></h4>
+              <div class="todo">
+                <div>Ghibli Park<span class="pill p-pink">URGENT</span></div>
+                <div>Hôtel Kyoto<span class="pill p-yellow">à réserver</span></div>
+                <div>Pass Kansai<span class="pill p-yellow">à acheter</span></div>
+                <div>Pokémon Café<span class="pill p-blue">J-31, 18h</span></div>
+                <div>eSIM<span class="pill p-mint">fait</span></div>
+              </div>
+            </div>
+            <p class="page-cap">Quoi réserver, et quand</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Comment ça marche ===== -->
+      <section class="sec" id="etapes">
+        <div class="sec-head">
+          <div><span class="label" style="--lb:var(--blue)">Comment ça marche</span></div>
+          <h2>En 4 étapes <span class="jp">流れ</span></h2>
+        </div>
+        <div class="grid-4">
+          <div class="card step" style="--sh:var(--pink)"><span class="num" style="--nb:var(--pink)">1</span><div><b>Ton devis</b><p>Tu indiques tes dates, ton budget et tes envies. Le prix s’affiche tout de suite.</p></div></div>
+          <div class="card step" style="--sh:var(--blue)"><span class="num" style="--nb:var(--blue)">2</span><div><b>On en parle</b><p>Je reviens vers toi sous 48 h pour préciser ce qui compte pour toi.</p></div></div>
+          <div class="card step" style="--sh:var(--yellow)"><span class="num" style="--nb:var(--yellow)">3</span><div><b>Ton carnet</b><p>Itinéraire, calendrier des réservations, liens directs. On ajuste jusqu’à ce qu’il te plaise.</p></div></div>
+          <div class="card step" style="--sh:var(--mint)"><span class="num" style="--nb:var(--mint)">4</span><div><b>Tu réserves, tu pars</b><p>Tu réserves toi-même avec mes liens, au bon moment. Je réponds à tes questions jusqu’au départ.</p></div></div>
+        </div>
+        <div class="note tip" style="margin-top:18px"><span class="ico">✳</span><span><b>Tu gardes la main :</b> vols, hôtels et activités sont réservés et payés par toi, directement chez les prestataires. Je ne prends aucune commission dessus.</span></div>
+      </section>
+
+      <!-- ===== Prix ===== -->
+      <section class="sec" id="prix">
+        <div class="sec-head">
+          <div><span class="label" style="--lb:var(--yellow)">Prix</span></div>
+          <h2>Un prix qui suit ton voyage <span class="jp">料金</span></h2>
+          <p>Le prix dépend surtout de la <b>durée</b> du voyage, et un peu du <b>budget</b> sur place (plus il y a d’options à comparer, plus il y a de recherche). Les longs voyages sont dégressifs.</p>
+        </div>
+        <div class="grid-3" id="examples"></div>
+        <div class="note formula"><span class="ico">🧮</span><span>
+          <b>La formule :</b> <code>29 €</code> + pour chaque jour <code>6 € + 2 % du budget du jour</code> (max 22 €/jour).
+          Les jours 15 à 30 comptent à 60 %, les suivants à 35 %. Multi-villes +8 %, multi-pays +15 %, groupe de 5 ou plus +10 %.
+        </span></div>
+      </section>
+
+      <!-- ===== Offre de lancement ===== -->
+      <section class="sec">
+        <div class="card launch" style="--sh:var(--pink)">
+          <img class="mascot" src="images/brand/lapin-pattes.svg" alt="" width="160" height="160" />
+          <div><span class="label" style="--lb:var(--yellow)">Offre de lancement</span></div>
+          <h3>Ton carnet de voyage offert, contre un avis ✨</h3>
+          <p>HodoPlanner démarre : pendant le lancement, la planification est gratuite. En échange, tu me laisses un avis honnête après ton voyage. Le devis t’indique quand même ce que vaudrait le service.</p>
+          <a class="btn" href="devis.html" data-keep-query>J’en profite</a>
+        </div>
+      </section>
+
+      <!-- ===== Bientôt : espace client ===== -->
+      <section class="sec">
+        <div class="app">
+          <div>
+            <span class="label" style="--lb:var(--lav)">Bientôt</span>
+            <h2 style="font-size:clamp(26px,4.4vw,36px);margin-top:10px">Ton espace voyage <span class="jp">マイページ</span></h2>
+            <p class="muted" style="margin-top:8px">Un espace privé et sécurisé pour retrouver tout ton voyage au même endroit :</p>
+            <ul>
+              <li><span class="num" style="--nb:var(--mint);width:26px;height:26px;flex-basis:26px;font-size:11px">✓</span>ton carnet de voyage, toujours à jour</li>
+              <li><span class="num" style="--nb:var(--blue);width:26px;height:26px;flex-basis:26px;font-size:11px">✓</span>tes réservations et leurs échéances, à cocher</li>
+              <li><span class="num" style="--nb:var(--yellow);width:26px;height:26px;flex-basis:26px;font-size:11px">✓</span>le paiement de ma prestation en ligne, avec facture</li>
+            </ul>
+          </div>
+          <div class="phone" aria-hidden="true">
+            <div class="phone-in">
+              <div class="hd"><b>Japon · avril</b><span data-icon="bunny" data-size="34"></span></div>
+              <div class="row"><span class="pill strong">14 jours</span><span class="pill p-pink">3 à réserver</span></div>
+              <div class="mini"><span data-icon="ticket" data-size="26"></span><div>Ghibli Park<small>ouvre le 10 · 14:00</small></div><span class="pill p-pink">urgent</span></div>
+              <div class="mini"><span data-icon="house" data-size="26"></span><div>Hôtel Kyoto<small>annulation gratuite → 2 avril</small></div><span class="pill p-mint">réservé</span></div>
+              <div class="mini"><span data-icon="train" data-size="26"></span><div>Shinkansen<small>Tokyo → Kyoto</small></div><span class="pill p-yellow">à faire</span></div>
+              <div class="mini" style="background:var(--yellow-soft)"><span data-icon="gem" data-size="26"></span><div>Ma prestation<small>facture HP-0012</small></div><span class="pill p-mint">offert</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FAQ ===== -->
+      <section class="sec" id="faq">
+        <div class="sec-head">
+          <div><span class="label" style="--lb:var(--mint)">FAQ</span></div>
+          <h2>Questions fréquentes <span class="jp">よくある質問</span></h2>
+        </div>
+        <details class="card" style="--sh:var(--pink)">
+          <summary>C’est vraiment gratuit ?</summary>
+          <p>Oui, pendant le lancement. Je te demande juste un avis honnête après ton voyage. Le devis t’affiche quand même la valeur du service pour que tout soit clair.</p>
+        </details>
+        <details class="card" style="--sh:var(--blue)">
+          <summary>Tu réserves à ma place ?</summary>
+          <p>Non : tu réserves et tu paies toi-même vols, hôtels et activités, directement chez les prestataires. Je te donne les liens, le bon moment pour réserver et les pièges à éviter.</p>
+        </details>
+        <details class="card" style="--sh:var(--yellow)">
+          <summary>Quelles destinations ?</summary>
+          <p>Surtout l’Asie (Japon en tête, Corée, Chine…) et l’Europe, là où j’ai voyagé. Mes adresses testées sont sur <a href="https://guides.erikaramel.com/">HodoGuides</a>. Pour une autre destination, demande quand même !</p>
+        </details>
+        <details class="card" style="--sh:var(--mint)">
+          <summary>Combien de temps pour recevoir mon carnet ?</summary>
+          <p>Je te réponds sous 48 h. Le carnet complet prend en général une à trois semaines selon la durée du voyage : plus tôt tu me contactes, mieux c’est pour les réservations qui ouvrent tôt.</p>
+        </details>
+        <details class="card" style="--sh:var(--lav)">
+          <summary>Et si mes dates changent ?</summary>
+          <p>Je réadapte l’itinéraire. Les ajustements sont inclus jusqu’à ce que le carnet te convienne.</p>
+        </details>
+      </section>
     </div>
-  </section>
+  </main>
 
-  <!-- Offre -->
-  <section class="section" id="offre">
-    <h2>Ce que je fais pour toi</h2>
-    <p class="muted">Tu gardes la liberté, je gère la complexité.</p>
-    <div class="grid-3">
-      <div class="card">
-        <div class="icon"><i class="fa-solid fa-route"></i></div>
-        <h3>Itinéraires futés</h3>
-        <p>Jours par ville, rythme adapté, liaisons optimisées (JR Pass ou non, bus, vol intérieur).</p>
-      </div>
-      <div class="card">
-        <div class="icon"><i class="fa-solid fa-ticket"></i></div>
-        <h3>Réservations au bon moment</h3>
-        <p>Hôtels, activités, parcs (ex: Ghibli Park), transferts, eSIM, pass — au timing parfait.</p>
-      </div>
-      <div class="card">
-        <div class="icon"><i class="fa-solid fa-map-location-dot"></i></div>
-        <h3>Guides & conseils</h3>
-        <p>Cartes et listes des immanquables, restos & cafés, etiquette locale, budget & tips.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Process -->
-  <section class="section" id="process">
-    <h2>Comment ça marche</h2>
-    <div class="steps">
-      <div class="step">
-        <b>1. Brief</b>
-        <p class="muted">On se parle 20–30 min (ou formulaire) : envies, dates, budget.</p>
-      </div>
-      <div class="step">
-        <b>2. Proposition</b>
-        <p class="muted">Itinéraire & devis (forfait). Aller-retours illimités jusqu’à validation.</p>
-      </div>
-      <div class="step">
-        <b>3. Plan complet</b>
-        <p class="muted">Détail jour par jour + calendrier des réservations & liens directs.</p>
-      </div>
-      <div class="step">
-        <b>4. Suivi</b>
-        <p class="muted">Support jusqu’au départ. Option “dispo pendant le voyage”.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tarifs -->
-  <section class="section" id="tarifs">
-    <h2>Formules</h2>
-    <p class="muted">Des bases solides, ajustables selon ton projet.</p>
-    <div class="plans">
-      <div class="card">
-        <div class="tag"><i class="fa-solid fa-feather"></i> Essentiel</div>
-        <h3>Itinéraire & conseils</h3>
-        <p class="price">190€</p>
-        <ul>
-          <li>Itinéraire optimisé (7–12 jours)</li>
-          <li>Listes d’incontournables & restos</li>
-          <li>Guide PDF + cartes</li>
-        </ul>
-        <a class="btn primary" href="formulaire.html">Choisir</a>
-      </div>
-      <div class="card">
-        <div class="tag"><i class="fa-solid fa-gem"></i> Complet</div>
-        <h3>Plan + rappels de réservations</h3>
-        <p class="price">290€</p>
-        <ul>
-          <li>Tous les éléments “Essentiel”</li>
-          <li>Calendrier des réservations (vols, hôtels, activités…)</li>
-          <li>Liens directs + check-list</li>
-        </ul>
-        <a class="btn primary" href="formulaire.html">Choisir</a>
-      </div>
-      <div class="card">
-        <div class="tag"><i class="fa-solid fa-crown"></i> Sur-mesure +</div>
-        <h3>Grand voyage / famille / business</h3>
-        <p class="price">Sur devis</p>
-        <ul>
-          <li>+15 jours / multi-pays</li>
-          <li>Réservations déléguées (option)</li>
-          <li>Assistance pendant le voyage</li>
-        </ul>
-        <a class="btn primary" href="formulaire.html">Demander un devis</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Avis -->
-  <section class="section">
-    <h2>Ils recommandent</h2>
-    <div class="grid-3">
-      <div class="card">
-        <p class="quote">“On a tout réservé au bon moment, zéro stress. Kyoto + Osaka parfaits pour 9 jours.”</p>
-        <b>— Léo & Camille</b>
-      </div>
-      <div class="card">
-        <p class="quote">“Ses conseils pour le JR Pass et les temples nous ont fait gagner du temps et de l’argent.”</p>
-        <b>— Anaïs</b>
-      </div>
-      <div class="card">
-        <p class="quote">“Excellent suivi, même pour nos questions de dernière minute. Je recommande.”</p>
-        <b>— Mathieu</b>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="section" id="faq">
-    <h2>FAQ</h2>
-    <details>
-      <summary>Comment se passe le paiement ?</summary>
-      <p class="muted">Virement ou carte via lien de paiement sécurisé après validation de la proposition.</p>
-    </details>
-    <details>
-      <summary>Tu fais les réservations à ma place ?</summary>
-      <p class="muted">Par défaut je fournis le calendrier + liens. Option “délégation des réservations” possible.</p>
-    </details>
-    <details>
-      <summary>Et si je modifie les dates ?</summary>
-      <p class="muted">Je réadapte l’itinéraire — aller-retours inclus jusqu’à validation finale.</p>
-    </details>
-  </section>
-
-  <footer>
-    <div class="small">© <span id="y"></span> Erika Travel Planner — Tous droits réservés.</div>
+  <footer class="foot">
+    <nav>
+      <a href="https://guides.erikaramel.com/">HodoGuides</a>
+      <a href="devis.html" data-keep-query>Devis</a>
+      <a href="conditions.html">Conditions</a>
+      <a href="mailto:hello@erikaramel.com">Contact</a>
+    </nav>
+    © <span id="y"></span> HodoPlanner by Erika
   </footer>
 
-  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+  <script src="assets/icons.js"></script>
+  <script src="assets/planner.js"></script>
+  <script>
+    // Exemples de prix calculés avec la vraie formule (assets/planner.js)
+    const EXAMPLES = [
+      { title: "City trip", meta: "5 jours · 1 voyageur · budget éco", sh: "var(--blue)", icon: "tower", days: 5, people: 1, level: "eco", complexity: "simple" },
+      { title: "Deux semaines au Japon", meta: "14 jours · 2 voyageurs · budget confort", sh: "var(--pink)", icon: "torii", days: 14, people: 2, level: "confort", complexity: "multi" },
+      { title: "Le grand voyage", meta: "1 mois · 2 voyageurs · confort · 2 pays", sh: "var(--mint)", icon: "mountain", days: 30, people: 2, level: "confort", complexity: "countries" },
+    ];
+    const box = document.getElementById("examples");
+    box.innerHTML = EXAMPLES.map((e) => {
+      const budget = Planner.BUDGET_LEVELS[e.level] * e.people * e.days;
+      const r = Planner.estimate({ days: e.days, people: e.people, budget, complexity: e.complexity });
+      return `<div class="card ex" style="--sh:${e.sh}">
+        <div class="between"><h3>${e.title}</h3><span data-icon="${e.icon}" data-size="44"></span></div>
+        <div class="meta">${e.meta}</div>
+        <div class="val">${r.free ? `<s>${Planner.euro(r.total)}</s><b>0 €</b><span class="pill dark">lancement</span>` : `<b>${Planner.euro(r.total)}</b>`}</div>
+      </div>`;
+    }).join("");
+    Planner.drawIcons(box);
+  </script>
 </body>
 </html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mon devis · HodoPlanner</title>
+  <meta name="description" content="Calcule le prix de la planification de ton voyage et envoie-moi ta demande." />
+  <link rel="icon" href="images/brand/lapin-icone.svg" type="image/svg+xml" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/planner.css" />
+  <style>
+    .page-head{display:grid; gap:8px; padding:34px 0 8px}
+    .page-head h1{font-size:clamp(32px, 6vw, 48px); display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+    .page-head h1 .jp{font-size:16px}
+    .page-head p{color:var(--ink-2); max-width:620px}
+
+    .layout{display:grid; gap:22px; margin-top:20px}
+    @media (min-width:980px){ .layout{grid-template-columns:minmax(0,1fr) 360px; align-items:start} .side{position:sticky; top:84px} }
+
+    .part{display:grid; gap:16px; padding:20px}
+    .part + .part{margin-top:22px}
+    .part-head{display:flex; gap:12px; align-items:center}
+    .part-head h2{font-size:21px}
+    .part-head small{display:block; font-size:12.5px; color:var(--ink-2); font-weight:500}
+    .two{display:grid; gap:14px}
+    @media (min-width:640px){ .two{grid-template-columns:1fr 1fr} }
+    .two.keep{grid-template-columns:auto auto; justify-content:start; column-gap:22px}
+
+    /* choix en pastilles (radio / checkbox cachés) */
+    .choices{display:flex; flex-wrap:wrap; gap:8px}
+    .choice{position:relative}
+    .choice input{position:absolute; opacity:0; pointer-events:none}
+    .choice span{display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 14px; border:2px solid var(--ink); border-radius:14px; background:#fff; font-weight:600; font-size:13.5px; cursor:pointer; transition:transform .1s}
+    .choice span small{font-weight:500; color:var(--ink-2); font-size:11.5px}
+    .choice input:checked + span{background:var(--ink); color:#fff; box-shadow:2px 2px 0 var(--pink)}
+    .choice input:checked + span small{color:#d9d6ec}
+    .choice input:focus-visible + span{outline:3px solid var(--blue); outline-offset:2px}
+    .choice.lvl span{display:grid; gap:0; text-align:left; padding:8px 14px}
+
+    .stepper{display:flex; align-items:center; border:2px solid var(--ink); border-radius:14px; background:#fff; overflow:hidden; width:max-content}
+    .stepper button{width:44px; height:42px; border:0; background:var(--tint); font-weight:800; font-size:18px}
+    .stepper input{width:64px !important; border:0 !important; text-align:center; min-height:42px !important; border-radius:0 !important; box-shadow:none !important; font-weight:700}
+
+    .computed{font-size:13px; color:var(--ink-2); font-weight:600}
+    .computed b{color:var(--ink)}
+
+    /* ---------- carte du prix ---------- */
+    .price-card{padding:0; overflow:hidden; --sh:var(--pink)}
+    .price-top{background:var(--ink); color:#fff; padding:16px 18px 18px; display:grid; gap:6px}
+    .price-top .label{justify-self:start}
+    .price-big{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+    .price-big s{font-size:20px; font-weight:600; opacity:.6}
+    .price-big b{font-size:44px; font-weight:800; letter-spacing:-1.5px; line-height:1}
+    .price-top p{font-size:13px; opacity:.85}
+    .breakdown{padding:14px 18px; display:grid; gap:7px; font-size:13px}
+    .breakdown div{display:flex; justify-content:space-between; gap:10px}
+    .breakdown div span:first-child{color:var(--ink-2)}
+    .breakdown div b{white-space:nowrap}
+    .breakdown .tot{border-top:2px dashed #e4dced; padding-top:8px; font-size:14px}
+    .price-foot{padding:0 18px 16px}
+    .side .note{margin-top:14px; font-size:13px}
+
+    /* barre de prix collée en bas sur mobile */
+    .mbar{position:fixed; z-index:40; left:10px; right:10px; bottom:calc(var(--safe-b) + 10px); display:flex; align-items:center; gap:10px; background:var(--ink); color:#fff; border:2px solid var(--ink); border-radius:16px; padding:8px 8px 8px 14px; box-shadow:3px 3px 0 var(--pink)}
+    .mbar div{display:grid; line-height:1.2}
+    .mbar small{font-size:11px; opacity:.8}
+    .mbar b{font-size:18px}
+    .mbar s{opacity:.6; font-weight:600; font-size:13px; margin-right:6px}
+    .mbar .btn{margin-left:auto; min-height:38px; color:var(--ink); border-color:#fff; box-shadow:none; font-size:13px; padding:0 12px}
+    @media (min-width:980px){ .mbar{display:none} }
+    @media (max-width:979px){ body{padding-bottom:84px} }
+
+    .done{text-align:center; display:grid; gap:12px; justify-items:center; padding:30px 20px}
+    .done h2{font-size:26px}
+  </style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="./"><img src="images/brand/lapin-logo.svg" alt="" /><b>HodoPlanner</b></a>
+      <a class="back-link" href="./">← Retour au site</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div><span class="label">Devis</span></div>
+      <h1>Ton voyage, ton devis <span class="jp">見積もり</span></h1>
+      <p>Remplis ce que tu sais déjà : le prix se calcule en direct. Plus tu m’en dis, plus ta première proposition sera juste. Les champs marqués d’un <b>*</b> sont obligatoires.</p>
+    </div>
+
+    <div class="layout">
+      <form id="f" novalidate>
+        <!-- 1. Le voyage -->
+        <section class="card part" style="--sh:var(--pink)">
+          <div class="part-head"><span class="num" style="--nb:var(--pink)">1</span><div><h2>Le voyage</h2><small>où, quand, avec qui</small></div></div>
+          <div class="field">
+            <label for="destinations">Destination(s) *</label>
+            <input id="destinations" name="destinations" placeholder="ex. Japon, ou Corée + Taïwan" required autocomplete="off" />
+          </div>
+          <div class="two">
+            <div class="field"><label for="start">Date de départ</label><input type="date" id="start" name="start" /></div>
+            <div class="field"><label for="end">Date de retour</label><input type="date" id="end" name="end" /></div>
+          </div>
+          <div class="two keep">
+            <div class="field">
+              <label for="days">Nombre de jours *</label>
+              <div class="stepper"><button type="button" data-step="days:-1" aria-label="Un jour de moins">−</button><input id="days" name="days" type="number" inputmode="numeric" min="1" max="365" value="14" required /><button type="button" data-step="days:1" aria-label="Un jour de plus">+</button></div>
+              <span class="help" id="daysHelp">Calculé depuis les dates si tu les indiques.</span>
+            </div>
+            <div class="field">
+              <label for="people">Voyageurs *</label>
+              <div class="stepper"><button type="button" data-step="people:-1" aria-label="Un voyageur de moins">−</button><input id="people" name="people" type="number" inputmode="numeric" min="1" max="30" value="2" required /><button type="button" data-step="people:1" aria-label="Un voyageur de plus">+</button></div>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" name="dates_flexible" value="oui" /> Mes dates sont flexibles</label>
+          <div class="field">
+            <span class="lbl">Le parcours</span>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="complexity" value="simple" checked /><span>Une ville ou une région</span></label>
+              <label class="choice"><input type="radio" name="complexity" value="multi" /><span>Plusieurs villes</span></label>
+              <label class="choice"><input type="radio" name="complexity" value="countries" /><span>Plusieurs pays</span></label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Le budget -->
+        <section class="card part" style="--sh:var(--yellow)">
+          <div class="part-head"><span class="num" style="--nb:var(--yellow)">2</span><div><h2>Le budget</h2><small>sur place, hors vols internationaux</small></div></div>
+          <div class="field">
+            <span class="lbl">Ton style de budget</span>
+            <div class="choices">
+              <label class="choice lvl"><input type="radio" name="level" value="eco" /><span>Petit budget<small>~80 € / pers. / jour</small></span></label>
+              <label class="choice lvl"><input type="radio" name="level" value="confort" checked /><span>Confort<small>~150 € / pers. / jour</small></span></label>
+              <label class="choice lvl"><input type="radio" name="level" value="plaisir" /><span>Se faire plaisir<small>~300 € / pers. / jour</small></span></label>
+              <label class="choice lvl"><input type="radio" name="level" value="custom" /><span>Je connais mon budget<small>je l’indique</small></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="budget">Budget sur place, pour tout le groupe (€) *</label>
+            <input id="budget" name="budget" type="number" inputmode="numeric" min="0" step="50" required />
+            <span class="computed" id="budgetHelp"></span>
+          </div>
+          <label class="check"><input type="checkbox" name="budget_flexible" value="oui" /> Mon budget est flexible</label>
+          <div class="field">
+            <span class="lbl">Options</span>
+            <label class="check"><input type="checkbox" name="reminders" value="oui" /> <span>Rappels de réservation par mail, au bon moment <span class="small" id="optRem"></span></span></label>
+            <label class="check"><input type="checkbox" name="on_trip" value="oui" /> <span>Je reste dispo pendant le voyage (WhatsApp) <span class="small" id="optTrip"></span></span></label>
+          </div>
+        </section>
+
+        <!-- 3. Les envies -->
+        <section class="card part" style="--sh:var(--mint)">
+          <div class="part-head"><span class="num" style="--nb:var(--mint)">3</span><div><h2>Tes envies</h2><small>facultatif, mais ça m’aide beaucoup</small></div></div>
+          <div class="field">
+            <span class="lbl">Rythme</span>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="pace" value="Tranquille" /><span>🐢 Tranquille</span></label>
+              <label class="choice"><input type="radio" name="pace" value="Équilibré" /><span>🚶 Équilibré</span></label>
+              <label class="choice"><input type="radio" name="pace" value="Intense" /><span>🏃 Intense</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="lbl">Ce qui te fait vibrer</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="interests" value="Culture & temples" /><span>⛩️ Culture &amp; temples</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Food & cafés" /><span>🍜 Food &amp; cafés</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Nature & randos" /><span>🏔️ Nature &amp; randos</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Onsen & détente" /><span>♨️ Onsen &amp; détente</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Parcs à thème" /><span>🎢 Parcs à thème</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Shopping & collectibles" /><span>🛍️ Shopping &amp; collectibles</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Photo" /><span>📸 Photo</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Ski & neige" /><span>🎿 Ski &amp; neige</span></label>
+              <label class="choice"><input type="checkbox" name="interests" value="Vie nocturne" /><span>🌙 Vie nocturne</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="stay">Hébergements</label>
+            <select id="stay" name="stay">
+              <option value="">Peu importe</option>
+              <option>Petits prix (auberges, capsules)</option>
+              <option>Hôtels 3★ bien placés</option>
+              <option>Hôtels 4–5★</option>
+              <option>Ryokan / maisons d’hôtes</option>
+              <option>Appartements</option>
+              <option>Un mélange</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="must_see">Ce que tu veux absolument voir ou faire</label>
+            <textarea id="must_see" name="must_see" placeholder="ex. Ghibli Park, voir le Fuji, un onsen privé, Pokémon Café, ski à Niseko…"></textarea>
+          </div>
+          <div class="field">
+            <label for="notes">Contraintes ou infos utiles</label>
+            <textarea id="notes" name="notes" placeholder="Enfants, allergies, mobilité, anniversaire pendant le voyage, permis de conduire, vols déjà réservés…"></textarea>
+          </div>
+          <label class="check"><input type="checkbox" id="visa" name="visa_help" value="oui" /> J’ai besoin d’aide pour le visa ou le passeport</label>
+          <div id="visaBlock" class="hidden" style="display:grid;gap:14px">
+            <div class="two">
+              <div class="field"><label for="nationality">Nationalité(s)</label><input id="nationality" name="nationality" placeholder="ex. belge, française" /></div>
+              <div class="field"><label for="passport_expiry">Expiration du passeport</label><input type="date" id="passport_expiry" name="passport_expiry" /></div>
+            </div>
+            <div class="note warn hidden" id="expiryWarn"><span class="ico">!</span><span>Ton passeport expire moins de 6 mois après ton retour : beaucoup de pays le refusent. On en parle ensemble.</span></div>
+          </div>
+        </section>
+
+        <!-- 4. Toi -->
+        <section class="card part" style="--sh:var(--blue)" id="contact">
+          <div class="part-head"><span class="num" style="--nb:var(--blue)">4</span><div><h2>Toi</h2><small>pour que je puisse te répondre</small></div></div>
+          <div class="two">
+            <div class="field"><label for="firstname">Prénom *</label><input id="firstname" name="firstname" required autocomplete="given-name" /></div>
+            <div class="field"><label for="email">Email *</label><input type="email" id="email" name="email" required autocomplete="email" /></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="whatsapp">WhatsApp</label><input id="whatsapp" name="whatsapp" type="tel" placeholder="+32 4…" autocomplete="tel" /><span class="help">Facultatif, pratique pour les petites questions.</span></div>
+            <div class="field">
+              <label for="source">Tu m’as connue comment ?</label>
+              <select id="source" name="source"><option value="">—</option><option>HodoGuides</option><option>Instagram</option><option>TikTok</option><option>Bouche-à-oreille</option><option>Autre</option></select>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" id="agree" name="agree" value="oui" required /> <span>J’ai lu et j’accepte les <a href="conditions.html" target="_blank" rel="noopener">conditions de service</a> *</span></label>
+          <div class="row">
+            <button class="btn dark" type="submit" id="sendBtn">✉️ Envoyer ma demande</button>
+            <span class="small">Je réponds sous 48 h.</span>
+          </div>
+        </section>
+      </form>
+
+      <!-- Prix -->
+      <aside class="side" id="price">
+        <div class="card price-card">
+          <div class="price-top">
+            <span class="label" style="--lb:var(--yellow)">Ton estimation</span>
+            <div class="price-big" id="pBig"></div>
+            <p id="pSub"></p>
+          </div>
+          <div class="breakdown" id="pRows"></div>
+          <div class="price-foot"><a class="btn small" href="#contact">Envoyer ma demande →</a></div>
+        </div>
+        <div class="note tip"><span class="ico">✳</span><span>Ce prix couvre la planification et le carnet. Vols, hôtels et activités sont réservés et payés par toi, directement chez les prestataires.</span></div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="mbar" id="mbar"><div><small>Ton estimation</small><span id="mPrice"></span></div><a class="btn small" href="#price">Détail</a></div>
+
+  <footer class="foot">
+    <nav><a href="./">Accueil</a><a href="conditions.html">Conditions</a><a href="mailto:hello@erikaramel.com">Contact</a></nav>
+    © <span id="y"></span> HodoPlanner by Erika
+  </footer>
+
+  <script src="assets/icons.js"></script>
+  <script src="assets/planner.js"></script>
+  <script>
+  (() => {
+    const f = document.getElementById("f");
+    const $ = (id) => document.getElementById(id);
+    const P = Planner.PRICING;
+    const euro = Planner.euro;
+    const LEVEL_NAMES = { eco: "petit budget", confort: "confort", plaisir: "se faire plaisir", custom: "budget indiqué" };
+    const COMPLEXITY_NAMES = { simple: "Une ville ou une région", multi: "Plusieurs villes", countries: "Plusieurs pays" };
+
+    // ----- pré-remplissage (liens depuis HodoGuides ou partagés) -----
+    const params = new URLSearchParams(location.search);
+    f.destinations.value = Planner.destinationFromUrl() || params.get("destinations") || "";
+    ["start", "end", "days", "people", "firstname", "email"].forEach((k) => { if (params.get(k)) f[k].value = params.get(k); });
+
+    $("optRem").textContent = `(+${P.REMINDERS} €)`;
+    $("optTrip").textContent = `(+${P.ON_TRIP_PER_DAY} € / jour)`;
+
+    // ----- durée depuis les dates (jour de départ et de retour compris) -----
+    function syncDays() {
+      const s = f.start.value, e = f.end.value;
+      if (s && e) {
+        const d = Math.round((new Date(e) - new Date(s)) / 86400000) + 1;
+        if (d >= 1) {
+          f.days.value = d; f.days.readOnly = true;
+          $("daysHelp").textContent = `Du départ au retour compris : ${d} jour${d > 1 ? "s" : ""} (${d - 1} nuit${d > 2 ? "s" : ""}).`;
+          return;
+        }
+        $("daysHelp").textContent = "La date de retour est avant le départ.";
+      } else {
+        $("daysHelp").textContent = "Calculé depuis les dates si tu les indiques.";
+      }
+      f.days.readOnly = false;
+    }
+    f.end.min = f.start.value;
+
+    // ----- budget suivant le niveau choisi -----
+    function syncBudget() {
+      const lvl = f.level.value;
+      const days = +f.days.value || 1, people = +f.people.value || 1;
+      if (lvl !== "custom") f.budget.value = Planner.BUDGET_LEVELS[lvl] * days * people;
+      const b = +f.budget.value || 0;
+      $("budgetHelp").innerHTML = b
+        ? `≈ <b>${euro(b / days / people)}</b> par personne et par jour`
+        : "Hébergements, transports sur place, activités et repas.";
+    }
+
+    function current() {
+      return Planner.estimate({
+        days: +f.days.value, people: +f.people.value, budget: +f.budget.value,
+        complexity: f.complexity.value, reminders: f.reminders.checked, onTrip: f.on_trip.checked,
+      });
+    }
+
+    // ----- affichage du prix -----
+    function render() {
+      const r = current();
+      const pct = Math.round((r.factor - 1) * 100);
+      const tiers = r.days > 14 ? ` <span class="small">(${r.wDays.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} j. après dégressif)</span>` : "";
+      const rows = [
+        ["Préparation du carnet", euro(P.BASE)],
+        [`${r.days} jour${r.days > 1 ? "s" : ""} × ${r.dayRate.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} €${tiers}`, euro(r.dayRate * r.wDays)],
+      ];
+      if (pct) rows.push([[f.complexity.value !== "simple" ? COMPLEXITY_NAMES[f.complexity.value] : "", r.people >= P.BIG_GROUP.from ? "groupe" : ""].filter(Boolean).join(" + "), `+${pct} %`]);
+      if (f.reminders.checked) rows.push(["Rappels de réservation", euro(P.REMINDERS)]);
+      if (f.on_trip.checked) rows.push([`Dispo pendant le voyage (${r.days} j.)`, euro(P.ON_TRIP_PER_DAY * r.days)]);
+      $("pRows").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join("")
+        + `<div class="tot"><span>Valeur du service</span><b>${euro(r.total)}</b></div>`;
+
+      if (r.free) {
+        $("pBig").innerHTML = `<s>${euro(r.total)}</s><b>0 €</b>`;
+        $("pSub").innerHTML = "🎁 Offre de lancement : gratuit, contre un avis après ton voyage.";
+        $("mPrice").innerHTML = `<s>${euro(r.total)}</s><b>0 €</b>`;
+      } else {
+        $("pBig").innerHTML = `<b>${euro(r.total)}</b>`;
+        $("pSub").textContent = r.custom ? "Grand voyage : je te confirme un prix personnalisé." : "Prix confirmé par message avant de commencer.";
+        $("mPrice").innerHTML = `<b>${euro(r.total)}</b>`;
+      }
+    }
+
+    function update(e) {
+      if (!e || ["start", "end"].includes(e.target.name)) { syncDays(); f.end.min = f.start.value; }
+      if (e && e.target.name === "budget") f.querySelector('input[name="level"][value="custom"]').checked = true;
+      syncBudget();
+      render();
+      if (e) e.target.classList?.remove("invalid");
+    }
+    f.addEventListener("input", update);
+    f.addEventListener("change", update);
+
+    // boutons − / +
+    document.querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => {
+      const [name, d] = b.dataset.step.split(":");
+      const el = f[name];
+      if (el.readOnly) { Planner.toast("La durée suit les dates : efface-les pour la changer à la main."); return; }
+      el.value = Math.max(+el.min || 1, Math.min(+el.max || 999, (+el.value || 0) + +d));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }));
+
+    // visa
+    $("visa").addEventListener("change", () => $("visaBlock").classList.toggle("hidden", !$("visa").checked));
+    function checkPassport() {
+      const exp = f.passport_expiry.value, back = f.end.value || f.start.value;
+      if (!exp || !back) { $("expiryWarn").classList.add("hidden"); return; }
+      const limit = new Date(back); limit.setMonth(limit.getMonth() + 6);
+      $("expiryWarn").classList.toggle("hidden", new Date(exp) >= limit);
+    }
+    f.passport_expiry.addEventListener("change", checkPassport);
+    f.end.addEventListener("change", checkPassport);
+
+    update();
+
+    // ----- envoi -----
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      let first = null;
+      f.querySelectorAll("[required]").forEach((el) => {
+        const ok = el.type === "checkbox" ? el.checked : el.checkValidity() && String(el.value).trim() !== "";
+        el.classList.toggle("invalid", !ok);
+        if (!ok && !first) first = el;
+      });
+      if (f.start.value && f.end.value && f.end.value < f.start.value) { f.end.classList.add("invalid"); first = first || f.end; }
+      if (first) {
+        first.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => first.focus({ preventScroll: true }), 300);
+        Planner.toast(first.type === "checkbox" ? "Coche les conditions de service pour envoyer." : "Il manque une info obligatoire.");
+        return;
+      }
+
+      const r = current();
+      const interests = [...f.querySelectorAll('input[name="interests"]:checked')].map((i) => i.value);
+      const priceTxt = r.free ? `${euro(r.total)} (offert : lancement)` : euro(r.total);
+      const fd = new FormData();
+      const lines = [];
+      const add = (label, value) => { if (value === undefined || value === null || String(value).trim() === "") return; fd.append(label, value); lines.push(`${label} : ${value}`); };
+      add("Prénom", f.firstname.value.trim());
+      add("Email", f.email.value.trim());
+      add("WhatsApp", f.whatsapp.value.trim());
+      lines.push("");
+      add("Destination(s)", f.destinations.value.trim());
+      add("Dates", f.start.value && f.end.value ? `${f.start.value} → ${f.end.value}` : "");
+      add("Durée", `${r.days} jours`);
+      add("Voyageurs", r.people);
+      add("Dates flexibles", f.dates_flexible.checked ? "oui" : "");
+      add("Parcours", COMPLEXITY_NAMES[f.complexity.value]);
+      add("Budget sur place", `${euro(r.budget)} (${LEVEL_NAMES[f.level.value]}, ≈ ${euro(r.budget / r.days / r.people)} / pers. / jour)`);
+      add("Budget flexible", f.budget_flexible.checked ? "oui" : "");
+      add("Options", [f.reminders.checked && "rappels", f.on_trip.checked && "dispo pendant le voyage"].filter(Boolean).join(", "));
+      add("Estimation", priceTxt);
+      lines.push("");
+      add("Rythme", f.pace.value);
+      add("Centres d’intérêt", interests.join(", "));
+      add("Hébergements", f.stay.value);
+      add("Incontournables", f.must_see.value.trim());
+      add("Contraintes", f.notes.value.trim());
+      if ($("visa").checked) add("Aide visa", `oui · nationalité : ${f.nationality.value || "?"} · passeport expire : ${f.passport_expiry.value || "?"}`);
+      add("Venu de", f.source.value || (params.get("destination") ? "HodoGuides" : ""));
+
+      const btn = $("sendBtn");
+      btn.disabled = true;
+      try {
+        const how = await Planner.send(fd, `Demande HodoPlanner · ${f.firstname.value.trim()} · ${f.destinations.value.trim()}`, lines);
+        const card = document.getElementById("contact");
+        card.innerHTML = how === "sent"
+          ? `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Merci ${f.firstname.value.trim().replace(/[<>&"]/g, "")} !</h2><p class="muted">Ta demande est bien partie. Je te réponds sous 48 h à l’adresse indiquée.</p></div>`
+          : `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Presque fini !</h2><p class="muted">Ton app mail vient de s’ouvrir avec ta demande déjà écrite : il ne reste plus qu’à l’envoyer.<br>Rien ne s’est ouvert ? Écris-moi à <a href="mailto:${Planner.CONTACT_EMAIL}">${Planner.CONTACT_EMAIL}</a>.</p></div>`;
+      } catch (err) {
+        btn.disabled = false;
+        Planner.toast(`Oups, l’envoi a échoué. Écris-moi à ${Planner.CONTACT_EMAIL}`);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
