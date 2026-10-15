@@ -237,6 +237,15 @@
             <label for="notes">Contraintes ou infos utiles</label>
             <textarea id="notes" name="notes" placeholder="Enfants, allergies, mobilité, anniversaire pendant le voyage, permis de conduire, vols déjà réservés…"></textarea>
           </div>
+          <div class="field">
+            <span class="lbl">Comment veux-tu retrouver ton voyage ?</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="format" value="App / espace en ligne" checked /><span>📱 Dans l’app (inclus)</span></label>
+              <label class="choice"><input type="checkbox" name="format" value="PDF" /><span>📄 En PDF</span></label>
+              <label class="choice"><input type="checkbox" name="format" value="Carnet papier" /><span>📒 Carnet papier imprimé</span></label>
+            </div>
+            <span class="help">Une autre idée (appel en visio, carte imprimée…) ? Dis-le dans « Contraintes ou infos utiles » : on s’arrange.</span>
+          </div>
           <label class="check"><input type="checkbox" id="visa" name="visa_help" value="oui" /> <span>Signale-moi si mon voyage risque de demander un <b>visa</b> ou des <b>vaccins</b></span></label>
           <div id="visaBlock" class="hidden" style="display:grid;gap:12px">
             <div class="field"><label for="nationality">Nationalité(s) des voyageurs</label><input id="nationality" name="nationality" placeholder="ex. belge, française" /><span class="help">Les règles de visa dépendent du passeport.</span></div>
@@ -462,6 +471,7 @@
       add("Budget flexible", f.budget_flexible.checked ? "oui" : "");
       add("Estimation", priceTxt);
       lines.push("");
+      add("Format", [...f.querySelectorAll('input[name="format"]:checked')].map((i) => i.value).join(", "));
       add("Rythme", f.pace.value);
       add("Centres d’intérêt", interests.join(", "));
       add("Hébergements", f.stay.value);
