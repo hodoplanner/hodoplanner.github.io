@@ -222,7 +222,7 @@
           <label class="check"><input type="checkbox" id="agree" name="agree" value="oui" required /> <span>J’ai lu et j’accepte les <a href="conditions.html" target="_blank" rel="noopener">conditions de service</a> *</span></label>
           <div class="row">
             <button class="btn dark" type="submit" id="sendBtn">✉️ Envoyer ma demande</button>
-            <span class="small">Je réponds sous 48 h.</span>
+            <span class="small" id="sendNote">Je réponds sous 48 h.</span>
           </div>
         </section>
       </form>
@@ -264,6 +264,13 @@
     const params = new URLSearchParams(location.search);
     f.destinations.value = Planner.destinationFromUrl() || params.get("destinations") || "";
     ["start", "end", "days", "people", "firstname", "email"].forEach((k) => { if (params.get(k)) f[k].value = params.get(k); });
+
+    // Mode « bientôt » : le formulaire inscrit à la liste d'attente
+    if (!Planner.OPEN) {
+      $("sendBtn").textContent = "🔔 Préviens-moi au lancement";
+      $("sendNote").textContent = `HodoPlanner ouvre en ${Planner.OPENING} : je t’écris dès que c’est prêt, avec ton devis.`;
+      document.querySelector('#contact .part-head small').textContent = "pour te prévenir à l’ouverture";
+    }
 
     $("optRem").textContent = `(+${P.REMINDERS} €)`;
     $("optTrip").textContent = `(+${P.ON_TRIP_PER_DAY} € / jour)`;
@@ -420,10 +427,10 @@
       const btn = $("sendBtn");
       btn.disabled = true;
       try {
-        const how = await Planner.send(fd, `Demande HodoPlanner · ${f.firstname.value.trim()} · ${f.destinations.value.trim()}`, lines);
+        const how = await Planner.send(fd, `${Planner.OPEN ? "Demande" : "Liste d’attente"} HodoPlanner · ${f.firstname.value.trim()} · ${f.destinations.value.trim()}`, lines);
         const card = document.getElementById("contact");
         card.innerHTML = how === "sent"
-          ? `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Merci ${f.firstname.value.trim().replace(/[<>&"]/g, "")} !</h2><p class="muted">Ta demande est bien partie. Je te réponds sous 48 h à l’adresse indiquée.</p></div>`
+          ? `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Merci ${f.firstname.value.trim().replace(/[<>&"]/g, "")} !</h2><p class="muted">${Planner.OPEN ? "Ta demande est bien partie. Je te réponds sous 48 h à l’adresse indiquée." : `C’est noté ! Je t’écris dès l’ouverture en ${Planner.OPENING}, avec ton voyage en tête.`}</p></div>`
           : `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Presque fini !</h2><p class="muted">Ton app mail vient de s’ouvrir avec ta demande déjà écrite : il ne reste plus qu’à l’envoyer.<br>Rien ne s’est ouvert ? Écris-moi à <a href="mailto:${Planner.CONTACT_EMAIL}">${Planner.CONTACT_EMAIL}</a>.</p></div>`;
       } catch (err) {
         btn.disabled = false;

@@ -14,6 +14,11 @@
   // Offre de lancement : true = la planification est offerte (contre un avis).
   const LAUNCH_FREE = true;
 
+  // Le service est-il ouvert ? false = mode « bientôt » : bannière en haut des pages,
+  // et le devis inscrit à la liste d'attente au lieu d'envoyer une demande.
+  const OPEN = false;
+  const OPENING = "2027";
+
   // Formule du devis :
   //   prix = BASE + Σ (tarif du jour × poids du jour) + options
   //   tarif du jour = DAY_MIN + DAY_PCT × (budget sur place ÷ nombre de jours), plafonné à DAY_MAX
@@ -157,6 +162,12 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     drawIcons();
+    if (!OPEN && !document.body.hasAttribute("data-no-banner")) {
+      const b = document.createElement("div");
+      b.className = "soon-banner";
+      b.innerHTML = `🌱 HodoPlanner ouvre en ${OPENING} · <a href="devis.html#contact">préviens-moi au lancement</a>`;
+      document.body.prepend(b);
+    }
     const y = document.getElementById("y");
     if (y) y.textContent = new Date().getFullYear();
     // Les liens venant de HodoGuides (?destination=…) sont transmis au devis.
@@ -168,6 +179,6 @@
 
   window.Planner = {
     estimate, weightedDays, euro, drawIcons, toast, send, destinationFromUrl,
-    PRICING, costFor, COST_ZONES, LAUNCH_FREE, CONTACT_EMAIL, hasForm: !!FORMSPREE_ID,
+    PRICING, costFor, COST_ZONES, LAUNCH_FREE, OPEN, OPENING, CONTACT_EMAIL, hasForm: !!FORMSPREE_ID,
   };
 })();
