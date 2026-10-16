@@ -37,7 +37,7 @@ const RECAP: [string, string, string, string[]][] = [
   ["Ton voyage", "#e3f0fc", "#a9cdf2", ["Destination(s)", "Dates", "Durée", "Voyageurs", "Dates flexibles", "Parcours"]],
   ["Ton budget", "#fff3d6", "#ffd98a", ["Budget", "Vols", "Plafond vol", "Plafond nuit", "Réductions", "Budget flexible"]],
   ["Tes envies", "#fde3ea", "#f6a9b9", ["Rythme", "Centres d’intérêt", "Hébergements", "Incontournables", "Contraintes", "Format"]],
-  ["À vérifier ensemble", "#dff5ea", "#8fd6b1", ["Visa / vaccins"]],
+  ["Formalités", "#dff5ea", "#8fd6b1", ["Passeport / visa", "Santé / vaccins", "Visa / vaccins"]],
 ];
 const LABEL: Record<string, string> = { "Destination(s)": "Destination", "Centres d’intérêt": "Centres d’intérêt" };
 const frDate = (iso: string) => {
@@ -47,7 +47,8 @@ const frDate = (iso: string) => {
 function niceValue(k: string, v: string) {
   if (k === "Dates") return v.split("→").map((x) => frDate(x.trim())).join(" → ");
   if (v === "oui" && (k === "Dates flexibles" || k === "Budget flexible")) return "oui, on peut ajuster";
-  if (k === "Visa / vaccins") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+  if (k === "Visa / vaccins" || k === "Passeport / visa") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+  if (k === "Santé / vaccins") return "je te dis quoi prévoir (à confirmer avec un médecin)";
   return v;
 }
 function prettyRecap(details: Record<string, unknown> | null | undefined, summary: string) {

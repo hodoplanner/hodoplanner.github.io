@@ -48,6 +48,13 @@
     .computed{font-size:13px; color:var(--ink-2); font-weight:600}
     .included{display:grid; gap:6px; border:2px solid var(--ink); border-radius:16px; padding:12px 14px; background:var(--mint-soft); font-size:13px}
     .included b{font-size:14px}
+    .formal{display:grid; gap:10px; border:2.5px solid var(--ink); border-radius:16px; padding:14px; background:var(--lav-soft); box-shadow:3px 3px 0 var(--lav)}
+    .formal > b{font-size:15px}
+    .counts{display:grid; gap:8px; margin-top:10px}
+    .counts:empty, .counts:has(> span:only-child){display:none}
+    .count-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13.5px; font-weight:600}
+    .count-row > span:first-child{flex:1 1 140px; min-width:0}
+    .counts .count-row input{width:72px; flex:0 0 72px; min-height:38px; padding:4px 6px; text-align:center}
     details.more{border:2px dashed var(--ink-3); border-radius:14px; padding:10px 14px; background:#fff}
     details.more summary{cursor:pointer; font-weight:700; font-size:14px}
     .poste{display:grid; gap:10px; border:2px solid var(--ink); border-radius:16px; padding:12px 14px; background:#fff}
@@ -168,7 +175,7 @@
             <summary>Je précise mes plafonds <span class="small">(facultatif)</span></summary>
             <div class="two" style="margin-top:12px">
               <div class="field"><label for="flight_pp">Vol : max par personne, A/R (€)</label><input id="flight_pp" name="flight_pp" type="number" inputmode="numeric" min="0" step="10" placeholder="ex. 900" /></div>
-              <div class="field"><label for="night_max">Nuit : max pour vous tous (€)</label><input id="night_max" name="night_max" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 120" /></div>
+              <div class="field"><label for="night_max">Logement : max <u>par nuit</u>, pour tout le groupe (€)</label><input id="night_max" name="night_max" type="number" inputmode="numeric" min="0" step="5" placeholder="ex. 120" /><span class="help">Le prix d’une nuit pour vous tous, pas par personne.</span></div>
             </div>
           </details>
           <span class="help" id="costHint"></span>
@@ -182,6 +189,7 @@
               <label class="choice"><input type="checkbox" name="discounts" value="Miles / points de fidélité" /><span><i class="pic" data-picto="plane"></i> Miles / points</span></label>
               <label class="choice"><input type="checkbox" name="discounts" value="Carte bancaire avec avantages voyage" /><span><i class="pic" data-picto="card"></i> Carte avec avantages</span></label>
             </div>
+            <div id="discountCounts" class="counts"></div>
           </div>
           <label class="check"><input type="checkbox" name="budget_flexible" value="oui" /> Mon budget est flexible</label>
           <div class="included">
@@ -246,10 +254,15 @@
             </div>
             <span class="help">Une autre idée (appel en visio, carte imprimée…) ? Dis-le dans « Contraintes ou infos utiles » : on s’arrange.</span>
           </div>
-          <label class="check"><input type="checkbox" id="visa" name="visa_help" value="oui" /> <span>Signale-moi si mon voyage risque de demander un <b>visa</b> ou des <b>vaccins</b></span></label>
-          <div id="visaBlock" class="hidden" style="display:grid;gap:12px">
-            <div class="field"><label for="nationality">Nationalité(s) des voyageurs</label><input id="nationality" name="nationality" placeholder="ex. belge, française" /><span class="help">Les règles de visa dépendent du passeport.</span></div>
-            <div class="note"><span class="ico">✳</span><span>Je te dis ce qu’il faut sans doute prévoir et où vérifier. Les règles changent souvent : la confirmation se fait toujours auprès des sources officielles (ambassade, site des Affaires étrangères de ton pays) et, pour les vaccins, auprès d’un médecin ou d’un centre de vaccination.</span></div>
+          <div class="formal">
+            <b>Formalités <span class="small">(inclus)</span></b>
+            <label class="check"><input type="checkbox" id="visa" name="visa_help" value="oui" checked /> <span><i class="pic" data-picto="passport"></i> <b>Passeport et visa</b> : vérifie ce qu’il nous faut pour entrer dans le pays</span></label>
+            <div id="visaBlock" class="field">
+              <label for="nationality">Nationalité(s) des voyageurs</label><input id="nationality" name="nationality" placeholder="ex. belge, française" />
+              <span class="help">Les règles dépendent du passeport : indique celle de chaque voyageur si elles sont différentes.</span>
+            </div>
+            <label class="check"><input type="checkbox" id="health" name="health_help" value="oui" checked /> <span><i class="pic" data-picto="syringe"></i> <b>Santé et vaccins</b> : dis-moi ce qu’il faut prévoir</span></label>
+            <p class="small">Je te dis ce qu’il faut sans doute prévoir et où vérifier. Les règles changent souvent : la confirmation se fait toujours auprès des sources officielles (ambassade, Affaires étrangères) et, pour les vaccins, auprès d’un médecin ou d’un centre de vaccination.</p>
           </div>
         </section>
 
@@ -429,8 +442,19 @@
       el.dispatchEvent(new Event("input", { bubbles: true }));
     }));
 
-    // visa & vaccins
+    // visa : la nationalité n'est demandée que si la case est cochée
     $("visa").addEventListener("change", () => $("visaBlock").classList.toggle("hidden", !$("visa").checked));
+
+    // réductions : combien de voyageurs sont concernés (s'ils sont plusieurs)
+    function discountCounts() {
+      const box = $("discountCounts"), all = +f.people.value || 1;
+      const keep = {}; box.querySelectorAll("[data-dcount]").forEach((el) => { keep[el.dataset.dcount] = el.value; });
+      const checked = [...f.querySelectorAll('input[name="discounts"]:checked')].map((i) => i.value);
+      box.innerHTML = all > 1 ? `<span class="small">Combien de voyageurs sont concernés ?</span>` + checked.map((v) => `<div class="count-row"><span>${v.replace(/[<>&"]/g, "")}</span>
+        <input type="number" inputmode="numeric" min="1" max="${all}" value="${Math.min(all, +keep[v] || 1)}" data-dcount="${v.replace(/"/g, "&quot;")}" aria-label="Nombre de voyageurs : ${v.replace(/"/g, "&quot;")}" /><span class="small">sur ${all}</span></div>`).join("") : "";
+    }
+    f.querySelectorAll('input[name="discounts"]').forEach((i) => i.addEventListener("change", discountCounts));
+    f.people.addEventListener("input", discountCounts);
 
     update();
 
@@ -470,8 +494,11 @@
       add("Budget", `${euro(budgetTotal())} pour tout le voyage (≈ ${euro(budgetTotal() / r.days / r.people)} / pers. / jour)`);
       add("Vols", { separate: "à part, en plus du budget", included: "compris dans le budget", none: "pas besoin" }[f.flight_mode.value]);
       add("Plafond vol", f.flight_pp.value ? `${euro(+f.flight_pp.value)} / pers. A/R` : "");
-      add("Plafond nuit", f.night_max.value ? `${euro(+f.night_max.value)} / nuit pour le groupe` : "");
-      add("Réductions", [...f.querySelectorAll('input[name="discounts"]:checked')].map((i) => i.value).join(", "));
+      add("Plafond nuit", f.night_max.value ? `${euro(+f.night_max.value)} par nuit, pour tout le groupe` : "");
+      add("Réductions", [...f.querySelectorAll('input[name="discounts"]:checked')].map((i) => {
+        const n = +(f.querySelector(`[data-dcount="${i.value}"]`) || {}).value || 0, all = +f.people.value || 1;
+        return all > 1 && n ? `${i.value} (${n === all ? "tout le monde" : n + " sur " + all})` : i.value;
+      }).join(", "));
       add("Budget flexible", f.budget_flexible.checked ? "oui" : "");
       add("Estimation", priceTxt);
       lines.push("");
@@ -481,7 +508,8 @@
       add("Hébergements", f.stay.value);
       add("Incontournables", f.must_see.value.trim());
       add("Contraintes", f.notes.value.trim());
-      if ($("visa").checked) add("Visa / vaccins", `à signaler · nationalité : ${f.nationality.value.trim() || "?"}`);
+      if ($("visa").checked) add("Passeport / visa", `à vérifier · nationalité : ${f.nationality.value.trim() || "?"}`);
+      if ($("health").checked) add("Santé / vaccins", "à signaler");
       add("Venu de", f.source.value || (params.get("destination") ? "HodoGuides" : ""));
 
       const btn = $("sendBtn");

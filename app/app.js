@@ -182,12 +182,13 @@
     ["Ton voyage", "blue", ["Destination(s)", "Dates", "Durée", "Voyageurs", "Dates flexibles", "Parcours"]],
     ["Ton budget", "yellow", ["Budget", "Vols", "Plafond vol", "Plafond nuit", "Réductions", "Budget flexible"]],
     ["Tes envies", "pink", ["Rythme", "Centres d’intérêt", "Hébergements", "Incontournables", "Contraintes", "Format"]],
-    ["À vérifier ensemble", "mint", ["Visa / vaccins"]],
+    ["Formalités", "mint", ["Passeport / visa", "Santé / vaccins", "Visa / vaccins"]],
   ];
   function briefValue(k, v) {
     if (k === "Dates") return v.split("→").map((x) => fmtDate(x.trim(), { day: "numeric", month: "long", year: "numeric" })).join(" → ");
     if (v === "oui" && /flexible/.test(k)) return "oui, on peut ajuster";
-    if (k === "Visa / vaccins") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+    if (k === "Visa / vaccins" || k === "Passeport / visa") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+    if (k === "Santé / vaccins") return "je te dis quoi prévoir (à confirmer avec un médecin)";
     return v;
   }
   function briefCards(b) {
