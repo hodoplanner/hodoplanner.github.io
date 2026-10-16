@@ -140,6 +140,9 @@
     adminHome: () => `
       <div class="app-top erika-top"><span>${icon("bunnymap", 36)}</span><div><b>Bonjour Erika</b><small>${S.trips.length} voyage${S.trips.length > 1 ? "s" : ""}</small></div><span class="sp"></span><button class="btn small" data-action="logout">Quitter</button></div>
       <div class="screen">
+        <button type="button" class="card client" data-action="requests" style="--sh:var(--yellow)">
+          <div class="row"><b><i class="pic" data-picto="mail"></i> Demandes</b><span class="pill ${S.newRequests ? "p-pink" : "p-mint"}">${S.newRequests ? S.newRequests + " nouvelle" + (S.newRequests > 1 ? "s" : "") : "à jour"}</span></div>
+          <small>devis et liste d’attente reçus depuis le site</small></button>
         <div class="sec-t" style="margin-top:4px"><h2>Mes voyageurs</h2><button data-action="newTrip">+ Nouveau voyage</button></div>
         ${S.trips.map((t) => `<button type="button" class="card client" data-admintrip="${t.id}" style="--sh:var(--pink)">
             <div class="row"><b>${esc((t.travelers || []).join(" & ") || "Voyageurs ?")}</b><span class="pill strong">${tripIcon(t, 18)} ${esc(t.title)}</span></div>
@@ -148,6 +151,24 @@
       </div>`,
 
     adminTrip: () => adminTrip(),
+
+    requests: () => `
+      <div class="app-top erika-top"><button class="icon-btn" data-action="adminHome" aria-label="Retour">←</button><div><b>Demandes</b><small>devis et liste d’attente</small></div></div>
+      <div class="screen" id="scr">
+        <div class="filters">${[["nouveau", "Nouvelles"], ["répondu", "Répondu"], ["client", "Clients"], ["archivé", "Archivées"], ["all", "Toutes"]]
+          .map(([k, l]) => `<button class="${S.reqFilter === k ? "on" : ""}" data-reqfilter="${k}">${l}${k === "nouveau" ? ` (${(S.requests || []).filter((r) => r.status === "nouveau").length})` : ""}</button>`).join("")}</div>
+        ${(S.requests || []).filter((r) => S.reqFilter === "all" || r.status === S.reqFilter).map((r) => `
+          <div class="card" style="--sh:var(--${r.status === "nouveau" ? "pink" : r.status === "client" ? "mint" : "blue"});margin-top:12px">
+            <div class="row" style="justify-content:space-between"><b>${esc(r.firstname || "?")} · ${esc(r.destinations || "")}</b><span class="pill ${r.kind === "attente" ? "p-lav" : "p-yellow"}">${r.kind === "attente" ? "liste d’attente" : "devis"}</span></div>
+            <small class="small">${new Date(r.created_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}${r.estimate ? " · " + esc(r.estimate) : ""}</small>
+            <details style="margin-top:8px"><summary class="small" style="cursor:pointer;font-weight:700">Voir la demande</summary><p class="small" style="white-space:pre-wrap;margin-top:6px">${esc(r.summary)}</p></details>
+            <div class="row" style="margin-top:10px">
+              <a class="btn small dark" href="mailto:${esc(r.email)}?subject=${encodeURIComponent("Ton voyage HodoPlanner")}"><i class="pic" data-picto="mail"></i> Répondre</a>
+              ${r.whatsapp ? `<a class="btn small" href="https://wa.me/${esc(r.whatsapp.replace(/\D/g, ""))}" target="_blank" rel="noopener"><i class="pic" data-picto="chat"></i> WhatsApp</a>` : ""}
+              <select data-reqstatus="${r.id}" style="width:auto;min-height:38px;padding:4px 30px 4px 10px">${["nouveau", "répondu", "client", "archivé"].map((st) => `<option ${r.status === st ? "selected" : ""}>${st}</option>`).join("")}</select>
+            </div>
+          </div>`).join("") || `<p class="sub" style="margin-top:12px">Rien ici.</p>`}
+      </div>`,
   };
 
   // =================== onglets voyageur ===================
@@ -471,6 +492,7 @@
       S.profile = await api.profile();
       S.trips = await api.trips();
     } catch (e) { toast(niceErr(e)); S.trips = []; }
+    if (isAdmin()) await countRequests();
     if (isAdmin() && !S.tripId) { S.screen = "adminHome"; render(); return; }
     if (S.tripId || S.trips.length === 1) return openTrip(S.tripId || S.trips[0].id, "traveler");
     S.screen = "trips"; render();
@@ -494,6 +516,10 @@
     }, 400);
   }
   async function reloadTrip() { S.data = await api.tripData(S.tripId); render(true); }
+  async function countRequests() {
+    try { S.newRequests = (await api.requests()).filter((r) => r.status === "nouveau").length; }
+    catch (_) { S.newRequests = 0; } // table pas encore créée : on n'affiche rien de bloquant
+  }
   async function loadMembers() {
     const el = document.getElementById("members"); if (!el) return;
     try {
@@ -505,6 +531,7 @@
     if (S.unsub) { S.unsub(); S.unsub = null; }
     S.tripId = null; S.data = null;
     try { S.trips = await api.trips(); } catch (e) { toast(niceErr(e)); }
+    if (isAdmin()) await countRequests();
     S.screen = isAdmin() ? "adminHome" : "trips"; render();
   }
 
@@ -525,6 +552,7 @@
     else if (d.trip) openTrip(d.trip, "traveler");
     else if (d.admintrip) { S.adminTab = "items"; openTrip(d.admintrip, "admin"); }
     else if (d.admintab) { S.adminTab = d.admintab; render(); }
+    else if (d.reqfilter) { S.reqFilter = d.reqfilter; render(true); }
     else if (d.edititem) editItem(d.edititem);
     else if (d.editday) editDay(d.editday);
     else if (d.action) action(d.action, t).catch((err) => showErr(niceErr(err)));
@@ -533,6 +561,7 @@
   async function action(a, t) {
     if (a === "me") { S.me = !S.me; render(); }
     else if (a === "back" || a === "adminHome") goAdminHome();
+    else if (a === "requests") { S.reqFilter = S.reqFilter || "nouveau"; S.requests = await api.requests(); S.screen = "requests"; render(); }
     else if (a === "toAdmin") { S.screen = "adminTrip"; S.adminTab = "items"; render(); }
     else if (a === "toTraveler") { S.screen = "trip"; S.tab = "home"; S.day = null; S.me = false; render(); }
     else if (a === "logout") { if (S.unsub) S.unsub(); await api.signOut(); Object.assign(S, { session: null, profile: null, trips: [], tripId: null, data: null, screen: "welcome" }); render(); }
@@ -558,6 +587,13 @@
     }
     else if (a === "install" && installEvt) { installEvt.prompt(); installEvt.userChoice.finally(() => { installEvt = null; render(); }); }
   }
+
+  // statut d'une demande (vue Erika)
+  $phone.addEventListener("change", async (e) => {
+    const sel = e.target.closest("[data-reqstatus]"); if (!sel) return;
+    try { await api.updateRequest(sel.dataset.reqstatus, { status: sel.value }); S.requests = await api.requests(); render(true); toast("Statut : " + sel.value); }
+    catch (err) { toast(niceErr(err)); }
+  });
 
   // =================== formulaires ===================
   const val = (f, n) => (f.elements[n] ? String(f.elements[n].value || "").trim() : "");

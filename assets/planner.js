@@ -143,17 +143,28 @@
     el._t = setTimeout(() => el.classList.remove("show"), 2800);
   }
 
-  /** Envoie la demande via Formspree, sinon ouvre un mail prérempli. `lines` = texte lisible du récap. */
-  async function send(fd, subject, lines) {
+  /** Envoie la demande : dans la base HodoPlanner (Supabase) si elle est configurée,
+      sinon (ou en cas de panne) on ouvre un mail prérempli. `meta` = champs principaux. */
+  async function send(fd, subject, lines, meta = {}) {
+    const cfg = window.HODO_CONFIG || {};
+    if (window.supabase && cfg.supabaseUrl && cfg.supabaseAnonKey) {
+      const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+      const details = {};
+      for (const [k, v] of fd.entries()) if (typeof v === "string" && v.trim()) details[k] = v.trim();
+      const { error } = await sb.from("requests").insert({ ...meta, summary: lines.join("\n").slice(0, 8000), details });
+      if (error) throw error;
+      return "saved";
+    }
     if (FORMSPREE_ID) {
       fd.append("_subject", subject);
       const r = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, { method: "POST", headers: { Accept: "application/json" }, body: fd });
       if (!r.ok) throw new Error(`Formspree HTTP ${r.status}`);
       return "sent";
     }
-    location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
+    location.href = mailtoLink(subject, lines);
     return "mail";
   }
+  const mailtoLink = (subject, lines) => `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
 
   function destinationFromUrl() {
     const d = new URLSearchParams(location.search).get("destination");
@@ -178,7 +189,7 @@
   });
 
   window.Planner = {
-    estimate, weightedDays, euro, drawIcons, toast, send, destinationFromUrl,
+    estimate, weightedDays, euro, drawIcons, toast, send, mailtoLink, destinationFromUrl,
     PRICING, costFor, COST_ZONES, LAUNCH_FREE, OPEN, OPENING, CONTACT_EMAIL, hasForm: !!FORMSPREE_ID,
   };
 })();

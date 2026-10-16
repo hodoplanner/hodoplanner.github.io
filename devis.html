@@ -267,6 +267,7 @@
               <select id="source" name="source"><option value="">—</option><option>HodoGuides</option><option>Instagram</option><option>TikTok</option><option>Bouche-à-oreille</option><option>Autre</option></select>
             </div>
           </div>
+          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Ne pas remplir <input name="website" tabindex="-1" autocomplete="off" /></label></div>
           <label class="check"><input type="checkbox" id="agree" name="agree" value="oui" required /> <span>J’ai lu et j’accepte les <a href="conditions.html" target="_blank" rel="noopener">conditions de service</a> *</span></label>
           <div class="row">
             <button class="btn dark" type="submit" id="sendBtn"><i class="pic" data-picto="mail"></i> Envoyer ma demande</button>
@@ -299,6 +300,8 @@
     © <span id="y"></span> HodoPlanner by Erika
   </footer>
 
+  <script src="app/config.js"></script>
+  <script src="assets/vendor/supabase/supabase.js"></script>
   <script src="assets/pictos.js"></script>
   <script src="assets/icons.js"></script>
   <script src="assets/planner.js"></script>
@@ -483,15 +486,24 @@
 
       const btn = $("sendBtn");
       btn.disabled = true;
+      const subject = `${Planner.OPEN ? "Demande" : "Liste d’attente"} HodoPlanner · ${f.firstname.value.trim()} · ${f.destinations.value.trim()}`;
+      const name = f.firstname.value.trim().replace(/[<>&"]/g, "");
+      const card = document.getElementById("contact");
+      const thanks = () => `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Merci ${name} !</h2><p class="muted">${Planner.OPEN ? "Ta demande est bien partie. Je te réponds sous 48 h à l’adresse indiquée." : `C’est noté ! Je t’écris dès l’ouverture en ${Planner.OPENING}, avec ton voyage en tête.`}</p></div>`;
+      // piège à robots : un champ invisible rempli = on fait semblant
+      if (f.website && f.website.value) { card.innerHTML = thanks(); return; }
       try {
-        const how = await Planner.send(fd, `${Planner.OPEN ? "Demande" : "Liste d’attente"} HodoPlanner · ${f.firstname.value.trim()} · ${f.destinations.value.trim()}`, lines);
-        const card = document.getElementById("contact");
-        card.innerHTML = how === "sent"
-          ? `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Merci ${f.firstname.value.trim().replace(/[<>&"]/g, "")} !</h2><p class="muted">${Planner.OPEN ? "Ta demande est bien partie. Je te réponds sous 48 h à l’adresse indiquée." : `C’est noté ! Je t’écris dès l’ouverture en ${Planner.OPENING}, avec ton voyage en tête.`}</p></div>`
-          : `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Presque fini !</h2><p class="muted">Ton app mail vient de s’ouvrir avec ta demande déjà écrite : il ne reste plus qu’à l’envoyer.<br>Rien ne s’est ouvert ? Écris-moi à <a href="mailto:${Planner.CONTACT_EMAIL}">${Planner.CONTACT_EMAIL}</a>.</p></div>`;
+        const how = await Planner.send(fd, subject, lines, {
+          kind: Planner.OPEN ? "devis" : "attente",
+          firstname: f.firstname.value.trim(), email: f.email.value.trim(), whatsapp: f.whatsapp.value.trim() || null,
+          destinations: f.destinations.value.trim(), estimate: priceTxt,
+        });
+        card.innerHTML = how === "mail"
+          ? `<div class="done"><img src="images/brand/lapin-pattes.svg" alt="" width="110" height="110"><h2>Presque fini !</h2><p class="muted">Ton app mail vient de s’ouvrir avec ta demande déjà écrite : il ne reste plus qu’à l’envoyer.<br>Rien ne s’est ouvert ? Écris-moi à <a href="mailto:${Planner.CONTACT_EMAIL}">${Planner.CONTACT_EMAIL}</a>.</p></div>`
+          : thanks();
       } catch (err) {
         btn.disabled = false;
-        Planner.toast(`Oups, l’envoi a échoué. Écris-moi à ${Planner.CONTACT_EMAIL}`);
+        card.insertAdjacentHTML("beforeend", `<div class="note warn" style="margin-top:12px"><span class="ico">!</span><span>L’envoi n’a pas marché (${String(err && err.message || err).replace(/[<>&]/g, "")}). Tu peux réessayer, ou <a href="${Planner.mailtoLink(subject, lines)}">m’envoyer ta demande par mail</a>.</span></div>`);
       }
     });
   })();

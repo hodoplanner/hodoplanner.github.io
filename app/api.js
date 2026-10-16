@@ -67,6 +67,8 @@
       async deleteItem(id) { must(await sb.from("items").delete().eq("id", id)); },
       saveDay: (d) => upsert("days", d),
       async deleteDay(id) { must(await sb.from("days").delete().eq("id", id)); },
+      async requests() { return must(await sb.from("requests").select("*").order("created_at", { ascending: false }).limit(200)); },
+      async updateRequest(id, fields) { must(await sb.from("requests").update(fields).eq("id", id)); },
       async members(tripId) {
         const m = must(await sb.from("trip_members").select("user_id, joined_at").eq("trip_id", tripId));
         if (!m.length) return [];
@@ -142,6 +144,8 @@
       async deleteItem(id) { guard(); db.items = db.items.filter((x) => x.id !== id); db.progress = db.progress.filter((x) => x.item_id !== id); save(); },
       async saveDay(d) { guard(); return up("days", { stops: [], eat: [], published: false, ...d }); },
       async deleteDay(id) { guard(); db.days = db.days.filter((x) => x.id !== id); save(); },
+      async requests() { guard(); return (db.requests || []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)); },
+      async updateRequest(id, fields) { guard(); const r = (db.requests || []).find((x) => x.id === id); if (r) Object.assign(r, fields); save(); },
       async members(tripId) { return db.members.filter((m) => m.trip_id === tripId).map((m) => ({ ...m, email: (db.users.find((u) => u.id === m.user_id) || {}).email })); },
       reset() { db = seed(); save(); },
     };
@@ -162,6 +166,9 @@
             { icon: "plug", title: "Prises et batteries", text: "100 V, prises type A : prends un adaptateur.\nBatteries externes en cabine uniquement.", source: "" },
           ] }],
         members: [{ trip_id: T, user_id: lea, joined_at: "2026-10-01T10:00:00Z" }],
+        requests: [{ id: "demo-req-1", created_at: "2026-10-15T18:20:00Z", kind: "attente", firstname: "Ardahan", email: "ardahan@demo.be", whatsapp: null,
+          destinations: "Japon", estimate: "180 € (offert : lancement)", status: "nouveau",
+          summary: "Prénom : Ardahan\nEmail : ardahan@demo.be\n\nDestination(s) : Japon\nDurée : 14 jours\nVoyageurs : 1\nBudget : 1 680 € pour tout le voyage\nCentres d’intérêt : Culture & temples, Food & cafés\nIncontournables : Ghibli Park" }],
         items: [
           it(1, { type: "flight", title: "Vols Bruxelles → Tokyo, Osaka → Bruxelles", where_label: "Skyscanner", link: "https://www.skyscanner.fr", date: "2027-04-03", deadline: "2026-11-30", price: "≈ 890 € / pers." }),
           it(2, { type: "activity", title: "Ghibli Park · Grand Warehouse", where_label: "ghibli-park.jp", link: "https://ghibli-park.jp/en/", date: "2027-04-11", rule: "ghibli-park", price: "2 × 3 500 ¥" }),
