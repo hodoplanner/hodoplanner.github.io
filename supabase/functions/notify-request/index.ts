@@ -26,6 +26,47 @@ const transport = nodemailer.createTransport({
 const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const emailOk = (e: string) => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(e) && e.length <= 200;
 
+// ---- récapitulatif illustré (cartes pastel par thème, faites en tableaux pour tous les logiciels de mail) ----
+const RECAP: [string, string, string, string[]][] = [
+  ["Ton voyage", "#e3f0fc", "#a9cdf2", ["Destination(s)", "Dates", "Durée", "Voyageurs", "Dates flexibles", "Parcours"]],
+  ["Ton budget", "#fff3d6", "#ffd98a", ["Budget", "Vols", "Plafond vol", "Plafond nuit", "Réductions", "Budget flexible"]],
+  ["Tes envies", "#fde3ea", "#f6a9b9", ["Rythme", "Centres d’intérêt", "Hébergements", "Incontournables", "Contraintes", "Format"]],
+  ["À vérifier ensemble", "#dff5ea", "#8fd6b1", ["Visa / vaccins"]],
+];
+const LABEL: Record<string, string> = { "Destination(s)": "Destination", "Centres d’intérêt": "Centres d’intérêt" };
+const frDate = (iso: string) => {
+  const d = new Date(iso + "T12:00:00Z");
+  return isNaN(+d) ? iso : d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+};
+function niceValue(k: string, v: string) {
+  if (k === "Dates") return v.split("→").map((x) => frDate(x.trim())).join(" → ");
+  if (v === "oui" && (k === "Dates flexibles" || k === "Budget flexible")) return "oui, on peut ajuster";
+  if (k === "Visa / vaccins") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+  return v;
+}
+function prettyRecap(details: Record<string, unknown> | null | undefined, summary: string) {
+  const d = (details && typeof details === "object") ? details as Record<string, unknown> : {};
+  const cards = RECAP.map(([title, soft, strong, keys]) => {
+    const rows = keys.filter((k) => typeof d[k] === "string" && String(d[k]).trim()).map((k) =>
+      `<tr><td style="padding:5px 10px 5px 0;font-size:12.5px;color:#6b6a8a;vertical-align:top;white-space:nowrap">${esc(LABEL[k] || k)}</td>
+           <td style="padding:5px 0;font-size:14px;font-weight:600;color:#3b3a5e;vertical-align:top">${esc(niceValue(k, String(d[k])))}</td></tr>`).join("");
+    if (!rows) return "";
+    return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 12px;background:${soft};border:2px solid #3b3a5e;border-radius:16px;border-collapse:separate;box-shadow:3px 3px 0 ${strong}">
+      <tr><td style="padding:12px 14px 4px"><span style="display:inline-block;background:#ffffff;border:2px solid #3b3a5e;border-radius:999px;padding:2px 12px;font-size:12px;font-weight:800;color:#3b3a5e">${esc(title)}</span></td></tr>
+      <tr><td style="padding:4px 14px 10px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows}</table></td></tr></table>`;
+  }).join("");
+  // ancienne demande sans détails : le texte tel quel
+  return cards || `<div style="background:#fff3d6;border:2px dashed #3b3a5e;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap">${esc(summary)}</div>`;
+}
+const priceBox = (label: string, price: string) =>
+  `<p style="text-align:center;font-size:13px;color:#6b6a8a;margin:18px 0 6px">${esc(label)}</p><div style="text-align:center;margin:0 0 16px"><span style="display:inline-block;background:#fff3d6;border:2.5px solid #3b3a5e;border-radius:16px;box-shadow:3px 3px 0 #8fd6b1;padding:10px 20px;font-size:20px;font-weight:800;color:#3b3a5e">${esc(price)}</span></div>`;
+// les étapes en pastilles numérotées
+const steps = (list: string[], done = 0) => `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:16px 0 4px">${list.map((s, i) =>
+  `<tr><td width="40" style="padding:5px 0;vertical-align:middle"><div style="width:30px;height:30px;line-height:30px;text-align:center;border:2px solid #3b3a5e;border-radius:50%;font-weight:800;font-size:14px;background:${i < done ? "#8fd6b1" : ["#fde3ea", "#e3f0fc", "#fff3d6", "#efe9fc"][i % 4]};color:#3b3a5e">${i < done ? "✓" : i + 1}</div></td>
+   <td style="padding:5px 0;font-size:14px;color:#3b3a5e;vertical-align:middle">${s}</td></tr>`).join("")}</table>`;
+const button = (href: string, label: string, dark = true) =>
+  `<a href="${href}" style="display:inline-block;margin:4px;background:${dark ? "#3b3a5e" : "#ffffff"};color:${dark ? "#ffffff" : "#3b3a5e"};border:2.5px solid #3b3a5e;text-decoration:none;font-weight:700;border-radius:14px;padding:11px 20px;font-size:14px">${label}</a>`;
+
 // Le même cadre que les mails de connexion (lapin, contour marine, ombre rose)
 function frame(title: string, intro: string, body: string) {
   return `<div style="margin:0;padding:24px 12px;background:#fdf8f2;font-family:Poppins,Helvetica,Arial,sans-serif;color:#3b3a5e">
@@ -71,8 +112,10 @@ Deno.serve(async (req) => {
           waitlist
             ? "Ton inscription est bien enregistrée. Je t’écris dès l’ouverture, avec ton voyage en tête."
             : "J’ai bien reçu ta demande. Je la lis avec attention et je te réponds sous 48 h.",
-          `<p style="font-size:13px;color:#6b6a8a;margin:0 0 6px">Ce que tu m’as envoyé :</p>${recap(summary)}
-           <p style="font-size:13px;color:#6b6a8a;margin:16px 0 0">Une précision à ajouter ? Réponds simplement à ce mail.</p>`,
+          `${!waitlist && r.estimate ? priceBox("Estimation", String(r.estimate)) : ""}
+           <p style="font-size:13px;color:#6b6a8a;margin:0 0 8px">Ce que tu m’as envoyé :</p>${prettyRecap(r.details as Record<string, unknown>, summary)}
+           ${waitlist ? "" : steps(["Tu m’as envoyé ta demande", "Je la lis et je te confirme le prix (sous 48 h)", "Tu valides, et je prépare tout", "Tout arrive dans ton app : réservations, jours, carte"], 1)}
+           <p style="font-size:13px;color:#6b6a8a;margin:16px 0 0;text-align:center">Une précision à ajouter ? Réponds simplement à ce mail.</p>`,
         ),
       });
       results.push("voyageur ok");

@@ -671,7 +671,6 @@
 
   // mails proposés depuis une demande (Erika peut tout modifier avant l'envoi)
   const isFree = (r) => /offert/i.test(r.estimate || "") || /offert/i.test((r.details || {}).quote_price || "");
-  const appLine = (r) => `Ouvre https://hodoplanner.com/app/ , connecte-toi avec ton adresse mail (${r.email}) et entre le code ${(r.details || {}).trip_code}.`;
   const MAILS = {
     valide: {
       label: "Validation",
@@ -679,11 +678,8 @@
       text: (r) => `Bonjour ${r.firstname || ""} !
 
 Bonne nouvelle : ta demande${r.destinations ? " pour ce voyage (" + r.destinations + ")" : ""} est validée, je peux m’en occuper.
-${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : "\nLe prix est confirmé, tu le trouves ci-dessous.\n"}
-Relis une dernière fois le récapitulatif ci-dessous : c’est sur cette base que je vais chercher.
-
-Tout est bon ? Réponds « OK » à ce mail${isFree(r) ? "" : " et règle le paiement"} : je commence dès ta réponse et tu recevras ton accès à l’app.
-Quelque chose à corriger ? Réponds avec les changements.
+${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : ""}
+Relis le récapitulatif ci-dessous : c’est sur cette base que je vais chercher. Tout est bon ? Réponds « OK »${isFree(r) ? "" : " et règle le paiement"} et je commence. Quelque chose à corriger ? Réponds avec les changements.
 
 À très vite,
 Erika`,
@@ -708,11 +704,9 @@ Erika`,
       subject: () => "Ton voyage t’attend dans l’app HodoPlanner",
       text: (r) => `Bonjour ${r.firstname || ""} !
 
-Ton espace voyage est prêt. Tu y trouveras au fur et à mesure tout ce qu’il faut réserver (avec les liens), ton programme jour par jour, la carte et les infos pratiques.
+Ton espace voyage est prêt ! Tu y trouveras au fur et à mesure tout ce qu’il faut réserver (avec les liens), ton programme jour par jour, la carte et les infos pratiques.
 
-${appLine(r)}
-
-Astuce : installe l’app sur ton téléphone (le bouton apparaît sur la page d’accueil) pour l’avoir toujours sous la main.
+Voici comment y accéder :
 
 À très vite,
 Erika`,

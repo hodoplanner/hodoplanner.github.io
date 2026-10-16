@@ -32,6 +32,47 @@ const emailOk = (e: string) => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(e) && e.l
 const linkify = (h: string) => h.replace(/https:\/\/[^\s<]+[^\s<.,;:!?)]/g, (u) => `<a href="${u}" style="color:#3b3a5e;font-weight:700">${u}</a>`);
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "content-type": "application/json" } });
 
+// ---- récapitulatif illustré (cartes pastel par thème, faites en tableaux pour tous les logiciels de mail) ----
+const RECAP: [string, string, string, string[]][] = [
+  ["Ton voyage", "#e3f0fc", "#a9cdf2", ["Destination(s)", "Dates", "Durée", "Voyageurs", "Dates flexibles", "Parcours"]],
+  ["Ton budget", "#fff3d6", "#ffd98a", ["Budget", "Vols", "Plafond vol", "Plafond nuit", "Réductions", "Budget flexible"]],
+  ["Tes envies", "#fde3ea", "#f6a9b9", ["Rythme", "Centres d’intérêt", "Hébergements", "Incontournables", "Contraintes", "Format"]],
+  ["À vérifier ensemble", "#dff5ea", "#8fd6b1", ["Visa / vaccins"]],
+];
+const LABEL: Record<string, string> = { "Destination(s)": "Destination", "Centres d’intérêt": "Centres d’intérêt" };
+const frDate = (iso: string) => {
+  const d = new Date(iso + "T12:00:00Z");
+  return isNaN(+d) ? iso : d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+};
+function niceValue(k: string, v: string) {
+  if (k === "Dates") return v.split("→").map((x) => frDate(x.trim())).join(" → ");
+  if (v === "oui" && (k === "Dates flexibles" || k === "Budget flexible")) return "oui, on peut ajuster";
+  if (k === "Visa / vaccins") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+  return v;
+}
+function prettyRecap(details: Record<string, unknown> | null | undefined, summary: string) {
+  const d = (details && typeof details === "object") ? details as Record<string, unknown> : {};
+  const cards = RECAP.map(([title, soft, strong, keys]) => {
+    const rows = keys.filter((k) => typeof d[k] === "string" && String(d[k]).trim()).map((k) =>
+      `<tr><td style="padding:5px 10px 5px 0;font-size:12.5px;color:#6b6a8a;vertical-align:top;white-space:nowrap">${esc(LABEL[k] || k)}</td>
+           <td style="padding:5px 0;font-size:14px;font-weight:600;color:#3b3a5e;vertical-align:top">${esc(niceValue(k, String(d[k])))}</td></tr>`).join("");
+    if (!rows) return "";
+    return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 12px;background:${soft};border:2px solid #3b3a5e;border-radius:16px;border-collapse:separate;box-shadow:3px 3px 0 ${strong}">
+      <tr><td style="padding:12px 14px 4px"><span style="display:inline-block;background:#ffffff;border:2px solid #3b3a5e;border-radius:999px;padding:2px 12px;font-size:12px;font-weight:800;color:#3b3a5e">${esc(title)}</span></td></tr>
+      <tr><td style="padding:4px 14px 10px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows}</table></td></tr></table>`;
+  }).join("");
+  // ancienne demande sans détails : le texte tel quel
+  return cards || `<div style="background:#fff3d6;border:2px dashed #3b3a5e;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap">${esc(summary)}</div>`;
+}
+const priceBox = (label: string, price: string) =>
+  `<p style="text-align:center;font-size:13px;color:#6b6a8a;margin:18px 0 6px">${esc(label)}</p><div style="text-align:center;margin:0 0 16px"><span style="display:inline-block;background:#fff3d6;border:2.5px solid #3b3a5e;border-radius:16px;box-shadow:3px 3px 0 #8fd6b1;padding:10px 20px;font-size:20px;font-weight:800;color:#3b3a5e">${esc(price)}</span></div>`;
+// les étapes en pastilles numérotées
+const steps = (list: string[], done = 0) => `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:16px 0 4px">${list.map((s, i) =>
+  `<tr><td width="40" style="padding:5px 0;vertical-align:middle"><div style="width:30px;height:30px;line-height:30px;text-align:center;border:2px solid #3b3a5e;border-radius:50%;font-weight:800;font-size:14px;background:${i < done ? "#8fd6b1" : ["#fde3ea", "#e3f0fc", "#fff3d6", "#efe9fc"][i % 4]};color:#3b3a5e">${i < done ? "✓" : i + 1}</div></td>
+   <td style="padding:5px 0;font-size:14px;color:#3b3a5e;vertical-align:middle">${s}</td></tr>`).join("")}</table>`;
+const button = (href: string, label: string, dark = true) =>
+  `<a href="${href}" style="display:inline-block;margin:4px;background:${dark ? "#3b3a5e" : "#ffffff"};color:${dark ? "#ffffff" : "#3b3a5e"};border:2.5px solid #3b3a5e;text-decoration:none;font-weight:700;border-radius:14px;padding:11px 20px;font-size:14px">${label}</a>`;
+
 // Le même cadre que les autres mails (lapin, contour marine, ombre rose)
 function frame(body: string) {
   return `<div style="margin:0;padding:24px 12px;background:#fdf8f2;font-family:Poppins,Helvetica,Arial,sans-serif;color:#3b3a5e">
@@ -67,16 +108,30 @@ Deno.serve(async (req) => {
   const to = String(r.email ?? "").trim();
   if (!emailOk(to)) return json({ error: "L’adresse mail de la demande n’est pas valide." }, 400);
 
-  let body = `<div style="font-size:15px;line-height:1.6;white-space:pre-wrap;margin-top:14px">${linkify(esc(message))}</div>`;
-  if ((kind === "valide" || kind === "precisions") && price) {
-    body += `<p style="text-align:center;font-size:13px;color:#6b6a8a;margin:18px 0 6px">${kind === "valide" ? "Prix confirmé" : "Nouveau prix proposé"}</p><div style="text-align:center;margin:0 0 6px"><span style="display:inline-block;background:#fff3d6;border:2.5px solid #3b3a5e;border-radius:16px;box-shadow:3px 3px 0 #b8e3d0;padding:10px 20px;font-size:20px;font-weight:800">${esc(price)}</span></div>`;
-  }
+  // le message d'Erika : première ligne en titre, le reste en paragraphes
+  // et la signature (« À très vite, Erika ») tout en bas, après le prix, le récap et les étapes
+  const [hello, ...rest] = message.split("\n");
+  const paras = rest.join("\n").trim().split(/\n\s*\n/);
+  const sign = paras.length > 1 && paras[paras.length - 1].length <= 60 ? paras.pop()! : "";
+  let body = `<h2 style="font-size:21px;margin:14px 0 8px;text-align:center;color:#3b3a5e">${esc(hello)}</h2>
+    <div style="font-size:15px;line-height:1.6;white-space:pre-wrap;color:#3b3a5e">${linkify(esc(paras.join("\n\n")))}</div>`;
+  const reply = (sub: string, txt: string) => `mailto:${USER}?subject=${encodeURIComponent("Re: " + subject + " · " + sub)}&body=${encodeURIComponent(txt)}`;
+  if ((kind === "valide" || kind === "precisions") && price) body += priceBox(kind === "valide" ? "Prix confirmé" : "Nouveau prix proposé", price);
   if (kind === "valide") {
-    body += `<p style="font-size:13px;color:#6b6a8a;margin:18px 0 6px">Ta demande :</p><div style="background:#fff3d6;border:2px dashed #3b3a5e;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap">${esc(String(r.summary ?? "").slice(0, 8000))}</div>`;
+    body += `<p style="font-size:13px;color:#6b6a8a;margin:18px 0 8px">Ta demande, telle que je l’ai comprise :</p>${prettyRecap(r.details, String(r.summary ?? "").slice(0, 8000))}`;
+    body += `<p style="text-align:center;margin:16px 0 0">${button(reply("OK", "OK, tout est bon pour moi !"), "C’est tout bon !")}${button(reply("à corriger", "Voici ce qu’il faut changer :\n\n"), "Corriger quelque chose", false)}</p>`;
+    body += steps(["Ta demande est validée", "Tu me confirmes que tout est juste", "Je prépare tout et je t’écris si j’ai une question", "Tout arrive dans ton app : réservations, jours, carte"], 1);
+  }
+  if (kind === "precisions") {
+    body += `<p style="text-align:center;margin:16px 0 0">${button(reply("mes réponses", ""), "Répondre à tes questions")}</p>`;
   }
   if (kind === "code") {
-    body += `<p style="text-align:center;margin:20px 0 0"><a href="${SITE}/app/" style="display:inline-block;background:#3b3a5e;color:#ffffff;text-decoration:none;font-weight:700;border-radius:14px;padding:12px 22px">Ouvrir mon voyage</a></p>`;
+    body += `<div style="text-align:center;margin:18px 0 0"><span style="display:inline-block;background:#dff5ea;border:2.5px dashed #3b3a5e;border-radius:14px;padding:10px 18px;font-size:22px;font-weight:800;letter-spacing:1px;color:#3b3a5e">${esc(String((r.details ?? {}).trip_code ?? ""))}</span></div>`;
+    body += steps([`Ouvre <a href="${SITE}/app/" style="color:#3b3a5e;font-weight:700">hodoplanner.com/app</a>`, `Connecte-toi avec ${esc(to)}`, "Entre ton code de voyage", "Installe l’app sur ton téléphone pour l’avoir toujours sous la main"]);
+    body += `<p style="text-align:center;margin:18px 0 0">${button(SITE + "/app/", "Ouvrir mon voyage")}</p>`;
   }
+
+  if (sign) body += `<p style="font-size:15px;line-height:1.6;white-space:pre-wrap;color:#3b3a5e;margin:20px 0 0">${esc(sign)}</p>`;
 
   try {
     await transport.sendMail({ from: `Erika · HodoPlanner <${USER}>`, to, bcc: NOTIFY, replyTo: USER, subject, html: frame(body), text: message });
