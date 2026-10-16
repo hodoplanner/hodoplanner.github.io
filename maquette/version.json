@@ -1,8 +1,8 @@
 {
-  "version": "2026.10.16-1",
-  "date": "16 octobre 2026",
+  "version": "2026.10.17-1",
+  "date": "17 octobre 2026",
   "notes": [
-    "Un bouton « Installer l’app » sur l’écran d’accueil",
-    "Un message comme celui-ci quand une nouvelle version est prête"
+    "Un lien vers la vraie app HodoPlanner (planner.erikaramel.com/app)",
+    "La maquette reste disponible comme démo"
   ]
 }

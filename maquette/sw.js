@@ -4,7 +4,7 @@
    1. change VERSION ci-dessous,
    2. mets le même numéro et la liste des nouveautés dans version.json.
    À la prochaine ouverture, chaque voyageur verra « Nouvelle version disponible ». */
-const VERSION = "2026.10.16-1";
+const VERSION = "2026.10.17-1";
 const CACHE = "hodo-maquette-" + VERSION;
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./version.json",
