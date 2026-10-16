@@ -1,8 +1,7 @@
 {
-  "version": "2026.10.18-2",
+  "version": "2026.10.18-3",
   "date": "18 octobre 2026",
   "notes": [
-    "Vue Erika : les demandes de devis et la liste d’attente arrivent dans l’app",
-    "Nouvelle adresse : hodoplanner.com"
+    "Les demandes affichent un message clair si elles ne peuvent pas être lues"
   ]
 }

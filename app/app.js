@@ -142,7 +142,7 @@
       <div class="screen">
         <button type="button" class="card client" data-action="requests" style="--sh:var(--yellow)">
           <div class="row"><b><i class="pic" data-picto="mail"></i> Demandes</b><span class="pill ${S.newRequests ? "p-pink" : "p-mint"}">${S.newRequests ? S.newRequests + " nouvelle" + (S.newRequests > 1 ? "s" : "") : "à jour"}</span></div>
-          <small>devis et liste d’attente reçus depuis le site</small></button>
+          <small>${S.reqError ? `<b style="color:var(--red)">Impossible de lire les demandes : ${esc(S.reqError)}</b>` : "devis et liste d’attente reçus depuis le site"}</small></button>
         <div class="sec-t" style="margin-top:4px"><h2>Mes voyageurs</h2><button data-action="newTrip">+ Nouveau voyage</button></div>
         ${S.trips.map((t) => `<button type="button" class="card client" data-admintrip="${t.id}" style="--sh:var(--pink)">
             <div class="row"><b>${esc((t.travelers || []).join(" & ") || "Voyageurs ?")}</b><span class="pill strong">${tripIcon(t, 18)} ${esc(t.title)}</span></div>
@@ -157,6 +157,7 @@
       <div class="screen" id="scr">
         <div class="filters">${[["nouveau", "Nouvelles"], ["répondu", "Répondu"], ["client", "Clients"], ["archivé", "Archivées"], ["all", "Toutes"]]
           .map(([k, l]) => `<button class="${S.reqFilter === k ? "on" : ""}" data-reqfilter="${k}">${l}${k === "nouveau" ? ` (${(S.requests || []).filter((r) => r.status === "nouveau").length})` : ""}</button>`).join("")}</div>
+        ${S.reqError ? `<div class="note warn" style="margin-top:12px"><span class="ico">!</span><span>Impossible de lire les demandes : ${esc(S.reqError)}</span></div>` : ""}
         ${(S.requests || []).filter((r) => S.reqFilter === "all" || r.status === S.reqFilter).map((r) => `
           <div class="card" style="--sh:var(--${r.status === "nouveau" ? "pink" : r.status === "client" ? "mint" : "blue"});margin-top:12px">
             <div class="row" style="justify-content:space-between"><b>${esc(r.firstname || "?")} · ${esc(r.destinations || "")}</b><span class="pill ${r.kind === "attente" ? "p-lav" : "p-yellow"}">${r.kind === "attente" ? "liste d’attente" : "devis"}</span></div>
@@ -517,8 +518,8 @@
   }
   async function reloadTrip() { S.data = await api.tripData(S.tripId); render(true); }
   async function countRequests() {
-    try { S.newRequests = (await api.requests()).filter((r) => r.status === "nouveau").length; }
-    catch (_) { S.newRequests = 0; } // table pas encore créée : on n'affiche rien de bloquant
+    try { S.newRequests = (await api.requests()).filter((r) => r.status === "nouveau").length; S.reqError = null; }
+    catch (e) { S.newRequests = 0; S.reqError = niceErr(e); } // affiché sur la carte, sans bloquer le reste
   }
   async function loadMembers() {
     const el = document.getElementById("members"); if (!el) return;
@@ -561,7 +562,11 @@
   async function action(a, t) {
     if (a === "me") { S.me = !S.me; render(); }
     else if (a === "back" || a === "adminHome") goAdminHome();
-    else if (a === "requests") { S.reqFilter = S.reqFilter || "nouveau"; S.requests = await api.requests(); S.screen = "requests"; render(); }
+    else if (a === "requests") {
+      S.reqFilter = S.reqFilter || "nouveau";
+      try { S.requests = await api.requests(); S.reqError = null; } catch (e) { S.requests = []; S.reqError = niceErr(e); }
+      S.screen = "requests"; render();
+    }
     else if (a === "toAdmin") { S.screen = "adminTrip"; S.adminTab = "items"; render(); }
     else if (a === "toTraveler") { S.screen = "trip"; S.tab = "home"; S.day = null; S.me = false; render(); }
     else if (a === "logout") { if (S.unsub) S.unsub(); await api.signOut(); Object.assign(S, { session: null, profile: null, trips: [], tripId: null, data: null, screen: "welcome" }); render(); }
