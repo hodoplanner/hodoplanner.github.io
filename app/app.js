@@ -999,6 +999,34 @@ Erika`,
     return `<div class="note" style="text-align:left;width:100%;max-width:310px"><span class="ico"><i class="pic" data-picto="phone"></i></span><span><b>Installer l’app :</b> ${how}</span></div>`;
   }
 
+  // =================== bouton retour du téléphone ===================
+  // Une « marche » d'historique sert de garde : le bouton retour ferme d'abord la fiche ouverte,
+  // puis remonte d'un écran ; il ne quitte l'app que depuis l'écran de départ.
+  function stepBack() {
+    if (document.getElementById("usheet")) { document.getElementById("later")?.click(); return true; }
+    if (document.getElementById("sheet")) { closeSheet(); return true; }
+    if (S.screen === "trip") {
+      if (S.me) { S.me = false; render(); return true; }
+      if (S.day !== null) { S.day = null; render(); return true; }
+      if (S.tab !== "home") { S.tab = "home"; S.day = null; render(); return true; }
+      if (isAdmin()) { S.screen = "adminTrip"; render(); return true; }
+      if (S.trips.length > 1) { action("back").catch(() => {}); return true; }
+      return false;
+    }
+    if (S.screen === "adminTrip" || S.screen === "requests") { goAdminHome(); return true; }
+    if (S.screen === "check") { S.screen = "login"; render(); return true; }
+    if (S.screen === "login") { S.screen = "welcome"; render(); return true; }
+    return false;
+  }
+  try {
+    history.replaceState({ hodo: "racine" }, "");
+    history.pushState({ hodo: "garde" }, "");
+    window.addEventListener("popstate", () => {
+      if (stepBack()) history.pushState({ hodo: "garde" }, "");
+      else history.back(); // écran de départ : on laisse vraiment partir
+    });
+  } catch (_) {}
+
   // =================== démarrage ===================
   let booted = false;
   api.onAuth((s) => {
