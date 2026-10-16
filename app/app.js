@@ -97,11 +97,12 @@
       <div class="app-top"><button class="icon-btn" data-go="login" aria-label="Retour">←</button><div><b>Regarde tes mails</b><small>${esc(S.email)}</small></div></div>
       <div class="screen"><form id="codeForm">
         <div style="text-align:center">${icon("bunnypaws", 110)}</div>
-        <p class="sub" style="text-align:center">Je t’ai envoyé un mail. <b>Clique sur le lien</b> qu’il contient, depuis ce téléphone : l’app s’ouvre connectée.</p>
-        <div class="field"><label for="t">Ou entre le code reçu</label><input id="t" name="token" inputmode="numeric" autocomplete="one-time-code" class="code-in" placeholder="123456" maxlength="10" /></div>
+        <p class="sub" style="text-align:center">Je t’ai envoyé un mail avec un <b>code à 6 chiffres</b>. Tape-le ici : tu restes connecté·e dans l’app.</p>
+        <div class="field"><label for="t">Code reçu par mail</label><input id="t" name="token" inputmode="numeric" autocomplete="one-time-code" class="code-in" placeholder="123456" maxlength="10" autofocus /></div>
         <p class="err hidden" id="err"></p>
         <button class="btn dark block" type="submit">Valider le code</button>
         <p class="small" style="text-align:center">Rien reçu ? Regarde dans les spams, ou <button type="button" class="linklike" data-action="resend">renvoie le mail</button>.</p>
+        <p class="small" style="text-align:center">Le bouton du mail marche aussi, mais il ouvre parfois un autre navigateur (celui de Gmail, par exemple) : c’est alors lui qui est connecté, pas cette app.</p>
         ${api.mode === "demo" ? `<div class="note tip"><span class="ico">✳</span><span>Mode démo : le code est <b>123456</b>.</span></div>` : ""}
       </form></div>`,
 
