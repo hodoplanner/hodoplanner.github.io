@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>HodoPlanner · mon voyage</title>
+  <meta name="description" content="Ton voyage sur mesure préparé par Erika : réservations à cocher, programme jour par jour, carte et infos pratiques." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#3b3a5e" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="../images/brand/lapin-icone.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../images/brand/lapin-app-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="HodoPlanner" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/planner.css" />
+  <link rel="stylesheet" href="../assets/vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body data-no-banner>
+  <div class="demo-tag" id="demoTag">Mode démo · données d’exemple <button type="button">tout remettre à zéro</button></div>
+  <div class="stage"><div class="phone" id="phone"></div></div>
+
+  <script src="config.js"></script>
+  <script src="../assets/vendor/supabase/supabase.js"></script>
+  <script src="../assets/vendor/leaflet/leaflet.js"></script>
+  <script src="../assets/icons.js"></script>
+  <script src="../assets/rules.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="update.js"></script>
+</body>
+</html>

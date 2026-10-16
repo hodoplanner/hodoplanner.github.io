@@ -4,6 +4,6 @@
    Ne mets JAMAIS ici la clé « service_role » ni le mot de passe de la base.
    Tant qu'elles sont vides, l'app tourne en mode démo (données d'exemple, sur le téléphone). */
 window.HODO_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: "",
+  supabaseUrl: "https://twzpdtjsfxdkcgasiumc.supabase.co",
+  supabaseAnonKey: "sb_publishable_wENnF5hJ-spb_n2VT1UQeg_oOTACMNK",
 };
