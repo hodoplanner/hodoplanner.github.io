@@ -75,6 +75,9 @@ p{margin:0}
 .btn.dark:hover{box-shadow:4px 4px 0 var(--pink)}
 .btn.pink{background:var(--pink)}
 .btn.yellow{background:var(--yellow)}
+.top-actions .btn{white-space:nowrap}
+.lbl-wide{margin-left:2px}
+@media (max-width:479px){ .lbl-wide{display:none} }
 .btn.small{min-height:38px; padding:0 13px; font-size:13px; border-width:2px; box-shadow:2px 2px 0 var(--ink)}
 .btn.dark.small{box-shadow:2px 2px 0 var(--pink)}
 .btn[disabled]{opacity:.45; cursor:not-allowed; transform:none; box-shadow:2px 2px 0 var(--ink-3)}
