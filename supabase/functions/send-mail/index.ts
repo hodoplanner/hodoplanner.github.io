@@ -1,4 +1,4 @@
-// HodoPlanner · mails envoyés par Erika depuis l'app (devis, brief, code de l'app, message libre).
+// HodoPlanner · mails envoyés par Erika depuis l'app (validation, précisions, code de l'app, message libre).
 // Appelée par l'app avec la session d'Erika : la fonction vérifie qu'elle est bien admin,
 // relit la demande dans la base (l'adresse du voyageur vient de là, pas de l'app),
 // envoie le mail depuis contact@hodoplanner.com (copie à Erika) et note l'envoi sur la demande.
@@ -12,7 +12,7 @@ const env = (k: string, d = "") => Deno.env.get(k) ?? d;
 const USER = env("SMTP_USER", "contact@hodoplanner.com");
 const NOTIFY = env("NOTIFY_EMAIL", USER);
 const SITE = "https://hodoplanner.com";
-const KINDS = ["devis", "brief", "code", "libre"];
+const KINDS = ["valide", "precisions", "code", "libre"];
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -68,8 +68,10 @@ Deno.serve(async (req) => {
   if (!emailOk(to)) return json({ error: "L’adresse mail de la demande n’est pas valide." }, 400);
 
   let body = `<div style="font-size:15px;line-height:1.6;white-space:pre-wrap;margin-top:14px">${linkify(esc(message))}</div>`;
-  if (kind === "devis" && price) {
-    body += `<div style="text-align:center;margin:18px 0 6px"><span style="display:inline-block;background:#fff3d6;border:2.5px solid #3b3a5e;border-radius:16px;box-shadow:3px 3px 0 #b8e3d0;padding:10px 20px;font-size:20px;font-weight:800">${esc(price)}</span></div>`;
+  if ((kind === "valide" || kind === "precisions") && price) {
+    body += `<p style="text-align:center;font-size:13px;color:#6b6a8a;margin:18px 0 6px">${kind === "valide" ? "Prix confirmé" : "Nouveau prix proposé"}</p><div style="text-align:center;margin:0 0 6px"><span style="display:inline-block;background:#fff3d6;border:2.5px solid #3b3a5e;border-radius:16px;box-shadow:3px 3px 0 #b8e3d0;padding:10px 20px;font-size:20px;font-weight:800">${esc(price)}</span></div>`;
+  }
+  if (kind === "valide") {
     body += `<p style="font-size:13px;color:#6b6a8a;margin:18px 0 6px">Ta demande :</p><div style="background:#fff3d6;border:2px dashed #3b3a5e;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap">${esc(String(r.summary ?? "").slice(0, 8000))}</div>`;
   }
   if (kind === "code") {
@@ -85,7 +87,7 @@ Deno.serve(async (req) => {
   // on note l'envoi sur la demande
   const details = (r.details && typeof r.details === "object") ? r.details : {};
   const sent = { ...(details.sent ?? {}), [kind]: new Date().toISOString() };
-  const fields: Record<string, unknown> = { details: { ...details, sent, ...(kind === "devis" && price ? { quote_price: price } : {}) } };
+  const fields: Record<string, unknown> = { details: { ...details, sent, ...(price && kind !== "code" && kind !== "libre" ? { quote_price: price } : {}) } };
   if (r.status === "nouveau") fields.status = "répondu";
   await sb.from("requests").update(fields).eq("id", r.id);
 

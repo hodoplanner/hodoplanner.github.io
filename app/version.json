@@ -1,11 +1,9 @@
 {
-  "version": "2026.10.18-7",
+  "version": "2026.10.18-8",
   "date": "18 octobre 2026",
   "notes": [
-    "Demandes : bouton Supprimer (avec le voyage lié si tu veux)",
-    "Demandes : chaque étape en un bouton (devis, brief, créer le voyage, envoyer le code)",
-    "Les mails partent directement de l’app, préremplis et modifiables",
-    "Nouvelles cartes (Mapbox)",
-    "Mise à jour : si tu choisis « Plus tard », un bouton reste en bas de l’écran"
+    "Demandes plus simples : 1 · Valider (prix + récap), Précisions si besoin, 2 · Créer le voyage + code",
+    "Bouton Supprimer sur chaque demande",
+    "Nouvelles cartes (Mapbox)"
   ]
 }

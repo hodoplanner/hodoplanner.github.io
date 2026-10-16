@@ -585,7 +585,8 @@
       const saved = await api.saveTrip({ title: r.destinations || "Voyage", travelers: r.firstname ? [r.firstname] : [],
         start_date: dates ? dates[1] : null, end_date: dates ? dates[2] : null, status: "brief" });
       await api.updateRequest(r.id, { status: "client", details: { ...d, trip_id: saved.id, trip_code: saved.code } });
-      S.adminTab = "trip"; await openTrip(saved.id, "admin"); toast("Voyage créé · code " + saved.code);
+      S.requests = await api.requests(); render(true); toast("Voyage créé · code " + saved.code);
+      action("reqMail", { dataset: { id: r.id, kind: "code" } }); // le mail du code s'ouvre, prêt à partir
     }
     else if (a === "reqDelete") {
       const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
@@ -598,15 +599,16 @@
     }
     else if (a === "reqMail") {
       const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
-      const kind = t.dataset.kind || "devis", T = MAILS[kind];
+      const kind = MAILS[t.dataset.kind] ? t.dataset.kind : "valide", T = MAILS[kind];
       showSheet(`<h2>${T.label} · ${esc(r.firstname || "?")}</h2><p class="small">Envoyé à ${esc(r.email)} depuis contact@hodoplanner.com. Tu reçois une copie.</p>
         <div class="filters" style="margin-top:10px">${Object.entries(MAILS).filter(([k, m]) => !m.needsTrip || (r.details || {}).trip_code)
           .map(([k, m]) => `<button class="${k === kind ? "on" : ""}" data-action="reqMail" data-kind="${k}" data-id="${esc(r.id)}">${m.label}</button>`).join("")}</div>
         <form id="mailForm" class="stack" style="margin-top:10px"><input type="hidden" name="rid" value="${esc(r.id)}" /><input type="hidden" name="kind" value="${kind}" />
           <div class="field"><label>Objet</label><input name="subject" maxlength="150" value="${esc(T.subject(r))}" required /></div>
-          ${kind === "devis" ? `<div class="field"><label>Prix</label><input name="price" maxlength="100" value="${esc((r.details || {}).quote_price || r.estimate || "")}" required /></div>` : ""}
+          ${kind === "valide" ? `<div class="field"><label>Prix confirmé</label><input name="price" maxlength="100" value="${esc((r.details || {}).quote_price || r.estimate || "")}" required /></div>` : ""}
+          ${kind === "precisions" ? `<div class="field"><label>Nouveau prix (seulement s’il change)</label><input name="price" maxlength="100" placeholder="${esc(r.estimate || "")}" /></div>` : ""}
           <div class="field"><label>Message (modifiable)</label><textarea name="message" rows="12" maxlength="4000" required>${esc(T.text(r))}</textarea></div>
-          ${kind === "devis" ? `<p class="small">Le récapitulatif de sa demande est ajouté sous ton message.</p>` : ""}
+          ${kind === "valide" ? `<p class="small">Le prix et le récapitulatif de sa demande sont ajoutés sous ton message.</p>` : ""}
           <button class="btn dark block" type="submit"><i class="pic" data-picto="mail"></i> Envoyer</button></form>`);
     }
     else if (a === "toAdmin") { S.screen = "adminTrip"; S.adminTab = "items"; render(); }
@@ -649,17 +651,16 @@
     e.preventDefault();
     submit(e.target).catch((err) => showErr(niceErr(err)));
   });
-  // étapes d'une demande : devis → brief → voyage + code (chaque bouton se grise une fois fait)
+  // étapes d'une demande : valider (ou demander des précisions) → créer le voyage + envoyer le code
   function stepBtns(r) {
     const d = r.details || {}, sent = d.sent || {}, id = esc(r.id);
-    const b = (kind, label, picto) => `<button class="btn small ${sent[kind] ? "" : "dark"}" data-action="reqMail" data-kind="${kind}" data-id="${id}"><i class="pic" data-picto="${picto}"></i> ${sent[kind] ? "✓ " : ""}${label}</button>`;
+    const b = (kind, label, picto, main) => `<button class="btn small ${sent[kind] || !main ? "" : "dark"}" data-action="reqMail" data-kind="${kind}" data-id="${id}"><i class="pic" data-picto="${picto}"></i> ${sent[kind] ? "✓ " : ""}${label}</button>`;
     return [
-      b("devis", "1 · Devis", "mail"),
-      b("brief", "2 · Brief", "doc"),
+      b("valide", "1 · Valider", "sparkle", true),
+      b("precisions", "Précisions ?", "chat", false),
       d.trip_id
-        ? `<button class="btn small" data-admintrip="${esc(d.trip_id)}"><i class="pic" data-picto="backpack"></i> ✓ Voyage ${esc(d.trip_code || "")}</button>`
-        : `<button class="btn small yellow" data-action="reqTrip" data-id="${id}"><i class="pic" data-picto="backpack"></i> 3 · Créer le voyage</button>`,
-      d.trip_id ? b("code", "4 · Envoyer le code", "phone") : "",
+        ? `<button class="btn small" data-admintrip="${esc(d.trip_id)}"><i class="pic" data-picto="backpack"></i> ✓ Voyage ${esc(d.trip_code || "")}</button>` + b("code", sent.code ? "Code envoyé" : "2 · Envoyer le code", "phone", true)
+        : `<button class="btn small ${sent.valide ? "dark" : "yellow"}" data-action="reqTrip" data-id="${id}"><i class="pic" data-picto="backpack"></i> 2 · Créer le voyage + code</button>`,
     ].join("");
   }
   function sentLine(r) {
@@ -672,32 +673,32 @@
   const isFree = (r) => /offert/i.test(r.estimate || "") || /offert/i.test((r.details || {}).quote_price || "");
   const appLine = (r) => `Ouvre https://hodoplanner.com/app/ , connecte-toi avec ton adresse mail (${r.email}) et entre le code ${(r.details || {}).trip_code}.`;
   const MAILS = {
-    devis: {
-      label: "Devis",
-      subject: (r) => `Ton devis HodoPlanner${r.destinations ? " · " + r.destinations : ""}`,
+    valide: {
+      label: "Validation",
+      subject: (r) => `C’est validé : je prépare ton voyage${r.destinations ? " · " + r.destinations : ""}`,
       text: (r) => `Bonjour ${r.firstname || ""} !
 
-Merci pour ta demande de voyage${r.destinations ? " (" + r.destinations + ")" : ""}. J’ai tout lu et je serais ravie de préparer ce voyage avec toi.
-${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : ""}
-Pour lancer la préparation :
-1. Réponds à ce mail pour valider (ou pour me poser tes questions).
-2. Je t’envoie ton brief à confirmer${isFree(r) ? "" : " et le lien de paiement"}.
-3. Je commence les recherches et tout arrive dans ton app.
+Bonne nouvelle : ta demande${r.destinations ? " pour ce voyage (" + r.destinations + ")" : ""} est validée, je peux m’en occuper.
+${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : "\nLe prix est confirmé, tu le trouves ci-dessous.\n"}
+Relis une dernière fois le récapitulatif ci-dessous : c’est sur cette base que je vais chercher.
+
+Tout est bon ? Réponds « OK » à ce mail${isFree(r) ? "" : " et règle le paiement"} : je commence dès ta réponse et tu recevras ton accès à l’app.
+Quelque chose à corriger ? Réponds avec les changements.
 
 À très vite,
 Erika`,
     },
-    brief: {
-      label: "Brief",
-      subject: (r) => `Ton brief à valider${r.destinations ? " · " + r.destinations : ""}`,
+    precisions: {
+      label: "Précisions",
+      subject: (r) => `Quelques questions sur ton voyage${r.destinations ? " · " + r.destinations : ""}`,
       text: (r) => `Bonjour ${r.firstname || ""} !
 
-Voici ce que j’ai compris de ton voyage. Relis bien : c’est sur cette base que je vais chercher.
+Merci pour ta demande de voyage${r.destinations ? " (" + r.destinations + ")" : ""}. Avant de la valider, j’ai besoin de quelques précisions :
 
-${r.summary || ""}
+- 
+- 
 
-Tout est juste ? Réponds simplement « OK » à ce mail${isFree(r) ? "" : " et règle le paiement"} : je commence les recherches dès ta validation.
-Quelque chose à corriger ? Réponds avec les changements.
+Réponds simplement à ce mail, et je te confirme tout ensuite.
 
 À très vite,
 Erika`,
