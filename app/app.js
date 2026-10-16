@@ -172,6 +172,7 @@
               <a class="btn small" href="mailto:${esc(r.email)}?subject=${encodeURIComponent("Ton voyage HodoPlanner")}"><i class="pic" data-picto="mail"></i> Répondre</a>
               ${r.whatsapp ? `<a class="btn small" href="https://wa.me/${esc(r.whatsapp.replace(/\D/g, ""))}" target="_blank" rel="noopener"><i class="pic" data-picto="chat"></i> WhatsApp</a>` : ""}
               <select data-reqstatus="${r.id}" style="width:auto;min-height:38px;padding:4px 30px 4px 10px">${["nouveau", "répondu", "client", "archivé"].map((st) => `<option ${r.status === st ? "selected" : ""}>${st}</option>`).join("")}</select>
+              <button class="btn small" style="color:var(--red)" data-action="reqDelete" data-id="${esc(r.id)}" aria-label="Supprimer la demande">Supprimer</button>
             </div>
           </div>`).join("") || `<p class="sub" style="margin-top:12px">Rien ici.</p>`}
       </div>`,
@@ -585,6 +586,15 @@
         start_date: dates ? dates[1] : null, end_date: dates ? dates[2] : null, status: "brief" });
       await api.updateRequest(r.id, { status: "client", details: { ...d, trip_id: saved.id, trip_code: saved.code } });
       S.adminTab = "trip"; await openTrip(saved.id, "admin"); toast("Voyage créé · code " + saved.code);
+    }
+    else if (a === "reqDelete") {
+      const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
+      if (!confirm(`Supprimer définitivement la demande de ${r.firstname || "?"} (${r.destinations || "?"}) ?`)) return;
+      const d = r.details || {};
+      if (d.trip_id && confirm(`Supprimer aussi son voyage ${d.trip_code || ""} et tout son contenu ?\n(Annuler = garder le voyage)`)) {
+        try { await api.deleteTrip(d.trip_id); } catch (e) { toast(niceErr(e)); }
+      }
+      await api.deleteRequest(r.id); S.requests = await api.requests(); render(true); toast("Demande supprimée");
     }
     else if (a === "reqMail") {
       const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;

@@ -69,6 +69,7 @@
       async deleteDay(id) { must(await sb.from("days").delete().eq("id", id)); },
       async requests() { return must(await sb.from("requests").select("*").order("created_at", { ascending: false }).limit(200)); },
       async updateRequest(id, fields) { must(await sb.from("requests").update(fields).eq("id", id)); },
+      async deleteRequest(id) { must(await sb.from("requests").delete().eq("id", id)); },
       // le mail part du serveur (fonction send-mail), jamais avec un mot de passe dans l'app
       async sendMail(q) {
         const { data, error } = await sb.functions.invoke("send-mail", { body: q });
@@ -156,6 +157,7 @@
       async deleteDay(id) { guard(); db.days = db.days.filter((x) => x.id !== id); save(); },
       async requests() { guard(); return (db.requests || []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)); },
       async updateRequest(id, fields) { guard(); const r = (db.requests || []).find((x) => x.id === id); if (r) Object.assign(r, fields); save(); },
+      async deleteRequest(id) { guard(); db.requests = (db.requests || []).filter((x) => x.id !== id); save(); },
       async sendMail(q) { guard(); const r = (db.requests || []).find((x) => x.id === q.request_id); if (!r) return; const d = r.details || {}; r.details = { ...d, sent: { ...(d.sent || {}), [q.kind]: new Date().toISOString() }, ...(q.price ? { quote_price: q.price } : {}) }; if (r.status === "nouveau") r.status = "répondu"; save(); },
       async members(tripId) { return db.members.filter((m) => m.trip_id === tripId).map((m) => ({ ...m, email: (db.users.find((u) => u.id === m.user_id) || {}).email })); },
       reset() { db = seed(); save(); },
