@@ -215,6 +215,7 @@
   <div class="demo-tag">Maquette · données fictives <button type="button" id="reset">tout remettre à zéro</button></div>
   <div class="stage"><div class="phone" id="phone"></div></div>
 
+  <script src="../app/config.js"></script>
   <script src="../assets/pictos.js"></script>
   <script src="../assets/icons.js"></script>
   <script src="../assets/rules.js"></script>
@@ -789,10 +790,15 @@
 
     // ============ Cartes (Leaflet) ============
     let maps = [];
-    const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+    // Mapbox si un jeton est configuré, sinon CARTO
+    const MAPBOX = (window.HODO_CONFIG || {}).mapboxToken;
+    const tiles = () => MAPBOX
+      ? L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}@2x?access_token=" + MAPBOX,
+          { tileSize: 512, zoomOffset: -1, maxZoom: 19, attribution: '© <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener"><b>Améliorer cette carte</b></a>' })
+      : L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 18, subdomains: "abcd", attribution: "© OpenStreetMap · © CARTO" });
     function baseMap(el, opts = {}) {
       const m = L.map(el, { zoomControl: false, attributionControl: true, ...opts });
-      L.tileLayer(TILES, { maxZoom: 18, subdomains: "abcd", attribution: "© OpenStreetMap · © CARTO" }).addTo(m);
+      tiles().addTo(m);
       maps.push(m);
       return m;
     }

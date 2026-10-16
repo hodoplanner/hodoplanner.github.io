@@ -425,10 +425,15 @@
 
   // =================== cartes ===================
   let maps = [];
-  const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+  // Mapbox si un jeton est configuré, sinon CARTO
+  const MAPBOX = (window.HODO_CONFIG || {}).mapboxToken;
+  const tiles = () => MAPBOX
+    ? L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}@2x?access_token=" + MAPBOX,
+        { tileSize: 512, zoomOffset: -1, maxZoom: 19, attribution: '© <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener"><b>Améliorer cette carte</b></a>' })
+    : L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 18, subdomains: "abcd", attribution: "© OpenStreetMap · © CARTO" });
   function baseMap(el, opts = {}) {
     const m = L.map(el, { zoomControl: false, ...opts });
-    L.tileLayer(TILES, { maxZoom: 18, subdomains: "abcd", attribution: "© OpenStreetMap · © CARTO" }).addTo(m);
+    tiles().addTo(m);
     maps.push(m); return m;
   }
   const pin = (html, size) => L.divIcon({ className: "", html: `<div class="pin spot">${html}</div>`, iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -size / 2] });
@@ -543,7 +548,7 @@
 
   // =================== clics ===================
   $phone.addEventListener("click", async (e) => {
-    const t = e.target.closest("[data-go],[data-tab],[data-filter],[data-open],[data-action],[data-day],[data-trip],[data-admintrip],[data-admintab],[data-edititem],[data-editday]");
+    const t = e.target.closest("[data-go],[data-tab],[data-filter],[data-open],[data-action],[data-day],[data-trip],[data-admintrip],[data-admintab],[data-reqfilter],[data-edititem],[data-editday]");
     if (!t) return;
     const d = t.dataset;
     if (d.go) {
@@ -587,7 +592,7 @@
       showSheet(`<h2>${T.label} · ${esc(r.firstname || "?")}</h2><p class="small">Envoyé à ${esc(r.email)} depuis contact@hodoplanner.com. Tu reçois une copie.</p>
         <div class="filters" style="margin-top:10px">${Object.entries(MAILS).filter(([k, m]) => !m.needsTrip || (r.details || {}).trip_code)
           .map(([k, m]) => `<button class="${k === kind ? "on" : ""}" data-action="reqMail" data-kind="${k}" data-id="${esc(r.id)}">${m.label}</button>`).join("")}</div>
-        <form id="mailForm" class="stack" style="margin-top:10px"><input type="hidden" name="id" value="${esc(r.id)}" /><input type="hidden" name="kind" value="${kind}" />
+        <form id="mailForm" class="stack" style="margin-top:10px"><input type="hidden" name="rid" value="${esc(r.id)}" /><input type="hidden" name="kind" value="${kind}" />
           <div class="field"><label>Objet</label><input name="subject" maxlength="150" value="${esc(T.subject(r))}" required /></div>
           ${kind === "devis" ? `<div class="field"><label>Prix</label><input name="price" maxlength="100" value="${esc((r.details || {}).quote_price || r.estimate || "")}" required /></div>` : ""}
           <div class="field"><label>Message (modifiable)</label><textarea name="message" rows="12" maxlength="4000" required>${esc(T.text(r))}</textarea></div>
@@ -662,7 +667,7 @@
       subject: (r) => `Ton devis HodoPlanner${r.destinations ? " · " + r.destinations : ""}`,
       text: (r) => `Bonjour ${r.firstname || ""} !
 
-Merci pour ta demande${r.destinations ? " pour " + r.destinations : ""}. J’ai tout lu et je serais ravie de préparer ce voyage avec toi.
+Merci pour ta demande de voyage${r.destinations ? " (" + r.destinations + ")" : ""}. J’ai tout lu et je serais ravie de préparer ce voyage avec toi.
 ${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : ""}
 Pour lancer la préparation :
 1. Réponds à ce mail pour valider (ou pour me poser tes questions).
@@ -761,7 +766,7 @@ Erika`,
         const practical = [...f.querySelectorAll("[data-sec]")].map(rowVals).map((x) => ({ icon: x.icon, title: x.title, text: x.text, source: x.source })).filter((x) => x.title || x.text);
         await api.saveTrip({ id: S.tripId, practical }); await reloadTrip(); toast("Infos pratiques enregistrées");
       } else if (f.id === "mailForm") {
-        const id = val(f, "id"), r = S.requests.find((x) => x.id === id);
+        const id = val(f, "rid"), r = S.requests.find((x) => x.id === id);
         await api.sendMail({ request_id: id, kind: val(f, "kind"), subject: val(f, "subject"), price: val(f, "price"), message: val(f, "message") });
         closeSheet(); S.requests = await api.requests(); render(true); toast("Mail envoyé à " + (r ? r.email : "?"));
       } else if (f.id === "tripForm") {

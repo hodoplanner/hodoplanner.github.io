@@ -3,6 +3,7 @@
   "date": "18 octobre 2026",
   "notes": [
     "Demandes : chaque étape en un bouton (devis, brief, créer le voyage, envoyer le code)",
-    "Les mails partent directement de l’app, préremplis et modifiables"
+    "Les mails partent directement de l’app, préremplis et modifiables",
+    "Nouvelles cartes (Mapbox)"
   ]
 }
