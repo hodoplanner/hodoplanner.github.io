@@ -1,9 +1,10 @@
 {
-  "version": "2026.10.18-5",
+  "version": "2026.10.18-6",
   "date": "18 octobre 2026",
   "notes": [
     "Demandes : chaque étape en un bouton (devis, brief, créer le voyage, envoyer le code)",
     "Les mails partent directement de l’app, préremplis et modifiables",
-    "Nouvelles cartes (Mapbox)"
+    "Nouvelles cartes (Mapbox)",
+    "Mise à jour : si tu choisis « Plus tard », un bouton reste en bas de l’écran"
   ]
 }
