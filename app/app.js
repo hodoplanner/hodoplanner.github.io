@@ -52,7 +52,8 @@
     const dl = deadlineOf(it);
     if (!dl) return `<span class="pill p-yellow">à faire</span>`;
     const d = daysUntil(dl.iso);
-    const txt = dl.rule ? `<i class="pic" data-picto="bell"></i> ouvre le ${fmtDate(dl.iso)}` : (d < 0 ? "en retard" : `avant le ${fmtDate(dl.iso)}`);
+    // dl.rule : le lieu n'accepte les réservations qu'à partir d'une date (calculée par HodoReminder)
+    const txt = dl.rule ? (d <= 0 ? `<i class="pic" data-picto="bell"></i> réservable maintenant` : `<i class="pic" data-picto="bell"></i> réservable dès le ${fmtDate(dl.iso)}`) : (d < 0 ? "en retard" : `avant le ${fmtDate(dl.iso)}`);
     return `<span class="pill ${it.urgent || d <= 30 ? "p-pink" : "p-yellow"}">${txt}</span>`;
   }
   const itemRow = (it, attr = "data-open") => `
@@ -236,7 +237,7 @@
       </div>
       ${t.status === "validated" ? `<div class="note warn" style="margin-top:14px"><span class="ico">!</span><span><b>Brief validé, merci !</b> Je t’envoie le lien de paiement par mail : je commence les recherches dès qu’il est réglé.</span></div>` : ""}
       ${t.status === "in_progress" && !S.data.items.length && !S.data.days.length ? `<div class="note tip" style="margin-top:14px"><span class="ico">✓</span><span><b>C’est parti !</b> Je prépare ton voyage : les réservations et les jours apparaîtront ici au fur et à mesure.</span></div>` : ""}
-      ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span><b>Prochaine ouverture :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}.</span></div>` : ""}
+      ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span><b>Bientôt réservable :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, les réservations ouvrent le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}.</span></div>` : ""}
       <div class="sec-t"><h2>À réserver bientôt</h2><button data-tab="book">tout voir</button></div>
       ${todo.slice(0, 3).map((i) => itemRow(i)).join("") || `<p class="sub">${S.data.items.length ? "Tout est réservé, bravo !" : "Erika prépare ta liste."}</p>`}
       ${S.data.days.length ? `<div class="sec-t"><h2>Le programme</h2><button data-tab="days">tous les jours</button></div>${dayRow(S.data.days[Math.max(0, firstDay)], Math.max(0, firstDay))}` : ""}
@@ -253,7 +254,7 @@
     const list = S.data.items.filter((i) => S.filter === "all" || (S.filter === "done" ? isDone(i) : !isDone(i))).sort(byDeadline);
     return `
       <div class="filters">${[["todo", `À faire (${s.total - s.done})`], ["done", `Réservé (${s.done})`], ["all", "Tout"]].map(([k, l]) => `<button class="${S.filter === k ? "on" : ""}" data-filter="${k}">${l}</button>`).join("")}</div>
-      <p class="small" style="margin-bottom:12px">Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs. <i class="pic" data-picto="bell"></i> = rappel calculé.</p>
+      <p class="small" style="margin-bottom:12px">Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs. <i class="pic" data-picto="bell"></i> = pas réservable avant une certaine date : ajoute-la à ton agenda pour ne pas la rater.</p>
       ${list.map((i) => itemRow(i)).join("") || `<p class="sub">Rien ici pour l’instant.</p>`}`;
   }
   function dayRow(day, i) {
@@ -506,11 +507,11 @@
       <div class="row" style="gap:12px;flex-wrap:nowrap"><span style="flex:0 0 auto">${icon(TYPES[it.type]?.icon || "star", 44)}</span><div><span class="small">${TYPES[it.type]?.label || ""}${it.partner ? ` · <span class="partner">lien partenaire</span>` : ""}</span><h2>${esc(it.title)}</h2></div></div>
       <div class="kv">
         ${it.date ? `<span>Pour le</span><b>${fmtDate(it.date, { weekday: "long", day: "numeric", month: "long" })}</b>` : ""}
-        ${dl ? `<span>${dl.rule ? "Ouverture" : "Avant le"}</span><b>${dl.rule ? esc(HodoRules.describe(dl.opens).local) : fmtDate(dl.iso, { day: "numeric", month: "long", year: "numeric" })}</b>` : ""}
+        ${dl ? `<span>${dl.rule ? "Réservable dès le" : "À réserver avant le"}</span><b>${dl.rule ? `${esc(HodoRules.describe(dl.opens).local)}<br><small>(${esc(HodoRules.describe(dl.opens).there)} heure du Japon)</small>` : fmtDate(dl.iso, { day: "numeric", month: "long", year: "numeric" })}</b>` : ""}
         ${it.where_label ? `<span>Où</span><b>${esc(it.where_label)}</b>` : ""}
         ${it.price ? `<span>Prix indicatif</span><b>${esc(it.price)}</b>` : ""}
       </div>
-      ${dl && dl.rule ? `<div class="note" style="margin-bottom:12px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span>${esc(dl.rule.how)} <button class="linklike" data-action="ics" data-id="${it.id}">Ajouter à mon agenda</button></span></div>` : ""}
+      ${dl && dl.rule ? `<div class="note" style="margin-bottom:12px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span>On ne peut pas réserver avant cette date. ${esc(dl.rule.how)} <button class="linklike" data-action="ics" data-id="${it.id}">Ajouter à mon agenda</button></span></div>` : ""}
       ${it.note ? `<div class="note tip" style="margin-bottom:12px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${nl(it.note)}</span></div>` : ""}
       ${it.partner ? `<p class="small" style="margin-bottom:10px">Lien partenaire : si tu réserves par ce lien, Erika touche une petite commission, sans surcoût pour toi.</p>` : ""}
       ${it.link ? `<a class="btn block" href="${esc(it.link)}" target="_blank" rel="noopener" style="margin-bottom:14px">Réserver${it.where_label ? " sur " + esc(it.where_label) : ""} ↗</a>` : ""}
@@ -519,7 +520,7 @@
         <div class="field"><label>N° de réservation <span class="small">(facultatif)</span></label><input name="ref" value="${esc(p.ref)}" /></div>
         <div class="field"><label>Prix payé <span class="small">(facultatif)</span></label><input name="paid" value="${esc(p.paid)}" /></div>
         <label class="file"><input type="file" name="file" accept="application/pdf,image/*" /><span><i class="pic" data-picto="clip"></i></span><span id="fname">${p.file_path ? "Confirmation jointe ✓ (touche pour la remplacer)" : "Joindre la confirmation (PDF ou capture) · facultatif"}</span></label>
-        ${p.file_path && api.mode === "live" ? `<button type="button" class="linklike" data-action="openFile" data-path="${esc(p.file_path)}" style="justify-self:start">Ouvrir la confirmation</button>` : ""}
+        ${p.file_path ? `<button type="button" class="linklike" data-action="openFile" data-path="${esc(p.file_path)}" style="justify-self:start">Ouvrir la confirmation</button>` : ""}
         <div class="field"><label>Note pour moi</label><textarea name="mynote" style="min-height:70px">${esc(p.mynote)}</textarea></div>
         <button class="btn dark block" type="submit">Enregistrer</button>
       </form>`);
@@ -534,7 +535,7 @@
     showSheet(`<h2>${id ? "Modifier" : "Nouvelle réservation"}</h2>
       ${p && (p.done || p.ref) ? `<div class="note" style="margin:10px 0"><span class="ico">✓</span><span>Côté voyageur : ${p.done ? "réservé" : "pas encore"}${p.ref ? " · n° " + esc(p.ref) : ""}${p.paid ? " · " + esc(p.paid) : ""}${p.file_path ? " · confirmation jointe" : ""}</span></div>` : ""}
       <form id="itemForm" class="stack" style="margin-top:10px" data-id="${id || ""}">
-        <div class="field"><label>Lieu connu (HodoReminder)</label><select name="rule"><option value="">Aucun</option>${HodoRules.RULES.map((r) => `<option value="${r.id}" ${it.rule === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select><span class="help">La date d’ouverture se calcule alors toute seule.</span></div>
+        <div class="field"><label>Lieu connu (HodoReminder)</label><select name="rule"><option value="">Aucun</option>${HodoRules.RULES.map((r) => `<option value="${r.id}" ${it.rule === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select><span class="help">La date à partir de laquelle on peut réserver se calcule alors toute seule (avec la date « Pour le »).</span></div>
         <div class="field"><label>Type</label><select name="type">${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${it.type === k ? "selected" : ""}>${v.label}</option>`).join("")}</select></div>
         <div class="field"><label>Quoi *</label><input name="title" value="${esc(it.title)}" placeholder="ex. Hôtel à Kyoto · 3 nuits" /></div>
         <div class="field"><label>Où réserver</label><input name="where_label" value="${esc(it.where_label)}" placeholder="ex. Booking" /></div>

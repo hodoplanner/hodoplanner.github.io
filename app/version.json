@@ -1,7 +1,8 @@
 {
-  "version": "2026.10.18-13",
+  "version": "2026.10.18-14",
   "date": "18 octobre 2026",
   "notes": [
+    "Plus clair : « réservable dès le… » au lieu de « ouverture », avec l’heure du Japon",
     "Listes à cocher partagées : checklist, valise, « À cocher » de chaque jour, plats à goûter",
     "Infos pratiques : les liens web sont cliquables",
     "Erika : importer / exporter un voyage, et « Tout publier » pour les jours"
