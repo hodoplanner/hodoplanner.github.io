@@ -1,10 +1,10 @@
 {
-  "version": "2026.10.18-10",
+  "version": "2026.10.18-11",
   "date": "18 octobre 2026",
   "notes": [
+    "Plus de mode démo : tout se passe dans la vraie app",
     "Nouveau : le voyageur relit et valide son brief dans l’app avant que je commence",
     "Demandes : « Valider + envoyer le code » crée le voyage et envoie prix, code et étapes",
-    "Mails plus jolis : cartes, étapes, boutons",
-    "Bouton Supprimer sur chaque demande"
+    "Mails plus jolis : cartes, étapes, boutons"
   ]
 }

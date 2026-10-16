@@ -90,7 +90,6 @@
         <div class="field"><label for="m">Ton email</label><input id="m" name="email" type="email" placeholder="toi@exemple.com" autocomplete="email" required value="${esc(S.email)}" /></div>
         <p class="err hidden" id="err"></p>
         <button class="btn dark block" type="submit">Recevoir mon lien</button>
-        ${api.mode === "demo" ? `<div class="note tip"><span class="ico">✳</span><span>Mode démo : code <b>HODO-DEMO42</b>, n’importe quel email. Un email qui commence par « erika » ouvre la vue d’Erika.</span></div>` : ""}
       </form></div>`,
 
     check: () => `
@@ -103,7 +102,6 @@
         <button class="btn dark block" type="submit">Valider le code</button>
         <p class="small" style="text-align:center">Rien reçu ? Regarde dans les spams, ou <button type="button" class="linklike" data-action="resend">renvoie le mail</button>.</p>
         <p class="small" style="text-align:center">Le bouton du mail marche aussi, mais il ouvre parfois un autre navigateur (celui de Gmail, par exemple) : c’est alors lui qui est connecté, pas cette app.</p>
-        ${api.mode === "demo" ? `<div class="note tip"><span class="ico">✳</span><span>Mode démo : le code est <b>123456</b>.</span></div>` : ""}
       </form></div>`,
 
     trips: () => `
@@ -866,11 +864,6 @@ Erika`,
   }
 
   // =================== démarrage ===================
-  if (api.mode === "demo") {
-    const tag = document.getElementById("demoTag");
-    tag.classList.add("on");
-    tag.querySelector("button").onclick = () => { api.reset(); location.reload(); };
-  }
   let booted = false;
   api.onAuth((s) => {
     const was = !!S.session; S.session = s;
