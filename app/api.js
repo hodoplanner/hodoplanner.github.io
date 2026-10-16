@@ -32,20 +32,26 @@
       async joinTrip(code) { return must(await sb.rpc("join_trip", { trip_code: code })); },
       async trips() { return must(await sb.from("trips").select("*").order("start_date", { nullsFirst: false })); },
       async tripData(id) {
-        const [t, i, p, d] = await Promise.all([
+        const [t, i, p, d, c] = await Promise.all([
           sb.from("trips").select("*").eq("id", id).single(),
           sb.from("items").select("*").eq("trip_id", id).order("position").order("created_at"),
           sb.from("item_progress").select("*").eq("trip_id", id),
           sb.from("days").select("*").eq("trip_id", id).order("date"),
+          sb.from("checks").select("key, done").eq("trip_id", id),
         ]);
-        return { trip: must(t), items: must(i), progress: must(p), days: must(d) };
+        // les cases cochées : sans le script 05-listes.sql, la table n'existe pas encore (on continue sans)
+        return { trip: must(t), items: must(i), progress: must(p), days: must(d), checks: c.error ? [] : c.data };
       },
       subscribe(id, cb) {
         const ch = sb.channel("trip-" + id);
-        ["trips", "items", "item_progress", "days"].forEach((table) =>
+        ["trips", "items", "item_progress", "days", "checks"].forEach((table) =>
           ch.on("postgres_changes", { event: "*", schema: "public", table, filter: table === "trips" ? `id=eq.${id}` : `trip_id=eq.${id}` }, () => cb()));
         ch.subscribe();
         return () => sb.removeChannel(ch);
+      },
+      async setCheck(tripId, key, done) {
+        if (done) must(await sb.from("checks").upsert({ trip_id: tripId, key, done: true }));
+        else must(await sb.from("checks").delete().eq("trip_id", tripId).eq("key", key));
       },
       async saveProgress(p) { must(await sb.from("item_progress").upsert(clean(p, ["updated_at", "updated_by"]))); },
       async validateBrief(tripId, note) { return must(await sb.rpc("validate_brief", { trip: tripId, note: note || null })); },

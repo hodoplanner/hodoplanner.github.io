@@ -262,6 +262,14 @@
       <span class="tx"><b>${esc(day.title)}${day.published ? "" : " · brouillon"}</b><p>${esc(day.subtitle || "")}</p></span>
       <span>${icon(day.icon || "star", 34)}</span><span class="chev">›</span></button>`;
   }
+  // ---- listes à cocher (partagées entre les voyageurs) ----
+  const lines = (txt) => String(txt || "").split("\n").map((x) => x.trim()).filter(Boolean);
+  const isChecked = (key) => (S.data.checks || []).some((c) => c.key === key && c.done);
+  const checkList = (prefix, list) => `<div class="cklist">${list.map((x) => {
+    const key = (prefix + ":" + x).slice(0, 500);
+    return `<label class="check"><input type="checkbox" data-check="${esc(key)}" ${isChecked(key) ? "checked" : ""} /> <span>${linkify(x)}</span></label>`;
+  }).join("")}</div>`;
+
   const tabDays = () => S.data.days.length
     ? `<p class="small" style="margin-bottom:12px">Touche un jour pour voir le programme, la carte, quoi manger et les conseils.</p>${S.data.days.map(dayRow).join("")}`
     : `<p class="sub">Erika prépare ton programme jour par jour : il apparaîtra ici.</p>`;
@@ -278,30 +286,34 @@
       ${(day.stops || []).length ? `<div class="sec-t"><h2>Le programme <span class="jp">予定</span></h2></div>
         <div class="tl">${day.stops.map((s) => `
           <div class="stop"><span class="ic">${icon(s.icon || "star", 32)}</span><div>
-            ${s.when ? `<span class="when">${esc(s.when)}</span>` : ""}<b>${esc(s.name)}</b>${s.text ? `<p>${nl(s.text)}</p>` : ""}
-            ${s.tip ? `<div class="tip">✳ ${nl(s.tip)}</div>` : ""}
+            ${s.when ? `<span class="when">${esc(s.when)}</span>` : ""}<b>${esc(s.name)}</b>${s.text ? `<p>${linkify(s.text)}</p>` : ""}
+            ${s.tip ? `<div class="tip">✳ ${linkify(s.tip)}</div>` : ""}
             <a href="${gmaps(s)}" target="_blank" rel="noopener">Itinéraire ↗</a>
           </div></div>`).join("")}</div>` : ""}
       ${(day.eat || []).length ? `<div class="sec-t"><h2>À goûter <span class="jp">グルメ</span></h2></div>
         <div class="eat">${day.eat.map((e) => `<div>${icon(e.icon || "ramen", 34)}<b>${esc(e.name)}</b><p>${esc(e.text || "")}</p></div>`).join("")}</div>` : ""}
       ${its.length ? `<div class="sec-t"><h2>Réservations du jour</h2></div>${its.map((x) => itemRow(x)).join("")}` : ""}
-      ${day.tip ? `<div class="note tip" style="margin-top:16px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${nl(day.tip)}</span></div>` : ""}
+      ${(day.checklist || []).length ? `<div class="sec-t"><h2>À cocher <span class="jp">チェック</span></h2></div><div class="card" style="--sh:var(--${COLORS.includes(day.color) ? day.color : "mint"})">${checkList("day:" + day.id, day.checklist)}</div>` : ""}
+      ${day.tip ? `<div class="note tip" style="margin-top:16px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${linkify(day.tip)}</span></div>` : ""}
       <div class="nav2">${i > 0 ? `<button class="btn small" data-day="${i - 1}">← Jour ${i}</button>` : "<span></span>"}${i < S.data.days.length - 1 ? `<button class="btn small" data-day="${i + 1}">Jour ${i + 2} →</button>` : ""}</div>`;
   }
   const tabMap = () => `<div id="tripMap"></div>${S.data.days.some((d) => (d.stops || []).some((s) => s.lat != null)) ? "" : `<div class="note" style="position:absolute;z-index:600;left:12px;right:12px;top:12px"><span class="ico"><i class="pic" data-picto="map"></i></span><span>Les lieux apparaîtront ici avec ton programme.</span></div>`}`;
   function tabInfo() {
     const sec = S.data.trip.practical || [];
     return `${sec.length ? sec.map((p, k) => `<div class="card" style="--sh:var(--${COLORS[k % COLORS.length]});margin-top:${k ? 14 : 0}px">
-        <div class="info"><b>${p.icon && window.HodoPictos ? HodoPictos.svg(p.icon, 24) : ""}${esc(p.title)}</b><p>${linkify(p.text || "")}</p>${p.source ? `<span class="src">Source : ${esc(p.source)}</span>` : ""}</div></div>`).join("")
+        <div class="info"><b>${p.icon && window.HodoPictos ? HodoPictos.svg(p.icon, 24) : ""}${esc(p.title)}</b>${p.list ? checkList("info:" + p.title, lines(p.text)) : `<p>${linkify(p.text || "")}</p>`}${p.source ? `<span class="src">Source : ${esc(p.source)}</span>` : ""}</div></div>`).join("")
       : `<p class="sub">Erika ajoute ici les infos pratiques de ton voyage : urgences, santé, visa, prises, argent…</p>`}
       <div class="sec-t"><h2>Besoin d’Erika ?</h2></div>${contactBtn()}`;
   }
   // numéros de téléphone cliquables dans les infos pratiques
   // (les numéros longs, et les numéros d'urgence à 3 chiffres écrits après « : », ex. « Police : 110 »)
   const tel = (m) => `<a href="tel:${m.replace(/[^\d+]/g, "")}">${m}</a>`;
-  const linkify = (txt) => nl(txt)
+  const telify = (h) => h
     .replace(/(\+?\d[\d\s-]{4,16}\d)/g, (m) => (m.replace(/\D/g, "").length >= 6 ? tel(m) : m))
     .replace(/(:\s*)(1\d{2})(?!\d)/g, (_m, pre, n) => pre + tel(n));
+  // et les adresses web (https://… ou www.…) deviennent des liens
+  const linkify = (txt) => nl(txt).split(/((?:https?:\/\/|www\.)[^\s<]*[^\s<.,;:!?)])/g)
+    .map((part, k) => (k % 2 ? `<a href="${part.startsWith("http") ? part : "https://" + part}" target="_blank" rel="noopener">${part.replace(/^https?:\/\//, "")}</a>` : telify(part))).join("");
 
   function tabMe(t) {
     return `
@@ -328,7 +340,8 @@
       body = `<button class="btn dark small" data-action="editItem" style="margin-bottom:12px">+ Ajouter une réservation</button>
         ${S.data.items.slice().sort(byDeadline).map((i) => itemRow(i, "data-edititem")).join("") || `<p class="sub">Aucune réservation. Ajoute la première.</p>`}`;
     } else if (S.adminTab === "days") {
-      body = `<button class="btn dark small" data-action="editDay" style="margin-bottom:12px">+ Ajouter un jour</button>
+      const drafts = S.data.days.filter((d) => !d.published).length;
+      body = `<div class="row" style="margin-bottom:12px"><button class="btn dark small" data-action="editDay">+ Ajouter un jour</button>${drafts ? `<button class="btn small" data-action="publishAll">Tout publier (${drafts})</button>` : ""}</div>
         <p class="small" style="margin-bottom:10px">Les voyageurs ne voient que les jours <b>publiés</b>. Les brouillons restent pour toi.</p>
         ${S.data.days.map((d) => `<button type="button" class="day ${d.published ? "" : "draft"}" data-editday="${d.id}" style="--sh:var(--${COLORS.includes(d.color) ? d.color : "mint"})">
           <span class="d" style="--c:${soft(d.color)}"><small>${fmtDate(d.date, { weekday: "short" })}</small><b>${new Date(d.date + "T12:00").getDate()}</b></span>
@@ -346,6 +359,10 @@
         <div class="sec-t"><h2>Voyageurs inscrits</h2></div><div id="members" class="small">…</div>
         ${t.validated_at ? `<div class="note tip" style="margin-top:14px"><span class="ico">✓</span><span>Brief validé le ${new Date(t.validated_at).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${t.brief_note ? `<br><b>Sa note :</b> ${esc(t.brief_note)}` : ""}</span></div>` : ""}
         <div class="sec-t"><h2>Infos du voyage</h2></div>${tripForm(t)}
+        <div class="sec-t"><h2>Importer · exporter</h2></div>
+        <p class="small" style="margin-bottom:10px">Exporte un voyage pour le garder ou le reprendre comme modèle, ou importe un fichier préparé (réservations, jours, infos pratiques).</p>
+        <div class="row"><button class="btn small" data-action="exportTrip"><i class="pic" data-picto="doc"></i> Exporter</button><button class="btn small" data-action="importTrip"><i class="pic" data-picto="clip"></i> Importer un fichier</button></div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden />
         <button class="btn block" style="margin-top:18px;color:var(--red)" data-action="deleteTrip">Supprimer ce voyage</button>`;
     }
     return `
@@ -357,6 +374,7 @@
       <div class="rowx-head"><span>Rubrique</span><button type="button" class="mini-x" data-action="delRow" aria-label="Retirer">×</button></div>
       <div class="two"><select name="icon">${pictoOptions(p.icon || "sparkle")}</select><input name="title" placeholder="ex. Urgences" value="${esc(p.title)}" /></div>
       <textarea name="text" placeholder="Le texte (une info par ligne)">${esc(p.text)}</textarea>
+      <label class="check"><input type="checkbox" data-list ${p.list ? "checked" : ""} /> <span>Liste à cocher (une case par ligne)</span></label>
       <input name="source" placeholder="Source, ex. wanda.be · vérifié le 12 oct." value="${esc(p.source)}" /></div>`;
   const tripForm = (t = {}) => `<form id="tripForm" class="stack">
       <div class="field"><label>Destination *</label><input name="title" required value="${esc(t.title)}" placeholder="ex. Japon" /></div>
@@ -366,6 +384,102 @@
       <div class="field"><label>Prix</label><input name="price" maxlength="100" value="${esc(t.price)}" placeholder="ex. 150 € (offert : lancement)" /></div>
       <div class="field"><label>Étape</label><select name="status">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${t.status === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></div>
       <button class="btn dark block" type="submit">${t.id ? "Enregistrer" : "Créer le voyage"}</button></form>`;
+
+  // =================== importer · exporter un voyage ===================
+  // Format : { hodoplanner: 1, trip: {...}, items: [...], days: [...], practical: [...] }
+  // Les réservations peuvent porter done / ref / paid (déjà réservé, n° de résa, prix payé).
+  const ITEM_TYPES = ["flight", "hotel", "activity", "transport", "food", "admin"];
+  const isDate = (v) => typeof v === "string" && /^\d{4}-\d\d-\d\d$/.test(v);
+  const str = (v, max = 2000) => (v == null || v === "" ? null : String(v).slice(0, max));
+  const okIcon = (v, d) => (window.HodoIcons && HodoIcons.has(v) ? v : d);
+  const okPicto = (v) => (window.HodoPictos && HodoPictos.names.includes(v) ? v : "sparkle");
+  function exportTrip() {
+    const t = S.data.trip, prog = (id) => S.data.progress.find((p) => p.item_id === id) || {};
+    const data = {
+      hodoplanner: 1, exported_at: new Date().toISOString(),
+      trip: { title: t.title, emoji: t.emoji, country: t.country, start_date: t.start_date, end_date: t.end_date, travelers: t.travelers, price: t.price },
+      items: S.data.items.map((i) => ({ type: i.type, title: i.title, where_label: i.where_label, link: i.link, date: i.date, deadline: i.deadline, rule: i.rule,
+        price: i.price, note: i.note, urgent: i.urgent, partner: i.partner, done: !!prog(i.id).done, ref: prog(i.id).ref || null, paid: prog(i.id).paid || null })),
+      days: S.data.days.map((d) => ({ date: d.date, title: d.title, subtitle: d.subtitle, icon: d.icon, color: d.color, base: d.base, tip: d.tip,
+        stops: d.stops, eat: d.eat, checklist: d.checklist || [], published: d.published })),
+      practical: t.practical || [],
+    };
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    a.download = `hodoplanner-${(t.title || "voyage").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-")}-${t.code}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("Fichier téléchargé");
+  }
+  let importData = null;
+  async function readImport(file) {
+    let d;
+    try { d = JSON.parse(await file.text()); } catch (_) { return toast("Ce fichier n’est pas un export HodoPlanner (JSON illisible)."); }
+    if (!d || d.hodoplanner !== 1) return toast("Ce fichier n’est pas un export HodoPlanner.");
+    importData = d;
+    const n = (k) => (Array.isArray(d[k]) ? d[k].length : 0), t = S.data.trip;
+    const has = S.data.items.length || S.data.days.length || (t.practical || []).length;
+    showSheet(`<h2>Importer dans ce voyage</h2>
+      <p class="small">${esc((d.trip || {}).title || "Fichier")}${d.trip && d.trip.start_date ? " · " + fmtDate(d.trip.start_date, { day: "numeric", month: "short" }) + " → " + fmtDate(d.trip.end_date, { day: "numeric", month: "short", year: "numeric" }) : ""}</p>
+      <div class="count" style="margin:12px 0"><div><b>${n("items")}</b><small>réservations</small></div><div><b>${n("days")}</b><small>jours</small></div><div><b>${n("practical")}</b><small>rubriques pratiques</small></div></div>
+      <div class="stack">
+        ${has ? `<label class="check"><input type="checkbox" id="impReplace" /> <span><b>Remplacer</b> ce qu’il y a déjà (${S.data.items.length} réservations, ${S.data.days.length} jours, ${(t.practical || []).length} rubriques). Sinon, tout est ajouté à la suite.</span></label>` : ""}
+        ${d.trip ? `<label class="check"><input type="checkbox" id="impTrip" ${t.start_date ? "" : "checked"} /> <span>Reprendre le titre, les dates et le pays du fichier</span></label>` : ""}
+        <label class="check"><input type="checkbox" id="impProgress" checked /> <span>Reprendre ce qui est déjà réservé (coches, n° de réservation, prix payé)</span></label>
+        <label class="check"><input type="checkbox" id="impPublish" /> <span>Publier les jours tout de suite (sinon : brouillons, à relire)</span></label>
+      </div>
+      <p class="err hidden" id="err"></p>
+      <button class="btn dark block" style="margin-top:14px" data-action="doImport" id="impGo">Importer</button>`);
+  }
+  async function doImport(btn) {
+    const d = importData; if (!d) return;
+    const opt = (id) => !!(document.getElementById(id) || {}).checked;
+    const replace = opt("impReplace"), withTrip = opt("impTrip"), withProgress = opt("impProgress"), publish = opt("impPublish");
+    if (replace && !confirm("Supprimer tout le contenu actuel de ce voyage avant d’importer ?")) return;
+    btn.disabled = true;
+    const step = (txt) => { btn.textContent = txt; };
+    const tid = S.tripId, t = S.data.trip;
+    if (replace) {
+      step("Nettoyage…");
+      for (const i of S.data.items) await api.deleteItem(i.id);
+      for (const x of S.data.days) await api.deleteDay(x.id);
+    }
+    const items = (Array.isArray(d.items) ? d.items : []).filter((i) => i && i.title);
+    let k = 0, pos = replace ? 0 : S.data.items.length;
+    for (const i of items) {
+      step(`Réservations… ${++k}/${items.length}`);
+      const saved = await api.saveItem({ trip_id: tid, type: ITEM_TYPES.includes(i.type) ? i.type : "activity", title: str(i.title, 300), where_label: str(i.where_label, 200),
+        link: /^https?:\/\//.test(i.link || "") ? str(i.link, 1000) : null, date: isDate(i.date) ? i.date : null, deadline: isDate(i.deadline) ? i.deadline : null,
+        rule: HodoRules.RULES.some((r) => r.id === i.rule) ? i.rule : null, price: str(i.price, 100), note: str(i.note),
+        urgent: !!i.urgent, partner: !!i.partner, position: ++pos });
+      if (withProgress && (i.done || i.ref || i.paid)) await api.saveProgress({ item_id: saved.id, trip_id: tid, done: !!i.done, ref: str(i.ref, 100), paid: str(i.paid, 100) });
+    }
+    const days = (Array.isArray(d.days) ? d.days : []).filter((x) => x && isDate(x.date) && x.title);
+    k = 0;
+    for (const x of days) {
+      step(`Jours… ${++k}/${days.length}`);
+      await api.saveDay({ trip_id: tid, date: x.date, title: str(x.title, 200), subtitle: str(x.subtitle, 300), icon: okIcon(x.icon, "star"), color: COLORS.includes(x.color) ? x.color : "mint",
+        base: str(x.base, 100), tip: str(x.tip),
+        stops: (x.stops || []).filter((p) => p && p.name).map((p) => ({ when: str(p.when, 40), name: str(p.name, 200), text: str(p.text), tip: str(p.tip, 500), icon: okIcon(p.icon, "star"),
+          lat: Number.isFinite(+p.lat) && p.lat !== null && p.lat !== "" ? +p.lat : null, lng: Number.isFinite(+p.lng) && p.lng !== null && p.lng !== "" ? +p.lng : null })),
+        eat: (x.eat || []).filter((e) => e && e.name).map((e) => ({ name: str(e.name, 100), text: str(e.text, 300), icon: okIcon(e.icon, "ramen") })),
+        checklist: (x.checklist || []).map((c) => str(c, 300)).filter(Boolean), published: publish || false });
+    }
+    step("Infos du voyage…");
+    const practical = (Array.isArray(d.practical) ? d.practical : []).filter((p) => p && (p.title || p.text))
+      .map((p) => ({ icon: okPicto(p.icon), title: str(p.title, 100) || "", text: str(p.text, 6000) || "", source: str(p.source, 200) || "", ...(p.list ? { list: true } : {}) }));
+    const row = { id: tid, practical: replace ? practical : (t.practical || []).concat(practical) };
+    if (withTrip && d.trip) {
+      const dt = d.trip;
+      if (dt.title) row.title = str(dt.title, 100);
+      if (isDate(dt.start_date)) row.start_date = dt.start_date;
+      if (isDate(dt.end_date)) row.end_date = dt.end_date;
+      if (dt.country) row.country = str(dt.country, 2).toUpperCase();
+      if (dt.emoji) row.emoji = okIcon(dt.emoji, t.emoji);
+    }
+    await api.saveTrip(row);
+    importData = null; closeSheet(); await reloadTrip();
+    toast(`Importé : ${items.length} réservations, ${days.length} jours, ${practical.length} rubriques`);
+  }
 
   // =================== fiches ===================
   function showSheet(html) {
@@ -464,6 +578,7 @@
         <button type="button" class="btn small" data-action="addStop">+ Étape</button>
         <b>À goûter</b><div id="eatRows" class="stack">${(d.eat || []).map(eatRow).join("")}</div>
         <button type="button" class="btn small" data-action="addEat">+ Spécialité</button>
+        <div class="field"><label>À cocher <span class="small">(une case par ligne, ex. « Crème solaire »)</span></label><textarea name="checklist" style="min-height:70px">${esc((d.checklist || []).join("\n"))}</textarea></div>
         <label class="switch">Publié (visible par les voyageurs)<input type="checkbox" name="published" ${d.published ? "checked" : ""} /><i></i></label>
         <p class="err hidden" id="err"></p>
         <button class="btn dark block" type="submit">Enregistrer</button>
@@ -665,6 +780,15 @@
     else if (a === "addEat") document.getElementById("eatRows").insertAdjacentHTML("beforeend", eatRow());
     else if (a === "addSec") document.getElementById("secRows").insertAdjacentHTML("beforeend", secRow());
     else if (a === "delRow") t.closest(".rowx").remove();
+    else if (a === "publishAll") {
+      const drafts = S.data.days.filter((d) => !d.published);
+      if (!confirm(`Publier les ${drafts.length} jours en brouillon ? Les voyageurs les verront tout de suite.`)) return;
+      for (const d of drafts) await api.saveDay({ id: d.id, published: true });
+      await reloadTrip(); toast("Tous les jours sont publiés");
+    }
+    else if (a === "exportTrip") exportTrip();
+    else if (a === "importTrip") document.getElementById("importFile").click();
+    else if (a === "doImport") await doImport(t);
     else if (a === "deleteItem") { if (!confirm("Supprimer cette réservation ?")) return; await api.deleteItem(t.dataset.id); closeSheet(); await reloadTrip(); toast("Supprimé"); }
     else if (a === "deleteDay") { if (!confirm("Supprimer ce jour ?")) return; await api.deleteDay(t.dataset.id); closeSheet(); await reloadTrip(); toast("Supprimé"); }
     else if (a === "deleteTrip") {
@@ -676,6 +800,15 @@
 
   // statut d'une demande (vue Erika)
   $phone.addEventListener("change", async (e) => {
+    if (e.target.id === "importFile") { const file = e.target.files[0]; e.target.value = ""; if (file) readImport(file); return; }
+    const ck = e.target.closest("[data-check]");
+    if (ck) {
+      const key = ck.dataset.check, done = ck.checked;
+      S.data.checks = (S.data.checks || []).filter((c) => c.key !== key).concat(done ? [{ key, done: true }] : []);
+      try { await api.setCheck(S.tripId, key, done); }
+      catch (err) { ck.checked = !done; toast(/checks/.test(niceErr(err)) ? "Les listes à cocher ne sont pas encore activées (script 05-listes.sql)." : niceErr(err)); }
+      return;
+    }
     const sel = e.target.closest("[data-reqstatus]"); if (!sel) return;
     try { await api.updateRequest(sel.dataset.reqstatus, { status: sel.value }); S.requests = await api.requests(); render(true); toast("Statut : " + sel.value); }
     catch (err) { toast(niceErr(err)); }
@@ -812,11 +945,12 @@ Erika`,
           .map((s) => ({ when: s.when, name: s.name, text: s.text, tip: s.tip, icon: s.icon, lat: num(s.lat), lng: num(s.lng) })).filter((s) => s.name);
         const eat = [...f.querySelectorAll("[data-eat]")].map(rowVals).map((x) => ({ name: x.name, text: x.text, icon: x.icon })).filter((x) => x.name);
         const row = { trip_id: S.tripId, date: val(f, "date"), title: val(f, "title"), subtitle: val(f, "subtitle") || null, base: val(f, "base") || null,
-          icon: val(f, "icon"), color: val(f, "color"), tip: val(f, "tip") || null, stops, eat, published: f.published.checked };
+          icon: val(f, "icon"), color: val(f, "color"), tip: val(f, "tip") || null, stops, eat, checklist: lines(val(f, "checklist")), published: f.published.checked };
         if (f.dataset.id) row.id = f.dataset.id;
         await api.saveDay(row); closeSheet(); await reloadTrip(); toast(row.published ? "Publié : visible par les voyageurs" : "Brouillon enregistré");
       } else if (f.id === "infosForm") {
-        const practical = [...f.querySelectorAll("[data-sec]")].map(rowVals).map((x) => ({ icon: x.icon, title: x.title, text: x.text, source: x.source })).filter((x) => x.title || x.text);
+        const practical = [...f.querySelectorAll("[data-sec]")].map((r) => ({ ...rowVals(r), list: r.querySelector("[data-list]").checked }))
+          .map((x) => ({ icon: x.icon, title: x.title, text: x.text, source: x.source, ...(x.list ? { list: true } : {}) })).filter((x) => x.title || x.text);
         await api.saveTrip({ id: S.tripId, practical }); await reloadTrip(); toast("Infos pratiques enregistrées");
       } else if (f.id === "briefForm") {
         const st = await api.validateBrief(S.tripId, val(f, "note"));

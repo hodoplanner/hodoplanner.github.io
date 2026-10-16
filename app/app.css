@@ -207,3 +207,9 @@
 .brief-rows{display:grid; grid-template-columns:auto minmax(0,1fr); gap:6px 12px; margin-top:10px; align-items:baseline}
 .brief-rows b{font-size:14px; overflow-wrap:anywhere}
 .price-tag{display:inline-block; margin-top:12px; background:var(--yellow-soft); border:var(--line); border-radius:14px; box-shadow:3px 3px 0 var(--mint); padding:8px 16px; font-weight:800; font-size:18px}
+
+/* listes à cocher */
+.cklist{display:grid; gap:8px; margin-top:8px}
+.cklist .check{align-items:flex-start; font-size:14px; line-height:1.4}
+.cklist .check input:checked + span{text-decoration:line-through; color:var(--ink-3, #8a89a6)}
+.info a, .tl a, .tip a, .note a{overflow-wrap:anywhere}
