@@ -1,10 +1,10 @@
 {
-  "version": "2026.10.18-15",
+  "version": "2026.10.18-16",
   "date": "18 octobre 2026",
   "notes": [
+    "Mises à jour plus fiables, et un bouton « Vérifier les mises à jour » dans Mon compte",
     "Le bouton retour du téléphone ferme la fiche ou revient à l’écran précédent (au lieu de quitter l’app)",
     "Plus clair : « réservable dès le… » au lieu de « ouverture », avec l’heure du Japon",
-    "Listes à cocher partagées : checklist, valise, « À cocher » de chaque jour, plats à goûter",
-    "Infos pratiques : les liens web sont cliquables"
+    "Listes à cocher partagées : checklist, valise, « À cocher » de chaque jour, plats à goûter"
   ]
 }

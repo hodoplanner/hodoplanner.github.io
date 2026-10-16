@@ -4,7 +4,7 @@
    1. change VERSION ci-dessous,
    2. mets le même numéro et la liste des nouveautés dans version.json.
    À la prochaine ouverture, chaque voyageur verra « Nouvelle version disponible ». */
-const VERSION = "2026.10.18-15";
+const VERSION = "2026.10.18-16";
 const CACHE = "hodo-app-" + VERSION;
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./version.json", "./app.css", "./config.js", "./api.js", "./app.js", "./update.js",
@@ -20,6 +20,7 @@ self.addEventListener("install", (e) => {
 });
 self.addEventListener("message", (e) => {
   if (e.data === "SKIP_WAITING") self.skipWaiting();
+  if (e.data === "VERSION" && e.ports[0]) e.ports[0].postMessage(VERSION); // l'app demande quelle version tourne
 });
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith("hodo-app-") && k !== CACHE && k !== "hodo-app-tiles").map((k) => caches.delete(k)))).then(() => self.clients.claim()));

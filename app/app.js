@@ -329,6 +329,8 @@
       <div class="sec-t"><h2>Mon compte</h2></div>
       <div class="card" style="--sh:var(--blue)"><p class="small">Connecté·e avec <b>${esc(S.profile?.email || "")}</b></p>
         ${S.trips.length > 1 ? `<button class="btn small" style="margin-top:10px" data-action="back">Mes autres voyages</button>` : ""}</div>
+      <div class="card" style="--sh:var(--yellow);margin-top:14px"><p class="small">Une nouveauté annoncée n’apparaît pas ?</p>
+        <button class="btn small" style="margin-top:8px" data-action="checkUpdate"><i class="pic" data-picto="sparkle"></i> Vérifier les mises à jour</button></div>
       <button class="btn block" style="margin-top:20px" data-action="logout">Se déconnecter</button>`;
   }
 
@@ -787,6 +789,7 @@
       for (const d of drafts) await api.saveDay({ id: d.id, published: true });
       await reloadTrip(); toast("Tous les jours sont publiés");
     }
+    else if (a === "checkUpdate") { if (window.HodoUpdate) { toast("Vérification…"); await HodoUpdate.check(); } }
     else if (a === "exportTrip") exportTrip();
     else if (a === "importTrip") document.getElementById("importFile").click();
     else if (a === "doImport") await doImport(t);
