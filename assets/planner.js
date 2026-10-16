@@ -9,7 +9,7 @@
   // ID du formulaire Formspree (https://formspree.io → "New form" → l'ID après /f/).
   // Tant qu'il est vide, la demande s'ouvre dans l'app mail avec tout le contenu prérempli.
   const FORMSPREE_ID = "";
-  const CONTACT_EMAIL = "hello@erikaramel.com";
+  const CONTACT_EMAIL = "contact@hodoplanner.com";
 
   // Offre de lancement : true = la planification est offerte (contre un avis).
   const LAUNCH_FREE = true;

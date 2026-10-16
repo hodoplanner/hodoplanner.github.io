@@ -173,7 +173,7 @@
   function contactBtn() {
     return cfg.whatsapp
       ? `<a class="btn block" href="https://wa.me/${esc(cfg.whatsapp.replace(/\D/g, ""))}" target="_blank" rel="noopener"><i class="pic" data-picto="chat"></i> Écrire sur WhatsApp</a><p class="small" style="margin-top:6px;text-align:center">En cas de souci : je réponds dès que possible, sans délai garanti.</p>`
-      : `<a class="btn block" href="mailto:${esc(cfg.contactEmail || "hello@erikaramel.com")}"><i class="pic" data-picto="mail"></i> Écrire à Erika</a>`;
+      : `<a class="btn block" href="mailto:${esc(cfg.contactEmail || "contact@hodoplanner.com")}"><i class="pic" data-picto="mail"></i> Écrire à Erika</a>`;
   }
   function tabBook() {
     const s = stats();
