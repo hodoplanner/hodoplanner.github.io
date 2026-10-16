@@ -1,6 +1,6 @@
 /* HodoPlanner (maquette) · fonctionne hors connexion : les fichiers de l'app sont gardés en cache,
    les pages sont d'abord demandées au réseau pour toujours avoir la dernière version. */
-const CACHE = "hodo-maquette-v2";
+const CACHE = "hodo-maquette-v3";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest",
   "../assets/planner.css", "../assets/icons.js", "../assets/rules.js",

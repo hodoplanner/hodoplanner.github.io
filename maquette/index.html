@@ -420,6 +420,7 @@
             <a class="btn block" href="../devis.html">✈️ Je prépare un voyage</a>
           </div>
           <p class="small">Déjà inscrit·e ? <button class="linklike" data-go="email">Me connecter</button></p>
+          ${installBox()}
           <div class="card" style="--sh:var(--yellow);margin-top:10px;text-align:left;width:100%;max-width:310px">
             <b style="font-size:13px">Démo : les autres écrans</b>
             <div class="stack" style="margin-top:8px;gap:8px">
@@ -487,6 +488,25 @@
 
       admin: () => ({ trip: adminTrip, draft: adminDraft, lib: adminLib, new: adminNew }[ui.admin] || adminHome)(),
     };
+
+    // --- Installer l'app ---
+    let installEvt = null;
+    const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; if (ui.screen === "welcome") render(); });
+    window.addEventListener("appinstalled", () => { installEvt = null; toast("App installée : retrouve le lapin sur ton écran d’accueil 🐰"); if (ui.screen === "welcome") render(); });
+    function installBox() {
+      if (standalone()) return "";
+      if (installEvt) return `<button class="btn yellow" data-action="install" style="width:100%;max-width:310px">📲 Installer l’app sur mon téléphone</button>`;
+      const ua = navigator.userAgent;
+      let how;
+      if (/; wv\)|FBAN|FBAV|Instagram|WhatsApp|Line\//i.test(ua)) how = "Tu es dans le navigateur d’une autre app. Ouvre d’abord ce lien dans <b>Chrome</b> (menu ⋮ → « Ouvrir dans Chrome »).";
+      else if (/SamsungBrowser/i.test(ua)) how = "Menu <b>≡</b> en bas → <b>Ajouter la page à</b> → <b>Écran d’accueil</b>.";
+      else if (/iPhone|iPad|iPod/i.test(ua)) how = "Dans <b>Safari</b> : bouton <b>Partager</b> ⬆️ → <b>Sur l’écran d’accueil</b>.";
+      else if (/Firefox/i.test(ua)) how = "Menu <b>⋮</b> → <b>Installer</b> (ou « Ajouter à l’écran d’accueil »).";
+      else if (/Android/i.test(ua)) how = "Dans <b>Chrome</b> : menu <b>⋮</b> en haut à droite → <b>Ajouter à l’écran d’accueil</b> → <b>Installer</b>.";
+      else how = "Sur ordinateur, l’icône d’installation apparaît à droite de la barre d’adresse de Chrome ou Edge. Sur téléphone : menu du navigateur → « Ajouter à l’écran d’accueil ».";
+      return `<div class="note" style="text-align:left;width:100%;max-width:310px"><span class="ico">📲</span><span><b>Installer l’app :</b> ${how}</span></div>`;
+    }
 
     // --- Brief et paiement ---
     function screenBrief() {
@@ -914,6 +934,7 @@
         ui.screen = "sent"; render();
       }
       else if (a === "me") { ui.me = !ui.me; render(); }
+      else if (a === "install" && installEvt) { installEvt.prompt(); installEvt.userChoice.finally(() => { installEvt = null; render(); }); }
       else if (a === "share") toast("Code copié : " + trip().code);
       else if (a === "pdf") toast("Demande de PDF envoyée à Erika (démo)");
       else if (a === "paper") toast("Demande de carnet papier envoyée à Erika (démo)");
