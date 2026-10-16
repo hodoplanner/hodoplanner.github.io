@@ -165,7 +165,11 @@
             <small class="small">${new Date(r.created_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}${r.estimate ? " · " + esc(r.estimate) : ""}</small>
             <details style="margin-top:8px"><summary class="small" style="cursor:pointer;font-weight:700">Voir la demande</summary><p class="small" style="white-space:pre-wrap;margin-top:6px">${esc(r.summary)}</p></details>
             <div class="row" style="margin-top:10px">
-              <a class="btn small dark" href="mailto:${esc(r.email)}?subject=${encodeURIComponent("Ton voyage HodoPlanner")}"><i class="pic" data-picto="mail"></i> Répondre</a>
+              ${stepBtns(r)}
+            </div>
+            ${sentLine(r)}
+            <div class="row" style="margin-top:8px">
+              <a class="btn small" href="mailto:${esc(r.email)}?subject=${encodeURIComponent("Ton voyage HodoPlanner")}"><i class="pic" data-picto="mail"></i> Répondre</a>
               ${r.whatsapp ? `<a class="btn small" href="https://wa.me/${esc(r.whatsapp.replace(/\D/g, ""))}" target="_blank" rel="noopener"><i class="pic" data-picto="chat"></i> WhatsApp</a>` : ""}
               <select data-reqstatus="${r.id}" style="width:auto;min-height:38px;padding:4px 30px 4px 10px">${["nouveau", "répondu", "client", "archivé"].map((st) => `<option ${r.status === st ? "selected" : ""}>${st}</option>`).join("")}</select>
             </div>
@@ -568,6 +572,28 @@
       try { S.requests = await api.requests(); S.reqError = null; } catch (e) { S.requests = []; S.reqError = niceErr(e); }
       S.screen = "requests"; render();
     }
+    else if (a === "reqTrip") {
+      const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
+      const d = r.details || {}, dates = String(d.Dates || "").match(/(\d{4}-\d\d-\d\d)\s*→\s*(\d{4}-\d\d-\d\d)/);
+      t.disabled = true;
+      const saved = await api.saveTrip({ title: r.destinations || "Voyage", travelers: r.firstname ? [r.firstname] : [],
+        start_date: dates ? dates[1] : null, end_date: dates ? dates[2] : null, status: "brief" });
+      await api.updateRequest(r.id, { status: "client", details: { ...d, trip_id: saved.id, trip_code: saved.code } });
+      S.adminTab = "trip"; await openTrip(saved.id, "admin"); toast("Voyage créé · code " + saved.code);
+    }
+    else if (a === "reqMail") {
+      const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
+      const kind = t.dataset.kind || "devis", T = MAILS[kind];
+      showSheet(`<h2>${T.label} · ${esc(r.firstname || "?")}</h2><p class="small">Envoyé à ${esc(r.email)} depuis contact@hodoplanner.com. Tu reçois une copie.</p>
+        <div class="filters" style="margin-top:10px">${Object.entries(MAILS).filter(([k, m]) => !m.needsTrip || (r.details || {}).trip_code)
+          .map(([k, m]) => `<button class="${k === kind ? "on" : ""}" data-action="reqMail" data-kind="${k}" data-id="${esc(r.id)}">${m.label}</button>`).join("")}</div>
+        <form id="mailForm" class="stack" style="margin-top:10px"><input type="hidden" name="id" value="${esc(r.id)}" /><input type="hidden" name="kind" value="${kind}" />
+          <div class="field"><label>Objet</label><input name="subject" maxlength="150" value="${esc(T.subject(r))}" required /></div>
+          ${kind === "devis" ? `<div class="field"><label>Prix</label><input name="price" maxlength="100" value="${esc((r.details || {}).quote_price || r.estimate || "")}" required /></div>` : ""}
+          <div class="field"><label>Message (modifiable)</label><textarea name="message" rows="12" maxlength="4000" required>${esc(T.text(r))}</textarea></div>
+          ${kind === "devis" ? `<p class="small">Le récapitulatif de sa demande est ajouté sous ton message.</p>` : ""}
+          <button class="btn dark block" type="submit"><i class="pic" data-picto="mail"></i> Envoyer</button></form>`);
+    }
     else if (a === "toAdmin") { S.screen = "adminTrip"; S.adminTab = "items"; render(); }
     else if (a === "toTraveler") { S.screen = "trip"; S.tab = "home"; S.day = null; S.me = false; render(); }
     else if (a === "logout") { if (S.unsub) S.unsub(); await api.signOut(); Object.assign(S, { session: null, profile: null, trips: [], tripId: null, data: null, screen: "welcome" }); render(); }
@@ -608,6 +634,85 @@
     e.preventDefault();
     submit(e.target).catch((err) => showErr(niceErr(err)));
   });
+  // étapes d'une demande : devis → brief → voyage + code (chaque bouton se grise une fois fait)
+  function stepBtns(r) {
+    const d = r.details || {}, sent = d.sent || {}, id = esc(r.id);
+    const b = (kind, label, picto) => `<button class="btn small ${sent[kind] ? "" : "dark"}" data-action="reqMail" data-kind="${kind}" data-id="${id}"><i class="pic" data-picto="${picto}"></i> ${sent[kind] ? "✓ " : ""}${label}</button>`;
+    return [
+      b("devis", "1 · Devis", "mail"),
+      b("brief", "2 · Brief", "doc"),
+      d.trip_id
+        ? `<button class="btn small" data-admintrip="${esc(d.trip_id)}"><i class="pic" data-picto="backpack"></i> ✓ Voyage ${esc(d.trip_code || "")}</button>`
+        : `<button class="btn small yellow" data-action="reqTrip" data-id="${id}"><i class="pic" data-picto="backpack"></i> 3 · Créer le voyage</button>`,
+      d.trip_id ? b("code", "4 · Envoyer le code", "phone") : "",
+    ].join("");
+  }
+  function sentLine(r) {
+    const sent = (r.details || {}).sent || {}, when = (iso) => new Date(iso).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const parts = Object.entries(sent).map(([k, v]) => `${(MAILS[k] || { label: k }).label} le ${when(v)}`);
+    return parts.length ? `<small class="small" style="display:block;margin-top:6px">Envoyé : ${parts.join(" · ")}</small>` : "";
+  }
+
+  // mails proposés depuis une demande (Erika peut tout modifier avant l'envoi)
+  const isFree = (r) => /offert/i.test(r.estimate || "") || /offert/i.test((r.details || {}).quote_price || "");
+  const appLine = (r) => `Ouvre https://hodoplanner.com/app/ , connecte-toi avec ton adresse mail (${r.email}) et entre le code ${(r.details || {}).trip_code}.`;
+  const MAILS = {
+    devis: {
+      label: "Devis",
+      subject: (r) => `Ton devis HodoPlanner${r.destinations ? " · " + r.destinations : ""}`,
+      text: (r) => `Bonjour ${r.firstname || ""} !
+
+Merci pour ta demande${r.destinations ? " pour " + r.destinations : ""}. J’ai tout lu et je serais ravie de préparer ce voyage avec toi.
+${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : ""}
+Pour lancer la préparation :
+1. Réponds à ce mail pour valider (ou pour me poser tes questions).
+2. Je t’envoie ton brief à confirmer${isFree(r) ? "" : " et le lien de paiement"}.
+3. Je commence les recherches et tout arrive dans ton app.
+
+À très vite,
+Erika`,
+    },
+    brief: {
+      label: "Brief",
+      subject: (r) => `Ton brief à valider${r.destinations ? " · " + r.destinations : ""}`,
+      text: (r) => `Bonjour ${r.firstname || ""} !
+
+Voici ce que j’ai compris de ton voyage. Relis bien : c’est sur cette base que je vais chercher.
+
+${r.summary || ""}
+
+Tout est juste ? Réponds simplement « OK » à ce mail${isFree(r) ? "" : " et règle le paiement"} : je commence les recherches dès ta validation.
+Quelque chose à corriger ? Réponds avec les changements.
+
+À très vite,
+Erika`,
+    },
+    code: {
+      label: "Code de l’app", needsTrip: true,
+      subject: () => "Ton voyage t’attend dans l’app HodoPlanner",
+      text: (r) => `Bonjour ${r.firstname || ""} !
+
+Ton espace voyage est prêt. Tu y trouveras au fur et à mesure tout ce qu’il faut réserver (avec les liens), ton programme jour par jour, la carte et les infos pratiques.
+
+${appLine(r)}
+
+Astuce : installe l’app sur ton téléphone (le bouton apparaît sur la page d’accueil) pour l’avoir toujours sous la main.
+
+À très vite,
+Erika`,
+    },
+    libre: {
+      label: "Message libre",
+      subject: (r) => `Ton voyage HodoPlanner${r.destinations ? " · " + r.destinations : ""}`,
+      text: (r) => `Bonjour ${r.firstname || ""} !
+
+
+
+À très vite,
+Erika`,
+    },
+  };
+
   async function submit(f) {
     const btn = f.querySelector('button[type="submit"]'); if (btn) btn.disabled = true;
     try {
@@ -655,6 +760,10 @@
       } else if (f.id === "infosForm") {
         const practical = [...f.querySelectorAll("[data-sec]")].map(rowVals).map((x) => ({ icon: x.icon, title: x.title, text: x.text, source: x.source })).filter((x) => x.title || x.text);
         await api.saveTrip({ id: S.tripId, practical }); await reloadTrip(); toast("Infos pratiques enregistrées");
+      } else if (f.id === "mailForm") {
+        const id = val(f, "id"), r = S.requests.find((x) => x.id === id);
+        await api.sendMail({ request_id: id, kind: val(f, "kind"), subject: val(f, "subject"), price: val(f, "price"), message: val(f, "message") });
+        closeSheet(); S.requests = await api.requests(); render(true); toast("Mail envoyé à " + (r ? r.email : "?"));
       } else if (f.id === "tripForm") {
         const row = { title: val(f, "title"), emoji: val(f, "emoji") || "torii", country: val(f, "country").toUpperCase() || null,
           travelers: val(f, "travelers").split(",").map((x) => x.trim()).filter(Boolean),

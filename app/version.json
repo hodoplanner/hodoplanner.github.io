@@ -1,8 +1,8 @@
 {
-  "version": "2026.10.18-4",
+  "version": "2026.10.18-5",
   "date": "18 octobre 2026",
   "notes": [
-    "Connexion : le code à 6 chiffres reçu par mail est mis en avant (tu restes connecté·e dans l’app)",
-    "Les demandes affichent un message clair si elles ne peuvent pas être lues"
+    "Demandes : chaque étape en un bouton (devis, brief, créer le voyage, envoyer le code)",
+    "Les mails partent directement de l’app, préremplis et modifiables"
   ]
 }

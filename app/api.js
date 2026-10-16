@@ -69,6 +69,16 @@
       async deleteDay(id) { must(await sb.from("days").delete().eq("id", id)); },
       async requests() { return must(await sb.from("requests").select("*").order("created_at", { ascending: false }).limit(200)); },
       async updateRequest(id, fields) { must(await sb.from("requests").update(fields).eq("id", id)); },
+      // le mail part du serveur (fonction send-mail), jamais avec un mot de passe dans l'app
+      async sendMail(q) {
+        const { data, error } = await sb.functions.invoke("send-mail", { body: q });
+        if (error) {
+          let msg = error.message;
+          try { msg = (await error.context.json()).error || msg; } catch (_) {}
+          throw new Error(msg);
+        }
+        return data;
+      },
       async members(tripId) {
         const m = must(await sb.from("trip_members").select("user_id, joined_at").eq("trip_id", tripId));
         if (!m.length) return [];
@@ -146,6 +156,7 @@
       async deleteDay(id) { guard(); db.days = db.days.filter((x) => x.id !== id); save(); },
       async requests() { guard(); return (db.requests || []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)); },
       async updateRequest(id, fields) { guard(); const r = (db.requests || []).find((x) => x.id === id); if (r) Object.assign(r, fields); save(); },
+      async sendMail(q) { guard(); const r = (db.requests || []).find((x) => x.id === q.request_id); if (!r) return; const d = r.details || {}; r.details = { ...d, sent: { ...(d.sent || {}), [q.kind]: new Date().toISOString() }, ...(q.price ? { quote_price: q.price } : {}) }; if (r.status === "nouveau") r.status = "répondu"; save(); },
       async members(tripId) { return db.members.filter((m) => m.trip_id === tripId).map((m) => ({ ...m, email: (db.users.find((u) => u.id === m.user_id) || {}).email })); },
       reset() { db = seed(); save(); },
     };
@@ -167,7 +178,7 @@
           ] }],
         members: [{ trip_id: T, user_id: lea, joined_at: "2026-10-01T10:00:00Z" }],
         requests: [{ id: "demo-req-1", created_at: "2026-10-15T18:20:00Z", kind: "attente", firstname: "Ardahan", email: "ardahan@demo.be", whatsapp: null,
-          destinations: "Japon", estimate: "180 € (offert : lancement)", status: "nouveau",
+          destinations: "Japon", estimate: "180 € (offert : lancement)", status: "nouveau", details: { Dates: "2027-04-01 → 2027-04-14" },
           summary: "Prénom : Ardahan\nEmail : ardahan@demo.be\n\nDestination(s) : Japon\nDurée : 14 jours\nVoyageurs : 1\nBudget : 1 680 € pour tout le voyage\nCentres d’intérêt : Culture & temples, Food & cafés\nIncontournables : Ghibli Park" }],
         items: [
           it(1, { type: "flight", title: "Vols Bruxelles → Tokyo, Osaka → Bruxelles", where_label: "Skyscanner", link: "https://www.skyscanner.fr", date: "2027-04-03", deadline: "2026-11-30", price: "≈ 890 € / pers." }),
