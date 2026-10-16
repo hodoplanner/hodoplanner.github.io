@@ -54,6 +54,7 @@
         return () => sb.removeChannel(ch);
       },
       async saveProgress(p) { must(await sb.from("item_progress").upsert(clean(p, ["updated_at", "updated_by"]))); },
+      async validateBrief(tripId, note) { return must(await sb.rpc("validate_brief", { trip: tripId, note: note || null })); },
       async upload(tripId, itemId, file) {
         const path = `${tripId}/${itemId}/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
         must(await sb.storage.from("confirmations").upload(path, file, { upsert: true }));
@@ -140,6 +141,13 @@
         };
       },
       subscribe(_id, cb) { listeners.add(cb); return () => listeners.delete(cb); },
+      async validateBrief(tripId, note) {
+        if (!canSee(tripId)) throw new Error("Refusé");
+        const t = db.trips.find((x) => x.id === tripId);
+        if (t.status !== "brief") return t.status;
+        t.status = /offert/i.test(t.price || "") ? "in_progress" : "validated"; t.validated_at = new Date().toISOString(); t.brief_note = note || null;
+        save(); return t.status;
+      },
       async saveProgress(p) {
         if (!canSee(p.trip_id)) throw new Error("Refusé");
         const i = db.progress.findIndex((x) => x.item_id === p.item_id);

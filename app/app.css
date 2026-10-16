@@ -207,3 +207,8 @@
     .trip-card + .trip-card{margin-top:12px}
     .seg{display:flex; gap:6px; flex-wrap:wrap}
     .draft{border-style:dashed !important; opacity:.8}
+
+/* brief à valider */
+.brief-rows{display:grid; grid-template-columns:auto minmax(0,1fr); gap:6px 12px; margin-top:10px; align-items:baseline}
+.brief-rows b{font-size:14px; overflow-wrap:anywhere}
+.price-tag{display:inline-block; margin-top:12px; background:var(--yellow-soft); border:var(--line); border-radius:14px; box-shadow:3px 3px 0 var(--mint); padding:8px 16px; font-weight:800; font-size:18px}

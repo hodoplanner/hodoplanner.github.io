@@ -1,4 +1,4 @@
-// HodoPlanner · mails envoyés par Erika depuis l'app (validation, précisions, code de l'app, message libre).
+// HodoPlanner · mails envoyés par Erika depuis l'app (validation + code, précisions, rappel du code, message libre).
 // Appelée par l'app avec la session d'Erika : la fonction vérifie qu'elle est bien admin,
 // relit la demande dans la base (l'adresse du voyageur vient de là, pas de l'app),
 // envoie le mail depuis contact@hodoplanner.com (copie à Erika) et note l'envoi sur la demande.
@@ -116,18 +116,23 @@ Deno.serve(async (req) => {
   let body = `<h2 style="font-size:21px;margin:14px 0 8px;text-align:center;color:#3b3a5e">${esc(hello)}</h2>
     <div style="font-size:15px;line-height:1.6;white-space:pre-wrap;color:#3b3a5e">${linkify(esc(paras.join("\n\n")))}</div>`;
   const reply = (sub: string, txt: string) => `mailto:${USER}?subject=${encodeURIComponent("Re: " + subject + " · " + sub)}&body=${encodeURIComponent(txt)}`;
-  if ((kind === "valide" || kind === "precisions") && price) body += priceBox(kind === "valide" ? "Prix confirmé" : "Nouveau prix proposé", price);
+  const code = String((r.details ?? {}).trip_code ?? "");
+  const free = /offert/i.test(price || String(r.estimate ?? ""));
+  const codeBox = code ? `<div style="text-align:center;margin:18px 0 0"><p style="font-size:13px;color:#6b6a8a;margin:0 0 6px">Ton code de voyage</p><span style="display:inline-block;background:#dff5ea;border:2.5px dashed #3b3a5e;border-radius:14px;padding:10px 18px;font-size:22px;font-weight:800;letter-spacing:1px;color:#3b3a5e">${esc(code)}</span></div>` : "";
+  const appSteps = [`Ouvre <a href="${SITE}/app/" style="color:#3b3a5e;font-weight:700">hodoplanner.com/app</a> et connecte-toi avec ${esc(to)}`, "Entre ton code de voyage"];
+  if ((kind === "valide" || kind === "precisions") && price) body += priceBox(kind === "valide" ? (free ? "Ton voyage" : "Prix confirmé") : "Nouveau prix proposé", price);
   if (kind === "valide") {
-    body += `<p style="font-size:13px;color:#6b6a8a;margin:18px 0 8px">Ta demande, telle que je l’ai comprise :</p>${prettyRecap(r.details, String(r.summary ?? "").slice(0, 8000))}`;
-    body += `<p style="text-align:center;margin:16px 0 0">${button(reply("OK", "OK, tout est bon pour moi !"), "C’est tout bon !")}${button(reply("à corriger", "Voici ce qu’il faut changer :\n\n"), "Corriger quelque chose", false)}</p>`;
-    body += steps(["Ta demande est validée", "Tu me confirmes que tout est juste", "Je prépare tout et je t’écris si j’ai une question", "Tout arrive dans ton app : réservations, jours, carte"], 1);
+    body += codeBox;
+    body += steps(["Ta demande est validée", ...appSteps, free ? "Relis ton brief et valide-le" : "Relis ton brief, valide-le et règle le paiement",
+      "Je prépare tout, et ça arrive au fur et à mesure dans ton app"], 1);
+    body += `<p style="text-align:center;margin:18px 0 0">${button(SITE + "/app/", free ? "Valider mon brief" : "Valider et payer")}</p>`;
   }
   if (kind === "precisions") {
     body += `<p style="text-align:center;margin:16px 0 0">${button(reply("mes réponses", ""), "Répondre à tes questions")}</p>`;
   }
   if (kind === "code") {
-    body += `<div style="text-align:center;margin:18px 0 0"><span style="display:inline-block;background:#dff5ea;border:2.5px dashed #3b3a5e;border-radius:14px;padding:10px 18px;font-size:22px;font-weight:800;letter-spacing:1px;color:#3b3a5e">${esc(String((r.details ?? {}).trip_code ?? ""))}</span></div>`;
-    body += steps([`Ouvre <a href="${SITE}/app/" style="color:#3b3a5e;font-weight:700">hodoplanner.com/app</a>`, `Connecte-toi avec ${esc(to)}`, "Entre ton code de voyage", "Installe l’app sur ton téléphone pour l’avoir toujours sous la main"]);
+    body += codeBox;
+    body += steps([...appSteps, "Installe l’app sur ton téléphone pour l’avoir toujours sous la main"]);
     body += `<p style="text-align:center;margin:18px 0 0">${button(SITE + "/app/", "Ouvrir mon voyage")}</p>`;
   }
 

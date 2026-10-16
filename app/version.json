@@ -1,10 +1,10 @@
 {
-  "version": "2026.10.18-9",
+  "version": "2026.10.18-10",
   "date": "18 octobre 2026",
   "notes": [
-    "Mails aux voyageurs plus jolis : récapitulatif en cartes, étapes, boutons",
-    "Demandes plus simples : 1 · Valider (prix + récap), Précisions si besoin, 2 · Créer le voyage + code",
-    "Bouton Supprimer sur chaque demande",
-    "Nouvelles cartes (Mapbox)"
+    "Nouveau : le voyageur relit et valide son brief dans l’app avant que je commence",
+    "Demandes : « Valider + envoyer le code » crée le voyage et envoie prix, code et étapes",
+    "Mails plus jolis : cartes, étapes, boutons",
+    "Bouton Supprimer sur chaque demande"
   ]
 }

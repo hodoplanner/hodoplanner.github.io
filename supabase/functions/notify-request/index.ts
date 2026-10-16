@@ -1,5 +1,6 @@
 // HodoPlanner · mails envoyés à chaque nouvelle demande (devis ou liste d'attente).
-// Déclenchée par un « Database Webhook » Supabase sur l'ajout d'une ligne dans public.requests.
+// Déclenchée par la base (03-notifications.sql) à chaque nouvelle demande,
+// et (04-brief.sql) quand un voyageur valide son brief dans l'app.
 // Envoie :
 //   1. au voyageur : « J'ai bien reçu ta demande » + le récapitulatif ;
 //   2. à Erika : « Nouvelle demande » + le détail (répondre = répondre au voyageur).
@@ -90,6 +91,27 @@ Deno.serve(async (req) => {
   let payload: { type?: string; table?: string; record?: Record<string, unknown> };
   try { payload = await req.json(); } catch { return new Response("JSON attendu", { status: 400 }); }
   const r = payload.record;
+  // un voyageur a validé son brief dans l'app (déclencheur 04-brief.sql) → mail à Erika
+  if (payload.type === "VALIDATED" && payload.table === "trips" && r) {
+    const who = Array.isArray(r.travelers) ? (r.travelers as string[]).join(" & ") : "";
+    const paid = r.status === "in_progress";
+    try {
+      await transport.sendMail({
+        from: `HodoPlanner <${USER}>`,
+        to: NOTIFY,
+        subject: `Brief validé : ${who || "?"} · ${String(r.title ?? "")}`,
+        html: frame(
+          "Brief validé !",
+          `${esc(who || "Ton voyageur")} · ${esc(r.title)} · ${esc(r.code)}`,
+          `${r.price ? priceBox(paid ? "Offert" : "Paiement attendu", String(r.price)) : ""}
+           <p style="font-size:15px;line-height:1.55;text-align:center;margin:0 0 12px">${paid ? "Tu peux commencer les recherches." : "Envoie le lien de paiement, puis passe le voyage en « recherches en cours » une fois payé."}</p>
+           ${r.brief_note ? `<p style="font-size:13px;color:#6b6a8a;margin:0 0 6px">Sa note :</p>${recap(String(r.brief_note).slice(0, 2000))}` : ""}
+           <p style="text-align:center;margin:18px 0 0">${button(SITE + "/app/", "Ouvrir l’app")}</p>`,
+        ),
+      });
+      return new Response("Erika ok", { status: 200 });
+    } catch (e) { return new Response("Erika : " + (e as Error).message, { status: 200 }); }
+  }
   if (payload.type !== "INSERT" || payload.table !== "requests" || !r) return new Response("ignoré", { status: 200 });
 
   const firstname = String(r.firstname ?? "").slice(0, 100);

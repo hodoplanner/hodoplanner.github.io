@@ -33,7 +33,7 @@
     flight: { label: "Vol", icon: "ticket" }, hotel: { label: "Hébergement", icon: "house" }, activity: { label: "Activité", icon: "star" },
     transport: { label: "Transport", icon: "train" }, food: { label: "Restaurant / café", icon: "cup" }, admin: { label: "À préparer", icon: "gem" },
   };
-  const STATUS = { brief: ["brief", "p-blue"], paid: ["payé", "p-yellow"], in_progress: ["recherches en cours", "p-yellow"], delivered: ["livré", "p-mint"], done: ["terminé", "p-lav"] };
+  const STATUS = { brief: ["brief à valider", "p-blue"], validated: ["à payer", "p-pink"], paid: ["payé", "p-yellow"], in_progress: ["recherches en cours", "p-yellow"], delivered: ["livré", "p-mint"], done: ["terminé", "p-lav"] };
 
   // ---------- données du voyage ouvert ----------
   const prog = (itemId) => (S.data?.progress || []).find((p) => p.item_id === itemId) || null;
@@ -179,8 +179,52 @@
   };
 
   // =================== onglets voyageur ===================
+  // ---- brief à valider (avant que je commence) ----
+  const BRIEF = [
+    ["Ton voyage", "blue", ["Destination(s)", "Dates", "Durée", "Voyageurs", "Dates flexibles", "Parcours"]],
+    ["Ton budget", "yellow", ["Budget", "Vols", "Plafond vol", "Plafond nuit", "Réductions", "Budget flexible"]],
+    ["Tes envies", "pink", ["Rythme", "Centres d’intérêt", "Hébergements", "Incontournables", "Contraintes", "Format"]],
+    ["À vérifier ensemble", "mint", ["Visa / vaccins"]],
+  ];
+  function briefValue(k, v) {
+    if (k === "Dates") return v.split("→").map((x) => fmtDate(x.trim(), { day: "numeric", month: "long", year: "numeric" })).join(" → ");
+    if (v === "oui" && /flexible/.test(k)) return "oui, on peut ajuster";
+    if (k === "Visa / vaccins") { const n = v.match(/nationalité : (.+)$/); return "je vérifie les infos officielles pour toi" + (n && n[1].trim() !== "?" ? ` (nationalité ${n[1].trim()})` : ""); }
+    return v;
+  }
+  function briefCards(b) {
+    const known = BRIEF.flatMap((x) => x[2]);
+    const other = Object.keys(b || {}).filter((k) => !known.includes(k));
+    return [...BRIEF, ["Autres infos", "lav", other]].map(([title, color, keys]) => {
+      const rows = keys.filter((k) => b && typeof b[k] === "string" && b[k].trim());
+      return rows.length ? `<div class="card" style="--sh:var(--${color});margin-top:12px"><span class="label" style="--lb:var(--${color}-soft)">${title}</span>
+        <div class="brief-rows">${rows.map((k) => `<span class="small">${esc(k === "Destination(s)" ? "Destination" : k)}</span><b>${esc(briefValue(k, b[k]))}</b>`).join("")}</div></div>` : "";
+    }).join("");
+  }
+  function briefPage(t) {
+    const free = /offert/i.test(t.price || "");
+    return `
+      <div class="card hello">
+        <span class="label" style="--lb:var(--yellow)">Bonjour ${esc((t.travelers || []).join(" & "))}</span>
+        <h2 style="margin-top:8px">Dernière étape : ton brief</h2>
+        <p class="sub" style="margin-top:6px">Relis-le bien : c’est la base de mes recherches. Je commence dès que tu le valides${free ? "" : " et que le paiement est fait"}.</p>
+        ${t.price ? `<div class="price-tag">${esc(t.price)}</div>` : ""}
+      </div>
+      ${briefCards(t.brief) || `<p class="sub" style="margin-top:12px">Ton brief arrive : je le prépare à partir de ta demande.</p>`}
+      <form id="briefForm" class="card stack" style="--sh:var(--lav);margin-top:14px">
+        <div class="field"><label>Quelque chose à ajouter ou corriger ? <span class="small">(facultatif)</span></label><textarea name="note" rows="3" maxlength="2000" placeholder="ex. on préfère éviter les auberges de jeunesse"></textarea></div>
+        <label class="check"><input type="checkbox" name="c1" required /> <span>J’ai relu mon brief : c’est la base de tes recherches.</span></label>
+        <label class="check"><input type="checkbox" name="c2" required /> <span>J’accepte les <a href="../conditions.html" target="_blank" rel="noopener">conditions de service</a> et je te demande de commencer tout de suite.</span></label>
+        <button class="btn dark block" type="submit">${free ? "Valider mon brief" : "Valider mon brief et payer"}</button>
+        ${free ? `<p class="small" style="text-align:center">Offert pendant le lancement : rien à payer.</p>` : `<p class="small" style="text-align:center">Le paiement en ligne arrive bientôt : en attendant, je t’envoie le lien de paiement par mail juste après ta validation.</p>`}
+      </form>
+      <div class="sec-t"><h2>Une question ?</h2></div>
+      ${contactBtn()}`;
+  }
+
   function tabHome() {
     const t = S.data.trip, s = stats(), d = t.start_date ? daysUntil(t.start_date) : null;
+    if (t.status === "brief") return briefPage(t);
     const todo = S.data.items.filter((i) => !isDone(i)).sort(byDeadline);
     const nextOpen = todo.filter((i) => i.rule).map((i) => ({ i, dl: deadlineOf(i) })).filter((x) => x.dl && x.dl.opens > new Date()).sort((a, b) => a.dl.opens - b.dl.opens)[0];
     const firstDay = S.data.days.findIndex((x) => x.date >= TODAY.toISOString().slice(0, 10));
@@ -191,6 +235,8 @@
         <div class="count"><div><b>${S.data.days.length}</b><small>jours prêts</small></div><div><b>${s.done}/${s.total}</b><small>réservés</small></div><div><b>${s.total - s.done}</b><small>à faire</small></div></div>
         <div class="bar" style="margin-top:12px"><i style="width:${s.pct}%"></i></div>
       </div>
+      ${t.status === "validated" ? `<div class="note warn" style="margin-top:14px"><span class="ico">!</span><span><b>Brief validé, merci !</b> Je t’envoie le lien de paiement par mail : je commence les recherches dès qu’il est réglé.</span></div>` : ""}
+      ${t.status === "in_progress" && !S.data.items.length && !S.data.days.length ? `<div class="note tip" style="margin-top:14px"><span class="ico">✓</span><span><b>C’est parti !</b> Je prépare ton voyage : les réservations et les jours apparaîtront ici au fur et à mesure.</span></div>` : ""}
       ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span><b>Prochaine ouverture :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}.</span></div>` : ""}
       <div class="sec-t"><h2>À réserver bientôt</h2><button data-tab="book">tout voir</button></div>
       ${todo.slice(0, 3).map((i) => itemRow(i)).join("") || `<p class="sub">${S.data.items.length ? "Tout est réservé, bravo !" : "Erika prépare ta liste."}</p>`}
@@ -299,6 +345,7 @@
       body = `<div class="card stack" style="--sh:var(--mint)"><span class="small">Code à envoyer aux voyageurs</span><div class="code">${esc(t.code)}</div>
           <button class="btn small" data-action="share">Copier le code</button></div>
         <div class="sec-t"><h2>Voyageurs inscrits</h2></div><div id="members" class="small">…</div>
+        ${t.validated_at ? `<div class="note tip" style="margin-top:14px"><span class="ico">✓</span><span>Brief validé le ${new Date(t.validated_at).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${t.brief_note ? `<br><b>Sa note :</b> ${esc(t.brief_note)}` : ""}</span></div>` : ""}
         <div class="sec-t"><h2>Infos du voyage</h2></div>${tripForm(t)}
         <button class="btn block" style="margin-top:18px;color:var(--red)" data-action="deleteTrip">Supprimer ce voyage</button>`;
     }
@@ -317,6 +364,7 @@
       <div class="two"><div class="field"><label>Icône</label><select name="emoji">${iconOptions(window.HodoIcons && HodoIcons.has(t.emoji) ? t.emoji : "torii")}</select></div><div class="field"><label>Pays (code)</label><input name="country" value="${esc(t.country)}" placeholder="JP" /></div></div>
       <div class="field"><label>Voyageurs (prénoms, séparés par des virgules)</label><input name="travelers" value="${esc((t.travelers || []).join(", "))}" placeholder="ex. Ardahan" /></div>
       <div class="two"><div class="field"><label>Départ</label><input type="date" name="start_date" value="${esc(t.start_date)}" /></div><div class="field"><label>Retour</label><input type="date" name="end_date" value="${esc(t.end_date)}" /></div></div>
+      <div class="field"><label>Prix</label><input name="price" maxlength="100" value="${esc(t.price)}" placeholder="ex. 150 € (offert : lancement)" /></div>
       <div class="field"><label>Étape</label><select name="status">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${t.status === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></div>
       <button class="btn dark block" type="submit">${t.id ? "Enregistrer" : "Créer le voyage"}</button></form>`;
 
@@ -578,16 +626,6 @@
       try { S.requests = await api.requests(); S.reqError = null; } catch (e) { S.requests = []; S.reqError = niceErr(e); }
       S.screen = "requests"; render();
     }
-    else if (a === "reqTrip") {
-      const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
-      const d = r.details || {}, dates = String(d.Dates || "").match(/(\d{4}-\d\d-\d\d)\s*→\s*(\d{4}-\d\d-\d\d)/);
-      t.disabled = true;
-      const saved = await api.saveTrip({ title: r.destinations || "Voyage", travelers: r.firstname ? [r.firstname] : [],
-        start_date: dates ? dates[1] : null, end_date: dates ? dates[2] : null, status: "brief" });
-      await api.updateRequest(r.id, { status: "client", details: { ...d, trip_id: saved.id, trip_code: saved.code } });
-      S.requests = await api.requests(); render(true); toast("Voyage créé · code " + saved.code);
-      action("reqMail", { dataset: { id: r.id, kind: "code" } }); // le mail du code s'ouvre, prêt à partir
-    }
     else if (a === "reqDelete") {
       const r = S.requests.find((x) => x.id === t.dataset.id); if (!r) return;
       if (!confirm(`Supprimer définitivement la demande de ${r.firstname || "?"} (${r.destinations || "?"}) ?`)) return;
@@ -608,7 +646,7 @@
           ${kind === "valide" ? `<div class="field"><label>Prix confirmé</label><input name="price" maxlength="100" value="${esc((r.details || {}).quote_price || r.estimate || "")}" required /></div>` : ""}
           ${kind === "precisions" ? `<div class="field"><label>Nouveau prix (seulement s’il change)</label><input name="price" maxlength="100" placeholder="${esc(r.estimate || "")}" /></div>` : ""}
           <div class="field"><label>Message (modifiable)</label><textarea name="message" rows="12" maxlength="4000" required>${esc(T.text(r))}</textarea></div>
-          ${kind === "valide" ? `<p class="small">Le prix et le récapitulatif de sa demande sont ajoutés sous ton message.</p>` : ""}
+          ${kind === "valide" ? `<p class="small">Le voyage est créé à l’envoi (brief repris de sa demande). Le mail contient le prix, le code et les étapes : la personne valide son brief dans l’app, et tu reçois un mail à ce moment-là.</p>` : ""}
           <button class="btn dark block" type="submit"><i class="pic" data-picto="mail"></i> Envoyer</button></form>`);
     }
     else if (a === "toAdmin") { S.screen = "adminTrip"; S.adminTab = "items"; render(); }
@@ -654,14 +692,27 @@
   // étapes d'une demande : valider (ou demander des précisions) → créer le voyage + envoyer le code
   function stepBtns(r) {
     const d = r.details || {}, sent = d.sent || {}, id = esc(r.id);
-    const b = (kind, label, picto, main) => `<button class="btn small ${sent[kind] || !main ? "" : "dark"}" data-action="reqMail" data-kind="${kind}" data-id="${id}"><i class="pic" data-picto="${picto}"></i> ${sent[kind] ? "✓ " : ""}${label}</button>`;
+    const b = (kind, label, picto, main) => `<button class="btn small ${main ? "dark" : ""}" data-action="reqMail" data-kind="${kind}" data-id="${id}"><i class="pic" data-picto="${picto}"></i> ${label}</button>`;
+    const trip = d.trip_id && (S.trips || []).find((x) => x.id === d.trip_id);
+    const st = trip ? STATUS[trip.status] || STATUS.brief : null;
     return [
-      b("valide", "1 · Valider", "sparkle", true),
-      b("precisions", "Précisions ?", "chat", false),
-      d.trip_id
-        ? `<button class="btn small" data-admintrip="${esc(d.trip_id)}"><i class="pic" data-picto="backpack"></i> ✓ Voyage ${esc(d.trip_code || "")}</button>` + b("code", sent.code ? "Code envoyé" : "2 · Envoyer le code", "phone", true)
-        : `<button class="btn small ${sent.valide ? "dark" : "yellow"}" data-action="reqTrip" data-id="${id}"><i class="pic" data-picto="backpack"></i> 2 · Créer le voyage + code</button>`,
+      sent.valide ? "" : b("precisions", sent.precisions ? "✓ Précisions" : "Précisions ?", "chat", false),
+      sent.valide ? "" : b("valide", "Valider + envoyer le code", "sparkle", true),
+      d.trip_id ? `<button class="btn small" data-admintrip="${esc(d.trip_id)}"><i class="pic" data-picto="backpack"></i> ${esc(d.trip_code || "Voyage")}${st ? ` <span class="pill ${st[1]}" style="font-size:10.5px">${st[0]}</span>` : ""}</button>` : "",
+      sent.valide ? b("code", "Renvoyer le code", "phone", false) : "",
     ].join("");
+  }
+  // voyage créé à partir d'une demande : destination, prénom, dates, prix et brief repris tels quels
+  const PRIVATE = ["Prénom", "Email", "WhatsApp", "Estimation", "Venu de", "trip_id", "trip_code", "sent", "quote_price"];
+  async function tripFromRequest(r, price) {
+    const d = r.details || {};
+    if (d.trip_id) return { id: d.trip_id, code: d.trip_code };
+    const dates = String(d.Dates || "").match(/(\d{4}-\d\d-\d\d)\s*→\s*(\d{4}-\d\d-\d\d)/);
+    const brief = Object.fromEntries(Object.entries(d).filter(([k, v]) => !PRIVATE.includes(k) && typeof v === "string"));
+    const saved = await api.saveTrip({ title: r.destinations || "Voyage", travelers: r.firstname ? [r.firstname] : [],
+      start_date: dates ? dates[1] : null, end_date: dates ? dates[2] : null, status: "brief", price: price || r.estimate || null, brief });
+    await api.updateRequest(r.id, { status: "client", details: { ...d, trip_id: saved.id, trip_code: saved.code } });
+    return saved;
   }
   function sentLine(r) {
     const sent = (r.details || {}).sent || {}, when = (iso) => new Date(iso).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -674,12 +725,12 @@
   const MAILS = {
     valide: {
       label: "Validation",
-      subject: (r) => `C’est validé : je prépare ton voyage${r.destinations ? " · " + r.destinations : ""}`,
+      subject: (r) => `C’est validé : ton espace voyage t’attend${r.destinations ? " · " + r.destinations : ""}`,
       text: (r) => `Bonjour ${r.firstname || ""} !
 
-Bonne nouvelle : ta demande${r.destinations ? " pour ce voyage (" + r.destinations + ")" : ""} est validée, je peux m’en occuper.
+Bonne nouvelle : ta demande${r.destinations ? " (" + r.destinations + ")" : ""} est validée, je peux préparer ce voyage.
 ${isFree(r) ? "\nPendant le lancement, c’est offert : en échange, je te demande juste un avis honnête après ton voyage.\n" : ""}
-Relis le récapitulatif ci-dessous : c’est sur cette base que je vais chercher. Tout est bon ? Réponds « OK »${isFree(r) ? "" : " et règle le paiement"} et je commence. Quelque chose à corriger ? Réponds avec les changements.
+Dernière étape avant que je commence : ouvre l’app avec ton code ci-dessous, relis ton brief et valide-le${isFree(r) ? "" : " en réglant le paiement"}. Je me mets au travail dès ta validation.
 
 À très vite,
 Erika`,
@@ -701,12 +752,10 @@ Erika`,
     },
     code: {
       label: "Code de l’app", needsTrip: true,
-      subject: () => "Ton voyage t’attend dans l’app HodoPlanner",
+      subject: () => "Ton code HodoPlanner",
       text: (r) => `Bonjour ${r.firstname || ""} !
 
-Ton espace voyage est prêt ! Tu y trouveras au fur et à mesure tout ce qu’il faut réserver (avec les liens), ton programme jour par jour, la carte et les infos pratiques.
-
-Voici comment y accéder :
+Voici à nouveau ton code pour retrouver ton voyage dans l’app : tout ce qu’il faut réserver (avec les liens), ton programme jour par jour, la carte et les infos pratiques.
 
 À très vite,
 Erika`,
@@ -770,14 +819,19 @@ Erika`,
       } else if (f.id === "infosForm") {
         const practical = [...f.querySelectorAll("[data-sec]")].map(rowVals).map((x) => ({ icon: x.icon, title: x.title, text: x.text, source: x.source })).filter((x) => x.title || x.text);
         await api.saveTrip({ id: S.tripId, practical }); await reloadTrip(); toast("Infos pratiques enregistrées");
+      } else if (f.id === "briefForm") {
+        const st = await api.validateBrief(S.tripId, val(f, "note"));
+        await reloadTrip(); scrollTo(0, 0);
+        toast(st === "in_progress" ? "Merci ! Je commence les recherches" : "Merci ! Je t’envoie le lien de paiement");
       } else if (f.id === "mailForm") {
         const id = val(f, "rid"), r = S.requests.find((x) => x.id === id);
+        if (val(f, "kind") === "valide" && r) { await tripFromRequest(r, val(f, "price")); S.trips = await api.trips(); }
         await api.sendMail({ request_id: id, kind: val(f, "kind"), subject: val(f, "subject"), price: val(f, "price"), message: val(f, "message") });
-        closeSheet(); S.requests = await api.requests(); render(true); toast("Mail envoyé à " + (r ? r.email : "?"));
+        closeSheet(); S.requests = await api.requests(); S.trips = await api.trips(); render(true); toast("Mail envoyé à " + (r ? r.email : "?"));
       } else if (f.id === "tripForm") {
         const row = { title: val(f, "title"), emoji: val(f, "emoji") || "torii", country: val(f, "country").toUpperCase() || null,
           travelers: val(f, "travelers").split(",").map((x) => x.trim()).filter(Boolean),
-          start_date: val(f, "start_date") || null, end_date: val(f, "end_date") || null, status: val(f, "status") || "brief" };
+          start_date: val(f, "start_date") || null, end_date: val(f, "end_date") || null, status: val(f, "status") || "brief", price: val(f, "price") || null };
         if (!row.title) throw new Error("Indique la destination.");
         const inSheet = !!f.closest("#sheet");
         if (!inSheet) row.id = S.tripId;
