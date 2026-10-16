@@ -16,7 +16,7 @@
 
   // Le service est-il ouvert ? false = mode « bientôt » : bannière en haut des pages,
   // et le devis inscrit à la liste d'attente au lieu d'envoyer une demande.
-  const OPEN = false;
+  const OPEN = true;
   const OPENING = "2027";
 
   // Formule du devis :
