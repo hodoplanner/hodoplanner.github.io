@@ -1,7 +1,8 @@
 {
-  "version": "2026.10.16-1",
-  "date": "16 octobre 2026",
+  "version": "2026.10.17-2",
+  "date": "17 octobre 2026",
   "notes": [
-    "Première version de l’app HodoPlanner"
+    "Des icônes dessinées à la place des emojis",
+    "Une icône pour chaque rubrique des infos pratiques"
   ]
 }

@@ -155,11 +155,11 @@
       return {
         session: null, pending: null,
         users: [{ id: erika, email: "erika@demo.be", is_admin: true }, { id: lea, email: "lea@demo.be", is_admin: false }],
-        trips: [{ id: T, code: "HODO-DEMO42", title: "Japon", emoji: "🌸", country: "JP", start_date: "2027-04-03", end_date: "2027-04-16", travelers: ["Léa", "Tom"], status: "delivered",
+        trips: [{ id: T, code: "HODO-DEMO42", title: "Japon", emoji: "flower", country: "JP", start_date: "2027-04-03", end_date: "2027-04-16", travelers: ["Léa", "Tom"], status: "delivered",
           practical: [
-            { title: "🆘 Urgences", text: "Police : 110\nAmbulance et pompiers : 119\nJapan Visitor Hotline (JNTO, en anglais, 24 h/24) : 050-3816-2787", source: "JNTO" },
-            { title: "💉 Santé", text: "Aucun vaccin obligatoire pour le Japon. Vérifie que tes vaccins de base sont à jour ; demande conseil à ton médecin.", source: "wanda.be · vérifié par Erika" },
-            { title: "🔌 Prises et batteries", text: "100 V, prises type A : prends un adaptateur.\nBatteries externes en cabine uniquement.", source: "" },
+            { icon: "sos", title: "Urgences", text: "Police : 110\nAmbulance et pompiers : 119\nJapan Visitor Hotline (JNTO, en anglais, 24 h/24) : 050-3816-2787", source: "JNTO" },
+            { icon: "syringe", title: "Santé", text: "Aucun vaccin obligatoire pour le Japon. Vérifie que tes vaccins de base sont à jour ; demande conseil à ton médecin.", source: "wanda.be · vérifié par Erika" },
+            { icon: "plug", title: "Prises et batteries", text: "100 V, prises type A : prends un adaptateur.\nBatteries externes en cabine uniquement.", source: "" },
           ] }],
         members: [{ trip_id: T, user_id: lea, joined_at: "2026-10-01T10:00:00Z" }],
         items: [

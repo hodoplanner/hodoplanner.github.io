@@ -4,11 +4,11 @@
    1. change VERSION ci-dessous,
    2. mets le même numéro et la liste des nouveautés dans version.json.
    À la prochaine ouverture, chaque voyageur verra « Nouvelle version disponible ». */
-const VERSION = "2026.10.16-1";
+const VERSION = "2026.10.17-2";
 const CACHE = "hodo-app-" + VERSION;
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./version.json", "./app.css", "./config.js", "./api.js", "./app.js", "./update.js",
-  "../assets/planner.css", "../assets/icons.js", "../assets/rules.js",
+  "../assets/planner.css", "../assets/icons.js", "../assets/pictos.js", "../assets/rules.js",
   "../assets/vendor/leaflet/leaflet.js", "../assets/vendor/leaflet/leaflet.css", "../assets/vendor/supabase/supabase.js",
   "../images/brand/lapin-carte.svg", "../images/brand/lapin-pattes.svg", "../images/brand/lapin-logo.svg",
   "../images/brand/lapin-icone.svg", "../images/brand/lapin-app-192.png", "../images/brand/lapin-app-512.png",

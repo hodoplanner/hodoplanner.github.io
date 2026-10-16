@@ -117,6 +117,7 @@
     © <span id="y"></span> HodoReminder · by Erika
   </footer>
 
+  <script src="../assets/pictos.js"></script>
   <script src="../assets/icons.js"></script>
   <script src="../assets/planner.js"></script>
   <script src="../assets/rules.js"></script>
@@ -150,8 +151,8 @@
         <p class="small">${esc(res.rule.how)}</p>
         ${past ? `<div class="note warn"><span class="ico">!</span><span>C’est déjà ouvert (ou passé) : va vite voir s’il reste des places !</span></div>` : ""}
         <div class="row">
-          <button type="button" class="btn dark small" id="cal">📅 Ajouter à mon agenda</button>
-          <button type="button" class="btn small" id="keep">🔔 Garder ce rappel</button>
+          <button type="button" class="btn dark small" id="cal"><i class="pic" data-picto="calendar"></i> Ajouter à mon agenda</button>
+          <button type="button" class="btn small" id="keep"><i class="pic" data-picto="bell"></i> Garder ce rappel</button>
           <a class="btn small" href="${esc(res.rule.link)}" target="_blank" rel="noopener">Site officiel ↗</a>
         </div>
       </div>`;
@@ -172,7 +173,7 @@
         return `<div class="r"><span data-icon="${res.rule.icon}" data-size="38"></span>
           <div><b>${esc(res.rule.name)}</b><small>visite le ${new Date(m.visit + "T12:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · ouverture ${esc(R.describe(res.opens).local)}</small></div>
           <span class="pill ${days <= 7 ? "p-pink" : "p-yellow"}">${days > 0 ? `J-${days}` : "ouvert"}</span>
-          <button type="button" class="x" data-ics="${i}" aria-label="Ajouter à l’agenda">📅</button>
+          <button type="button" class="x" data-ics="${i}" aria-label="Ajouter à l’agenda"><i class="pic" data-picto="calendar"></i></button>
           <button type="button" class="x" data-del="${i}" aria-label="Supprimer">×</button></div>`;
       }).join("");
       Planner.drawIcons(document.getElementById("mine"));

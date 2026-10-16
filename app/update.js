@@ -21,7 +21,7 @@
     const box = document.createElement("div");
     box.innerHTML = `<div class="sheet-bg show" id="ubg"></div><div class="sheet open" id="usheet" role="dialog"><div class="grip"></div>
       <div style="text-align:center">${window.HodoIcons ? HodoIcons.icon("bunnypaws", 90) : ""}</div>
-      <h2 style="text-align:center">Nouvelle version disponible ✨</h2>
+      <h2 style="text-align:center">Nouvelle version disponible <i class="pic" data-picto="sparkle"></i></h2>
       ${notes.length ? `<ul style="margin:12px 0;padding-left:20px;display:grid;gap:6px;font-size:14px">${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
       <p class="small" style="text-align:center;margin-bottom:12px">Ton voyage et tes coches sont gardés.</p>
       <div class="stack"><button class="btn dark block" id="doUpdate">Mettre à jour</button><button class="btn block" id="later">Plus tard</button></div></div>`;

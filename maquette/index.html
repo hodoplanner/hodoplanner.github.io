@@ -215,6 +215,7 @@
   <div class="demo-tag">Maquette · données fictives <button type="button" id="reset">tout remettre à zéro</button></div>
   <div class="stage"><div class="phone" id="phone"></div></div>
 
+  <script src="../assets/pictos.js"></script>
   <script src="../assets/icons.js"></script>
   <script src="../assets/rules.js"></script>
   <script src="../assets/vendor/leaflet/leaflet.js"></script>
@@ -334,7 +335,7 @@
 
     const SEED = () => ({
       trip: {
-        code: "HODO-7K2F", title: "Japon", emoji: "🌸", start: "2027-04-03", end: "2027-04-16", travelers: ["Léa", "Tom"],
+        code: "HODO-7K2F", title: "Japon", emoji: "flower", start: "2027-04-03", end: "2027-04-16", travelers: ["Léa", "Tom"],
         items: [
           { id: 1, type: "flight", title: "Vols Bruxelles → Tokyo, Osaka → Bruxelles", where: "Skyscanner", link: "https://www.skyscanner.fr", date: "2027-04-03", deadline: "2026-11-30", price: "≈ 890 € / pers.", status: "done", ref: "XK7L2P", paid: "1 780 €", note: "Arrivée à Haneda, retour depuis Kansai : pas besoin de revenir à Tokyo.", file: "" },
           { id: 2, type: "admin", title: "Assurance voyage (frais médicaux)", where: "comparateur", link: "", date: "", deadline: "2027-03-01", price: "≈ 60 €", status: "todo", partner: true, note: "Les soins sont très chers au Japon pour les touristes.", file: "" },
@@ -391,7 +392,7 @@
       const dl = deadlineOf(it);
       if (!dl) return `<span class="pill p-yellow">à faire</span>`;
       const d = daysUntil(dl.iso);
-      const txt = dl.rule ? `🔔 ouvre le ${fmtDate(dl.iso)}` : (d < 0 ? "en retard" : `avant le ${fmtDate(dl.iso)}`);
+      const txt = dl.rule ? `<i class="pic" data-picto="bell"></i> ouvre le ${fmtDate(dl.iso)}` : (d < 0 ? "en retard" : `avant le ${fmtDate(dl.iso)}`);
       return `<span class="pill ${it.urgent || d <= 30 ? "p-pink" : "p-yellow"}">${txt}</span>`;
     }
     const itemRow = (it) => `
@@ -416,17 +417,17 @@
           <h1 class="big">HodoPlanner</h1>
           <p class="sub" style="max-width:280px">Ton voyage sur mesure, préparé par Erika, toujours dans ta poche.</p>
           <div class="stack" style="width:100%;max-width:310px;margin-top:8px">
-            <button class="btn dark block" data-go="code">🎒 J’ai un voyage avec Erika</button>
-            <a class="btn block" href="../devis.html">✈️ Je prépare un voyage</a>
+            <button class="btn dark block" data-go="code"><i class="pic" data-picto="backpack"></i> J’ai un voyage avec Erika</button>
+            <a class="btn block" href="../devis.html"><i class="pic" data-picto="plane"></i> Je prépare un voyage</a>
           </div>
           <p class="small">Déjà inscrit·e ? <button class="linklike" data-go="email">Me connecter</button></p>
-          <a class="note tip" href="../app/" style="text-align:left;width:100%;max-width:310px;text-decoration:none"><span class="ico">✨</span><span><b>Ceci est la maquette (démo).</b> La vraie app est ici : <u>planner.erikaramel.com/app</u></span></a>
+          <a class="note tip" href="../app/" style="text-align:left;width:100%;max-width:310px;text-decoration:none"><span class="ico"><i class="pic" data-picto="sparkle"></i></span><span><b>Ceci est la maquette (démo).</b> La vraie app est ici : <u>planner.erikaramel.com/app</u></span></a>
           ${installBox()}
           <div class="card" style="--sh:var(--yellow);margin-top:10px;text-align:left;width:100%;max-width:310px">
             <b style="font-size:13px">Démo : les autres écrans</b>
             <div class="stack" style="margin-top:8px;gap:8px">
-              <button class="btn small" data-go="brief">📝 Brief et paiement</button>
-              <button class="btn small" data-go="admin">🐰 La vue d’Erika</button>
+              <button class="btn small" data-go="brief"><i class="pic" data-picto="doc"></i> Brief et paiement</button>
+              <button class="btn small" data-go="admin"><i class="pic" data-picto="bunny"></i> La vue d’Erika</button>
             </div>
           </div>
         </div>`,
@@ -439,7 +440,7 @@
           <div class="field"><label for="m">Ton email</label><input id="m" type="email" placeholder="toi@exemple.com" autocomplete="email" /></div>
           <div class="note warn hidden" id="err"><span class="ico">!</span><span id="errTx"></span></div>
           <button class="btn dark block" data-action="code">Recevoir mon lien</button>
-          <div class="note"><span class="ico">🔒</span><span>Le code relie ton compte au voyage. Il faut aussi accéder à ta boîte mail : si quelqu’un d’autre voit le code, il ne peut pas ouvrir ton voyage.</span></div>
+          <div class="note"><span class="ico"><i class="pic" data-picto="lock"></i></span><span>Le code relie ton compte au voyage. Il faut aussi accéder à ta boîte mail : si quelqu’un d’autre voit le code, il ne peut pas ouvrir ton voyage.</span></div>
         </div></div>`,
 
       email: () => `
@@ -478,7 +479,7 @@
         else body = { home: tabHome, book: tabBook, days: tabDays, map: tabMap, info: tabInfo }[ui.tab](t);
         const flush = ui.tab === "map" && !ui.me;
         return `
-          <div class="app-top"><span>${icon("bunny", 36)}</span><div><b>${esc(t.title)} ${t.emoji}</b><small>${fmtDate(t.start, { day: "numeric", month: "long" })} → ${fmtDate(t.end, { day: "numeric", month: "long", year: "numeric" })}</small></div><span class="sp"></span>
+          <div class="app-top"><span>${icon("bunny", 36)}</span><div><b>${esc(t.title)} ${icon(t.emoji, 20)}</b><small>${fmtDate(t.start, { day: "numeric", month: "long" })} → ${fmtDate(t.end, { day: "numeric", month: "long", year: "numeric" })}</small></div><span class="sp"></span>
             <button class="icon-btn" data-action="me" aria-label="Mon compte" style="${ui.me ? "background:var(--yellow)" : ""}">${icon("bunnypaws", 30)}</button></div>
           <div class="screen ${flush ? "flush" : ""}" id="scr">${body}</div>
           <nav class="tabs">
@@ -494,10 +495,10 @@
     let installEvt = null;
     const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
     window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; if (ui.screen === "welcome") render(); });
-    window.addEventListener("appinstalled", () => { installEvt = null; toast("App installée : retrouve le lapin sur ton écran d’accueil 🐰"); if (ui.screen === "welcome") render(); });
+    window.addEventListener("appinstalled", () => { installEvt = null; toast("App installée : retrouve le lapin sur ton écran d’accueil"); if (ui.screen === "welcome") render(); });
     function installBox() {
       if (standalone()) return "";
-      if (installEvt) return `<button class="btn yellow" data-action="install" style="width:100%;max-width:310px">📲 Installer l’app sur mon téléphone</button>`;
+      if (installEvt) return `<button class="btn yellow" data-action="install" style="width:100%;max-width:310px"><i class="pic" data-picto="phone"></i> Installer l’app sur mon téléphone</button>`;
       const ua = navigator.userAgent;
       let how;
       if (/; wv\)|FBAN|FBAV|Instagram|WhatsApp|Line\//i.test(ua)) how = "Tu es dans le navigateur d’une autre app. Ouvre d’abord ce lien dans <b>Chrome</b> (menu ⋮ → « Ouvrir dans Chrome »).";
@@ -506,7 +507,7 @@
       else if (/Firefox/i.test(ua)) how = "Menu <b>⋮</b> → <b>Installer</b> (ou « Ajouter à l’écran d’accueil »).";
       else if (/Android/i.test(ua)) how = "Dans <b>Chrome</b> : menu <b>⋮</b> en haut à droite → <b>Ajouter à l’écran d’accueil</b> → <b>Installer</b>.";
       else how = "Sur ordinateur, l’icône d’installation apparaît à droite de la barre d’adresse de Chrome ou Edge. Sur téléphone : menu du navigateur → « Ajouter à l’écran d’accueil ».";
-      return `<div class="note" style="text-align:left;width:100%;max-width:310px"><span class="ico">📲</span><span><b>Installer l’app :</b> ${how}</span></div>`;
+      return `<div class="note" style="text-align:left;width:100%;max-width:310px"><span class="ico"><i class="pic" data-picto="phone"></i></span><span><b>Installer l’app :</b> ${how}</span></div>`;
     }
 
     // --- Brief et paiement ---
@@ -530,7 +531,7 @@
               <div>Nuit, pour vous deux (€)<input name="cap_night" type="number" inputmode="numeric" value="130" /></div>
               <div>Sur place, / jour / pers. (€)<input name="cap_day" type="number" inputmode="numeric" value="70" /></div>
             </div>
-            <div class="row"><span class="pill p-yellow">🎓 Léa étudiante</span><span class="pill p-yellow">Tom −26 ans</span></div>
+            <div class="row"><span class="pill p-yellow"><i class="pic" data-picto="cap"></i> Léa étudiante</span><span class="pill p-yellow">Tom −26 ans</span></div>
           </div>
           <div class="card stack" style="--sh:var(--mint)">
             <b>Ce qui est compris</b>
@@ -557,13 +558,13 @@
           <div class="count"><div><b>${DAYS.length}</b><small>jours</small></div><div><b>${s.done}/${s.total}</b><small>réservés</small></div><div><b>${s.total - s.done}</b><small>à faire</small></div></div>
           <div class="bar" style="margin-top:12px"><i style="width:${s.pct}%"></i></div>
         </div>
-        ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico">🔔</span><span><b>Prochaine ouverture :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}. Je t’envoie un rappel la veille.</span></div>` : ""}
+        ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span><b>Prochaine ouverture :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}. Je t’envoie un rappel la veille.</span></div>` : ""}
         <div class="sec-t"><h2>À réserver bientôt</h2><button data-tab="book">tout voir</button></div>
         ${next.map(itemRow).join("") || `<p class="sub">Tout est réservé, bravo !</p>`}
         <div class="sec-t"><h2>Le programme</h2><button data-tab="days">tous les jours</button></div>
         ${dayRow(DAYS[1], 1)}
         <div class="sec-t"><h2>Besoin d’Erika ?</h2></div>
-        <button class="btn block" data-action="wa">💬 Écrire sur WhatsApp</button>
+        <button class="btn block" data-action="wa"><i class="pic" data-picto="chat"></i> Écrire sur WhatsApp</button>
         <p class="small" style="margin-top:6px;text-align:center">En cas de souci : je réponds dès que possible, sans délai garanti.</p>`;
     }
 
@@ -574,7 +575,7 @@
         <div class="filters">
           ${[["todo", `À faire (${s.total - s.done})`], ["done", `Réservé (${s.done})`], ["all", "Tout"]].map(([k, l]) => `<button class="${ui.filter === k ? "on" : ""}" data-filter="${k}">${l}</button>`).join("")}
         </div>
-        <p class="small" style="margin-bottom:12px">Erika a préparé cette liste dans l’ordre des dates limites. Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs. 🔔 = rappel automatique.</p>
+        <p class="small" style="margin-bottom:12px">Erika a préparé cette liste dans l’ordre des dates limites. Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs. <i class="pic" data-picto="bell"></i> = rappel automatique.</p>
         ${list.map(itemRow).join("") || `<p class="sub">Rien ici pour l’instant.</p>`}`;
     }
 
@@ -625,16 +626,16 @@
         </div>
         <div class="sec-t"><h2>Santé et formalités</h2></div>
         <div class="card" style="--sh:var(--mint)">
-          <div class="info"><b>💉 Vaccins</b><p>Aucun vaccin obligatoire pour le Japon. Vérifie que tes vaccins de base sont à jour ; d’autres peuvent être conseillés selon ton profil : demande à ton médecin.</p><span class="src">Source : wanda.be (Institut de Médecine Tropicale) · vérifié par Erika le 12 oct.</span></div>
-          <div class="info"><b>🛂 Visa</b><p>Passeport belge : pas de visa pour un séjour touristique de moins de 90 jours. Passeport valable pendant tout le séjour.</p><span class="src">Source : diplomatie.belgium.be · vérifié par Erika le 12 oct.</span></div>
-          <div class="info"><b>🛡️ Assurance</b><p>Les soins sont très chers au Japon pour les touristes : prends une assurance frais médicaux et rapatriement. Vérifie d’abord ce que couvre ta carte bancaire.</p><span class="partner">lien partenaire possible</span></div>
+          <div class="info"><b><i class="pic" data-picto="syringe"></i> Vaccins</b><p>Aucun vaccin obligatoire pour le Japon. Vérifie que tes vaccins de base sont à jour ; d’autres peuvent être conseillés selon ton profil : demande à ton médecin.</p><span class="src">Source : wanda.be (Institut de Médecine Tropicale) · vérifié par Erika le 12 oct.</span></div>
+          <div class="info"><b><i class="pic" data-picto="passport"></i> Visa</b><p>Passeport belge : pas de visa pour un séjour touristique de moins de 90 jours. Passeport valable pendant tout le séjour.</p><span class="src">Source : diplomatie.belgium.be · vérifié par Erika le 12 oct.</span></div>
+          <div class="info"><b><i class="pic" data-picto="shield"></i> Assurance</b><p>Les soins sont très chers au Japon pour les touristes : prends une assurance frais médicaux et rapatriement. Vérifie d’abord ce que couvre ta carte bancaire.</p><span class="partner">lien partenaire possible</span></div>
         </div>
         <div class="sec-t"><h2>Dans ta valise</h2></div>
         <div class="card" style="--sh:var(--yellow)">
-          <div class="info"><b>🔌 Prises et courant</b><p>100 V, prises type A (deux fiches plates) : prends un adaptateur. Les chargeurs de téléphone et d’ordi acceptent le 100 V ; sèche-cheveux et lisseurs européens, pas toujours.</p></div>
-          <div class="info"><b>🔋 Batteries externes</b><p>En cabine uniquement, jamais en soute. Certaines compagnies demandent de les garder à portée de main pendant le vol.</p></div>
-          <div class="info"><b>📶 Internet</b><p>Installe ton eSIM avant de partir et active-la à l’arrivée.</p><span class="partner">HodoSIM · bientôt</span></div>
-          <div class="info"><b>💴 Argent</b><p>La carte passe presque partout, mais garde du liquide pour les temples et les petits restos. Retraits faciles aux distributeurs des konbini.</p></div>
+          <div class="info"><b><i class="pic" data-picto="plug"></i> Prises et courant</b><p>100 V, prises type A (deux fiches plates) : prends un adaptateur. Les chargeurs de téléphone et d’ordi acceptent le 100 V ; sèche-cheveux et lisseurs européens, pas toujours.</p></div>
+          <div class="info"><b><i class="pic" data-picto="battery"></i> Batteries externes</b><p>En cabine uniquement, jamais en soute. Certaines compagnies demandent de les garder à portée de main pendant le vol.</p></div>
+          <div class="info"><b><i class="pic" data-picto="signal"></i> Internet</b><p>Installe ton eSIM avant de partir et active-la à l’arrivée.</p><span class="partner">HodoSIM · bientôt</span></div>
+          <div class="info"><b><i class="pic" data-picto="money"></i> Argent</b><p>La carte passe presque partout, mais garde du liquide pour les temples et les petits restos. Retraits faciles aux distributeurs des konbini.</p></div>
         </div>
         <div class="sec-t"><h2>Phrases utiles <span class="jp">会話</span></h2></div>
         <div class="phrases">
@@ -644,7 +645,7 @@
           <div><span>Un menu en anglais ?</span><span>Eigo no menyū wa arimasu ka ?</span></div>
           <div><span>Je suis allergique à…</span><span>… arerugī desu</span></div>
         </div>
-        <button class="btn block" style="margin-top:18px" data-action="wa">💬 Écrire à Erika sur WhatsApp</button>
+        <button class="btn block" style="margin-top:18px" data-action="wa"><i class="pic" data-picto="chat"></i> Écrire à Erika sur WhatsApp</button>
         <p class="small" style="margin-top:6px;text-align:center">Je réponds dès que possible, sans délai garanti. En urgence, appelle d’abord les numéros ci-dessus.</p>`;
     }
 
@@ -663,12 +664,12 @@
         <div class="card" style="--sh:var(--yellow)"><div class="row" style="justify-content:space-between"><b>Planification du voyage</b><span class="pill p-mint">offert</span></div><p class="small" style="margin-top:6px">Offre de lancement. Plus tard, ta facture sera ici.</p></div>
         <div class="sec-t"><h2>Autres formats</h2></div>
         <div class="card stack" style="--sh:var(--blue)"><p class="small">Tu veux aussi ton voyage en PDF, ou en carnet papier imprimé avant de partir ? Les mises à jour peuvent prendre quelques jours.</p>
-          <div class="row"><button class="btn small" data-action="pdf">📄 PDF</button><button class="btn small" data-action="paper">📒 Carnet papier</button></div></div>
+          <div class="row"><button class="btn small" data-action="pdf"><i class="pic" data-picto="doc"></i> PDF</button><button class="btn small" data-action="paper"><i class="pic" data-picto="notebook"></i> Carnet papier</button></div></div>
         <div class="sec-t"><h2>Ton avis</h2></div>
-        ${r ? `<div class="card" style="--sh:var(--mint)"><b>Merci ${"⭐".repeat(r.stars)}</b><p class="small" style="margin-top:6px">${esc(r.text) || "Ton avis est bien enregistré."}</p>
+        ${r ? `<div class="card" style="--sh:var(--mint)"><b>Merci ${'<i class="pic" data-picto="star"></i>'.repeat(r.stars)}</b><p class="small" style="margin-top:6px">${esc(r.text) || "Ton avis est bien enregistré."}</p>
               <p class="small" style="margin-top:8px">Tous les voyageurs reçoivent ensuite la même invitation à le partager aussi sur Trustpilot (pour les prestations payantes).</p></div>`
           : `<div class="card stack" style="--sh:var(--pink)"><p class="small">Après ton voyage, l’app te demande comment ça s’est passé. Démo :</p>
-              <div class="stars" id="stars">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" class="${n <= ui.stars ? "on" : ""}" aria-label="${n} étoile${n > 1 ? "s" : ""}">⭐</button>`).join("")}</div>
+              <div class="stars" id="stars">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" class="${n <= ui.stars ? "on" : ""}" aria-label="${n} étoile${n > 1 ? "s" : ""}"><i class="pic" data-picto="star"></i></button>`).join("")}</div>
               <textarea id="revTx" placeholder="Ce qui t’a plu, ce qui pourrait être mieux…"></textarea>
               <label class="check"><input type="checkbox" id="revOk" checked /> Erika peut publier mon avis avec mon prénom</label>
               <button class="btn dark" data-action="review">Envoyer mon avis</button></div>`}
@@ -688,13 +689,13 @@
           <div class="sec-t" style="margin-top:6px"><h2>À valider</h2></div>
           <p class="small" style="margin-bottom:10px">L’IA prépare, tu vérifies : rien n’est visible par les voyageurs avant ta validation.</p>
           ${db.queue.map((q) => `<button type="button" class="todo-erika ${q.ok ? "ok" : ""}" data-q="${q.id}">
-              <span>${q.kind === "day" ? "🗓️" : q.kind === "place" ? "📍" : "🩺"}</span><div><b>${esc(q.t)}</b><small>${esc(q.s)}</small></div>
+              <span>${q.kind === "day" ? "<i class='pic' data-picto='calendar'></i>" : q.kind === "place" ? "<i class='pic' data-picto='pin'></i>" : "<i class='pic' data-picto='health'></i>"}</span><div><b>${esc(q.t)}</b><small>${esc(q.s)}</small></div>
               <span class="pill ${q.ok ? "p-mint" : "p-yellow"}">${q.ok ? "validé" : q.kind === "day" ? "voir" : "valider"}</span></button>`).join("")}
           <div class="sec-t"><h2>Mes voyageurs</h2><button data-admin="new">+ Nouveau</button></div>
           ${clients.map((c) => `<button type="button" class="card client" ${c.mine ? 'data-admin="trip"' : ""} style="--sh:${c.mine ? "var(--pink)" : "var(--blue)"}">
               <div class="row"><b>${esc(c.name)}</b><span class="pill strong">${esc(c.title)}</span></div>
               <small>départ le ${fmtDate(c.start, { day: "numeric", month: "long" })} · <span class="pill ${status[c.status][1]}" style="font-size:10.5px">${status[c.status][0]}</span></small>
-              ${c.total ? `<div class="bar"><i style="width:${Math.round((c.done / c.total) * 100)}%"></i></div><small>${c.done}/${c.total} réservés${c.total - c.done ? ` · <b style="color:var(--red)">${c.total - c.done} à faire</b>` : " 🎉"}</small>` : `<small>${esc(c.note)}</small>`}
+              ${c.total ? `<div class="bar"><i style="width:${Math.round((c.done / c.total) * 100)}%"></i></div><small>${c.done}/${c.total} réservés${c.total - c.done ? ` · <b style="color:var(--red)">${c.total - c.done} à faire</b>` : " <i class='pic' data-picto='sparkle'></i>"}</small>` : `<small>${esc(c.note)}</small>`}
             </button>`).join("")}
         </div>`;
     }
@@ -721,7 +722,7 @@
           ${t.items.slice().sort(byDeadline).map((i) => { const dl = deadlineOf(i); return `
             <div class="item ${i.status === "done" ? "done" : ""}">
               <span class="ic">${icon(TYPES[i.type].icon, 28)}</span>
-              <span class="tx"><b>${esc(i.title)}</b><small>${i.status === "done" ? `réservé${i.ref ? " · n° " + esc(i.ref) : ""}${i.file ? " · 📎" : ""}` : (dl ? (dl.rule ? "🔔 ouvre le " : "avant le ") + fmtDate(dl.iso) : "à faire")}${i.partner ? " · partenaire" : ""}</small></span>
+              <span class="tx"><b>${esc(i.title)}</b><small>${i.status === "done" ? `réservé${i.ref ? " · n° " + esc(i.ref) : ""}${i.file ? " · <i class='pic' data-picto='clip'></i>" : ""}` : (dl ? (dl.rule ? "<i class='pic' data-picto='bell'></i> ouvre le " : "avant le ") + fmtDate(dl.iso) : "à faire")}${i.partner ? " · partenaire" : ""}</small></span>
               <span class="tick">${i.status === "done" ? "✓" : ""}</span>
             </div>`; }).join("")}
         </div>`;
@@ -806,8 +807,8 @@
         line([B[0], B[1], B[2]], "#8fd6b1"); line([B[2], [34.6851, 135.8430], B[3]], "#8fd6b1");
         line([B[2], [35.1720, 137.0890]], "#ec5866", "8 8");
         line([[35.5494, 139.7798], [36.3, 137.6]], "#7fa9dc", "2 7"); line([[34.4320, 135.2304], [33.6, 133.6]], "#7fa9dc", "2 7");
-        L.marker([35.5494, 139.7798], { icon: divIcon("air", "✈", 28) }).addTo(m).bindPopup("<b>Arrivée · Haneda</b>4 avril");
-        L.marker([34.4320, 135.2304], { icon: divIcon("air", "✈", 28) }).addTo(m).bindPopup("<b>Départ · Kansai</b>16 avril");
+        L.marker([35.5494, 139.7798], { icon: divIcon("air", HodoPictos.svg("plane", 18), 28) }).addTo(m).bindPopup("<b>Arrivée · Haneda</b>4 avril");
+        L.marker([34.4320, 135.2304], { icon: divIcon("air", HodoPictos.svg("plane", 18), 28) }).addTo(m).bindPopup("<b>Départ · Kansai</b>16 avril");
         DAYS.forEach((d, i) => d.stops.forEach(([, name, , , ll, ic]) => {
           if (!ll) return;
           L.marker(ll, { icon: divIcon("spot", icon(ic, 22), 26) }).addTo(m).bindPopup(`<b>${esc(name)}</b>Jour ${i + 1} · ${esc(d.t)}<br><button data-day="${i}" data-tabto="days">Voir la journée</button>`);
@@ -855,7 +856,7 @@
           <span>Où</span><b>${esc(it.where)}</b>
           ${it.price ? `<span>Prix indicatif</span><b>${esc(it.price)}</b>` : ""}
         </div>
-        ${dl && dl.rule ? `<div class="note" style="margin-bottom:12px"><span class="ico">🔔</span><span>${esc(dl.rule.how)} Je t’envoie un rappel la veille. <button class="linklike" data-action="ics" data-id="${it.id}">Ajouter à mon agenda</button></span></div>` : ""}
+        ${dl && dl.rule ? `<div class="note" style="margin-bottom:12px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span>${esc(dl.rule.how)} Je t’envoie un rappel la veille. <button class="linklike" data-action="ics" data-id="${it.id}">Ajouter à mon agenda</button></span></div>` : ""}
         ${it.note ? `<div class="note tip" style="margin-bottom:12px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${esc(it.note)}</span></div>` : ""}
         ${it.partner ? `<p class="small" style="margin-bottom:10px">Lien partenaire : si tu réserves par ce lien, Erika touche une petite commission, sans surcoût pour toi.</p>` : ""}
         ${it.link ? `<a class="btn block" href="${esc(it.link)}" target="_blank" rel="noopener" style="margin-bottom:14px">Réserver sur ${esc(it.where)} ↗</a>` : ""}
@@ -863,7 +864,7 @@
           <label class="switch">C’est réservé !<input type="checkbox" name="done" ${it.status === "done" ? "checked" : ""} /><i></i></label>
           <div class="field"><label>N° de réservation <span class="small">(facultatif)</span></label><input name="ref" value="${esc(it.ref)}" placeholder="ex. 4821 339 610" /></div>
           <div class="field"><label>Prix payé <span class="small">(facultatif)</span></label><input name="paid" value="${esc(it.paid)}" placeholder="ex. 372 €" /></div>
-          <label class="file"><input type="file" name="file" accept="application/pdf,image/*" /><span>📎</span><span id="fname">${it.file ? esc(it.file) : "Joindre la confirmation (PDF ou capture) · facultatif"}</span></label>
+          <label class="file"><input type="file" name="file" accept="application/pdf,image/*" /><span><i class="pic" data-picto="clip"></i></span><span id="fname">${it.file ? esc(it.file) : "Joindre la confirmation (PDF ou capture) · facultatif"}</span></label>
           <div class="field"><label>Note pour moi</label><textarea name="mynote" style="min-height:70px" placeholder="ex. chambre 2 lits, check-in 15:00">${esc(it.mynote || "")}</textarea></div>
           <button class="btn dark block" type="submit">Enregistrer</button>
         </form>`);
@@ -875,7 +876,7 @@
       showSheet(`
         <h2>Paiement</h2><p class="small" style="margin:4px 0 12px">Planification du voyage · Japon · <b>185 €</b> <span class="pill dark">0 € pendant le lancement</span></p>
         <div class="stack">
-          <div class="filters"><button class="on">💳 Carte</button><button>Bancontact</button><button>Virement</button></div>
+          <div class="filters"><button class="on"><i class="pic" data-picto="card"></i> Carte</button><button>Bancontact</button><button>Virement</button></div>
           <div class="field"><label>Numéro de carte</label><input value="4242 4242 4242 4242" disabled /></div>
           <div class="two"><div class="field"><label>Expiration</label><input value="12 / 29" disabled /></div><div class="field"><label>CVC</label><input value="123" disabled /></div></div>
           <button class="btn dark block" data-action="pay">Payer (démo)</button>
@@ -993,7 +994,7 @@
         const notes = v && v.notes ? v.notes : [];
         showSheet(`
           <div style="text-align:center">${icon("bunnypaws", 90)}</div>
-          <h2 style="text-align:center">Nouvelle version disponible ✨</h2>
+          <h2 style="text-align:center">Nouvelle version disponible <i class="pic" data-picto="sparkle"></i></h2>
           ${notes.length ? `<ul style="margin:12px 0;padding-left:20px;display:grid;gap:6px;font-size:14px">${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
           <p class="small" style="text-align:center;margin-bottom:12px">Ton voyage et tes coches sont gardés.</p>
           <div class="stack"><button class="btn dark block" id="doUpdate">Mettre à jour</button><button class="btn block" id="later">Plus tard</button></div>`);

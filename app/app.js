@@ -14,6 +14,7 @@
   const COLORS = ["mint", "blue", "pink", "yellow", "lav"];
   const soft = (c) => `var(--${COLORS.includes(c) ? c : "mint"}-soft)`;
   const PENDING = "hodo-pending-code";
+  const tripIcon = (t, size = 20) => icon(window.HodoIcons && HodoIcons.has(t.emoji) ? t.emoji : "bunny", size);
 
   const S = { screen: "loading", session: null, profile: null, trips: [], tripId: null, data: null, view: "traveler",
     tab: "home", filter: "todo", day: null, me: false, adminTab: "items", unsub: null, email: "" };
@@ -51,7 +52,7 @@
     const dl = deadlineOf(it);
     if (!dl) return `<span class="pill p-yellow">à faire</span>`;
     const d = daysUntil(dl.iso);
-    const txt = dl.rule ? `🔔 ouvre le ${fmtDate(dl.iso)}` : (d < 0 ? "en retard" : `avant le ${fmtDate(dl.iso)}`);
+    const txt = dl.rule ? `<i class="pic" data-picto="bell"></i> ouvre le ${fmtDate(dl.iso)}` : (d < 0 ? "en retard" : `avant le ${fmtDate(dl.iso)}`);
     return `<span class="pill ${it.urgent || d <= 30 ? "p-pink" : "p-yellow"}">${txt}</span>`;
   }
   const itemRow = (it, attr = "data-open") => `
@@ -73,8 +74,8 @@
         <h1 class="big">HodoPlanner</h1>
         <p class="sub" style="max-width:280px">Ton voyage sur mesure, préparé par Erika, toujours dans ta poche.</p>
         <div class="stack" style="width:100%;max-width:310px;margin-top:8px">
-          <button class="btn dark block" data-go="login" data-withcode="1">🎒 J’ai un voyage avec Erika</button>
-          <a class="btn block" href="../devis.html">✈️ Je prépare un voyage</a>
+          <button class="btn dark block" data-go="login" data-withcode="1"><i class="pic" data-picto="backpack"></i> J’ai un voyage avec Erika</button>
+          <a class="btn block" href="../devis.html"><i class="pic" data-picto="plane"></i> Je prépare un voyage</a>
         </div>
         <p class="small">Déjà inscrit·e ? <button class="linklike" data-go="login">Me connecter</button></p>
         ${installBox()}
@@ -108,7 +109,7 @@
       <div class="app-top"><span>${icon("bunny", 36)}</span><div><b>Mes voyages</b><small>${esc(S.profile?.email || "")}</small></div><span class="sp"></span><button class="btn small" data-action="logout">Quitter</button></div>
       <div class="screen">
         ${S.trips.length ? S.trips.map((t) => `<button class="card trip-card" data-trip="${t.id}" style="--sh:var(--pink)">
-            <div class="row" style="justify-content:space-between"><b style="font-size:17px">${esc(t.emoji || "")} ${esc(t.title)}</b><span class="pill strong">${esc((t.travelers || []).join(" & "))}</span></div>
+            <div class="row" style="justify-content:space-between"><b style="font-size:17px">${tripIcon(t, 24)} ${esc(t.title)}</b><span class="pill strong">${esc((t.travelers || []).join(" & "))}</span></div>
             <small class="small">${t.start_date ? `${fmtDate(t.start_date, { day: "numeric", month: "long" })} → ${fmtDate(t.end_date, { day: "numeric", month: "long", year: "numeric" })}` : "dates à venir"}</small></button>`).join("")
           : `<p class="sub">Aucun voyage pour l’instant.</p>`}
         <div class="sec-t"><h2>Ajouter un voyage</h2></div>
@@ -128,8 +129,8 @@
       const flush = S.tab === "map" && !S.me;
       return `
         <div class="app-top">${S.trips.length > 1 || isAdmin() ? `<button class="icon-btn" data-action="back" aria-label="Mes voyages">←</button>` : `<span>${icon("bunny", 36)}</span>`}
-          <div style="min-width:0"><b>${esc(t.title)} ${esc(t.emoji || "")}</b><small>${t.start_date ? `${fmtDate(t.start_date, { day: "numeric", month: "long" })} → ${fmtDate(t.end_date, { day: "numeric", month: "long", year: "numeric" })}` : ""}</small></div><span class="sp"></span>
-          ${isAdmin() ? `<button class="btn small" data-action="toAdmin" title="Vue Erika">🐰 Erika</button>` : ""}
+          <div style="min-width:0"><b>${esc(t.title)} ${tripIcon(t)}</b><small>${t.start_date ? `${fmtDate(t.start_date, { day: "numeric", month: "long" })} → ${fmtDate(t.end_date, { day: "numeric", month: "long", year: "numeric" })}` : ""}</small></div><span class="sp"></span>
+          ${isAdmin() ? `<button class="btn small" data-action="toAdmin" title="Vue Erika"><i class="pic" data-picto="bunny"></i> Erika</button>` : ""}
           <button class="icon-btn" data-action="me" aria-label="Mon compte" style="${S.me ? "background:var(--yellow)" : ""}">${icon("bunnypaws", 30)}</button></div>
         <div class="screen ${flush ? "flush" : ""}" id="scr">${body}</div>
         <nav class="tabs">${[["home", "Accueil"], ["book", "Réserver"], ["days", "Jours"], ["map", "Carte"], ["info", "Pratique"]]
@@ -141,7 +142,7 @@
       <div class="screen">
         <div class="sec-t" style="margin-top:4px"><h2>Mes voyageurs</h2><button data-action="newTrip">+ Nouveau voyage</button></div>
         ${S.trips.map((t) => `<button type="button" class="card client" data-admintrip="${t.id}" style="--sh:var(--pink)">
-            <div class="row"><b>${esc((t.travelers || []).join(" & ") || "Voyageurs ?")}</b><span class="pill strong">${esc(t.emoji || "")} ${esc(t.title)}</span></div>
+            <div class="row"><b>${esc((t.travelers || []).join(" & ") || "Voyageurs ?")}</b><span class="pill strong">${tripIcon(t, 18)} ${esc(t.title)}</span></div>
             <small>${t.start_date ? "départ le " + fmtDate(t.start_date, { day: "numeric", month: "long", year: "numeric" }) + " · " : ""}<span class="pill ${(STATUS[t.status] || STATUS.brief)[1]}" style="font-size:10.5px">${(STATUS[t.status] || STATUS.brief)[0]}</span> · code ${esc(t.code)}</small>
           </button>`).join("") || `<p class="sub">Aucun voyage. Crée le premier !</p>`}
       </div>`,
@@ -162,7 +163,7 @@
         <div class="count"><div><b>${S.data.days.length}</b><small>jours prêts</small></div><div><b>${s.done}/${s.total}</b><small>réservés</small></div><div><b>${s.total - s.done}</b><small>à faire</small></div></div>
         <div class="bar" style="margin-top:12px"><i style="width:${s.pct}%"></i></div>
       </div>
-      ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico">🔔</span><span><b>Prochaine ouverture :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}.</span></div>` : ""}
+      ${nextOpen ? `<div class="note tip" style="margin-top:14px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span><b>Prochaine ouverture :</b> ${esc(nextOpen.i.title.split(" · ")[0])}, le ${esc(HodoRules.describe(nextOpen.dl.opens).local)}.</span></div>` : ""}
       <div class="sec-t"><h2>À réserver bientôt</h2><button data-tab="book">tout voir</button></div>
       ${todo.slice(0, 3).map((i) => itemRow(i)).join("") || `<p class="sub">${S.data.items.length ? "Tout est réservé, bravo !" : "Erika prépare ta liste."}</p>`}
       ${S.data.days.length ? `<div class="sec-t"><h2>Le programme</h2><button data-tab="days">tous les jours</button></div>${dayRow(S.data.days[Math.max(0, firstDay)], Math.max(0, firstDay))}` : ""}
@@ -171,15 +172,15 @@
   }
   function contactBtn() {
     return cfg.whatsapp
-      ? `<a class="btn block" href="https://wa.me/${esc(cfg.whatsapp.replace(/\D/g, ""))}" target="_blank" rel="noopener">💬 Écrire sur WhatsApp</a><p class="small" style="margin-top:6px;text-align:center">En cas de souci : je réponds dès que possible, sans délai garanti.</p>`
-      : `<a class="btn block" href="mailto:${esc(cfg.contactEmail || "hello@erikaramel.com")}">✉️ Écrire à Erika</a>`;
+      ? `<a class="btn block" href="https://wa.me/${esc(cfg.whatsapp.replace(/\D/g, ""))}" target="_blank" rel="noopener"><i class="pic" data-picto="chat"></i> Écrire sur WhatsApp</a><p class="small" style="margin-top:6px;text-align:center">En cas de souci : je réponds dès que possible, sans délai garanti.</p>`
+      : `<a class="btn block" href="mailto:${esc(cfg.contactEmail || "hello@erikaramel.com")}"><i class="pic" data-picto="mail"></i> Écrire à Erika</a>`;
   }
   function tabBook() {
     const s = stats();
     const list = S.data.items.filter((i) => S.filter === "all" || (S.filter === "done" ? isDone(i) : !isDone(i))).sort(byDeadline);
     return `
       <div class="filters">${[["todo", `À faire (${s.total - s.done})`], ["done", `Réservé (${s.done})`], ["all", "Tout"]].map(([k, l]) => `<button class="${S.filter === k ? "on" : ""}" data-filter="${k}">${l}</button>`).join("")}</div>
-      <p class="small" style="margin-bottom:12px">Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs. 🔔 = rappel calculé.</p>
+      <p class="small" style="margin-bottom:12px">Réserve avec les liens, puis coche : le numéro de réservation et la confirmation sont facultatifs. <i class="pic" data-picto="bell"></i> = rappel calculé.</p>
       ${list.map((i) => itemRow(i)).join("") || `<p class="sub">Rien ici pour l’instant.</p>`}`;
   }
   function dayRow(day, i) {
@@ -214,11 +215,11 @@
       ${day.tip ? `<div class="note tip" style="margin-top:16px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${nl(day.tip)}</span></div>` : ""}
       <div class="nav2">${i > 0 ? `<button class="btn small" data-day="${i - 1}">← Jour ${i}</button>` : "<span></span>"}${i < S.data.days.length - 1 ? `<button class="btn small" data-day="${i + 1}">Jour ${i + 2} →</button>` : ""}</div>`;
   }
-  const tabMap = () => `<div id="tripMap"></div>${S.data.days.some((d) => (d.stops || []).some((s) => s.lat != null)) ? "" : `<div class="note" style="position:absolute;z-index:600;left:12px;right:12px;top:12px"><span class="ico">🗺️</span><span>Les lieux apparaîtront ici avec ton programme.</span></div>`}`;
+  const tabMap = () => `<div id="tripMap"></div>${S.data.days.some((d) => (d.stops || []).some((s) => s.lat != null)) ? "" : `<div class="note" style="position:absolute;z-index:600;left:12px;right:12px;top:12px"><span class="ico"><i class="pic" data-picto="map"></i></span><span>Les lieux apparaîtront ici avec ton programme.</span></div>`}`;
   function tabInfo() {
     const sec = S.data.trip.practical || [];
     return `${sec.length ? sec.map((p, k) => `<div class="card" style="--sh:var(--${COLORS[k % COLORS.length]});margin-top:${k ? 14 : 0}px">
-        <div class="info"><b>${esc(p.title)}</b><p>${linkify(p.text || "")}</p>${p.source ? `<span class="src">Source : ${esc(p.source)}</span>` : ""}</div></div>`).join("")
+        <div class="info"><b>${p.icon && window.HodoPictos ? HodoPictos.svg(p.icon, 24) : ""}${esc(p.title)}</b><p>${linkify(p.text || "")}</p>${p.source ? `<span class="src">Source : ${esc(p.source)}</span>` : ""}</div></div>`).join("")
       : `<p class="sub">Erika ajoute ici les infos pratiques de ton voyage : urgences, santé, visa, prises, argent…</p>`}
       <div class="sec-t"><h2>Besoin d’Erika ?</h2></div>${contactBtn()}`;
   }
@@ -274,18 +275,18 @@
         <button class="btn block" style="margin-top:18px;color:var(--red)" data-action="deleteTrip">Supprimer ce voyage</button>`;
     }
     return `
-      <div class="app-top erika-top"><button class="icon-btn" data-action="adminHome" aria-label="Retour">←</button><div style="min-width:0"><b>${esc((t.travelers || []).join(" & ") || t.title)}</b><small>${esc(t.emoji || "")} ${esc(t.title)} · ${esc(t.code)}</small></div><span class="sp"></span>
-        <button class="btn small" data-action="toTraveler">👀 Voyageur</button></div>
+      <div class="app-top erika-top"><button class="icon-btn" data-action="adminHome" aria-label="Retour">←</button><div style="min-width:0"><b>${esc((t.travelers || []).join(" & ") || t.title)}</b><small>${esc(t.title)} · ${esc(t.code)}</small></div><span class="sp"></span>
+        <button class="btn small" data-action="toTraveler"><i class="pic" data-picto="eye"></i> Voyageur</button></div>
       <div class="screen" id="scr"><div class="filters">${tabs.map(([k, l]) => `<button class="${S.adminTab === k ? "on" : ""}" data-admintab="${k}">${l}</button>`).join("")}</div>${body}</div>`;
   }
   const secRow = (p = {}) => `<div class="rowx" data-sec>
       <div class="rowx-head"><span>Rubrique</span><button type="button" class="mini-x" data-action="delRow" aria-label="Retirer">×</button></div>
-      <input name="title" placeholder="ex. 🆘 Urgences" value="${esc(p.title)}" />
+      <div class="two"><select name="icon">${pictoOptions(p.icon || "sparkle")}</select><input name="title" placeholder="ex. Urgences" value="${esc(p.title)}" /></div>
       <textarea name="text" placeholder="Le texte (une info par ligne)">${esc(p.text)}</textarea>
       <input name="source" placeholder="Source, ex. wanda.be · vérifié le 12 oct." value="${esc(p.source)}" /></div>`;
   const tripForm = (t = {}) => `<form id="tripForm" class="stack">
       <div class="field"><label>Destination *</label><input name="title" required value="${esc(t.title)}" placeholder="ex. Japon" /></div>
-      <div class="two"><div class="field"><label>Emoji</label><input name="emoji" value="${esc(t.emoji || "✈️")}" /></div><div class="field"><label>Pays (code)</label><input name="country" value="${esc(t.country)}" placeholder="JP" /></div></div>
+      <div class="two"><div class="field"><label>Icône</label><select name="emoji">${iconOptions(window.HodoIcons && HodoIcons.has(t.emoji) ? t.emoji : "torii")}</select></div><div class="field"><label>Pays (code)</label><input name="country" value="${esc(t.country)}" placeholder="JP" /></div></div>
       <div class="field"><label>Voyageurs (prénoms, séparés par des virgules)</label><input name="travelers" value="${esc((t.travelers || []).join(", "))}" placeholder="ex. Ardahan" /></div>
       <div class="two"><div class="field"><label>Départ</label><input type="date" name="start_date" value="${esc(t.start_date)}" /></div><div class="field"><label>Retour</label><input type="date" name="end_date" value="${esc(t.end_date)}" /></div></div>
       <div class="field"><label>Étape</label><select name="status">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${t.status === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></div>
@@ -320,7 +321,7 @@
         ${it.where_label ? `<span>Où</span><b>${esc(it.where_label)}</b>` : ""}
         ${it.price ? `<span>Prix indicatif</span><b>${esc(it.price)}</b>` : ""}
       </div>
-      ${dl && dl.rule ? `<div class="note" style="margin-bottom:12px"><span class="ico">🔔</span><span>${esc(dl.rule.how)} <button class="linklike" data-action="ics" data-id="${it.id}">Ajouter à mon agenda</button></span></div>` : ""}
+      ${dl && dl.rule ? `<div class="note" style="margin-bottom:12px"><span class="ico"><i class="pic" data-picto="bell"></i></span><span>${esc(dl.rule.how)} <button class="linklike" data-action="ics" data-id="${it.id}">Ajouter à mon agenda</button></span></div>` : ""}
       ${it.note ? `<div class="note tip" style="margin-bottom:12px"><span class="ico">✳</span><span><b>Le conseil d’Erika :</b> ${nl(it.note)}</span></div>` : ""}
       ${it.partner ? `<p class="small" style="margin-bottom:10px">Lien partenaire : si tu réserves par ce lien, Erika touche une petite commission, sans surcoût pour toi.</p>` : ""}
       ${it.link ? `<a class="btn block" href="${esc(it.link)}" target="_blank" rel="noopener" style="margin-bottom:14px">Réserver${it.where_label ? " sur " + esc(it.where_label) : ""} ↗</a>` : ""}
@@ -328,7 +329,7 @@
         <label class="switch">C’est réservé !<input type="checkbox" name="done" ${p.done ? "checked" : ""} /><i></i></label>
         <div class="field"><label>N° de réservation <span class="small">(facultatif)</span></label><input name="ref" value="${esc(p.ref)}" /></div>
         <div class="field"><label>Prix payé <span class="small">(facultatif)</span></label><input name="paid" value="${esc(p.paid)}" /></div>
-        <label class="file"><input type="file" name="file" accept="application/pdf,image/*" /><span>📎</span><span id="fname">${p.file_path ? "Confirmation jointe ✓ (touche pour la remplacer)" : "Joindre la confirmation (PDF ou capture) · facultatif"}</span></label>
+        <label class="file"><input type="file" name="file" accept="application/pdf,image/*" /><span><i class="pic" data-picto="clip"></i></span><span id="fname">${p.file_path ? "Confirmation jointe ✓ (touche pour la remplacer)" : "Joindre la confirmation (PDF ou capture) · facultatif"}</span></label>
         ${p.file_path && api.mode === "live" ? `<button type="button" class="linklike" data-action="openFile" data-path="${esc(p.file_path)}" style="justify-self:start">Ouvrir la confirmation</button>` : ""}
         <div class="field"><label>Note pour moi</label><textarea name="mynote" style="min-height:70px">${esc(p.mynote)}</textarea></div>
         <button class="btn dark block" type="submit">Enregistrer</button>
@@ -372,6 +373,7 @@
       <div class="rowx-head"><span>À goûter</span><button type="button" class="mini-x" data-action="delRow" aria-label="Retirer">×</button></div>
       <div class="two"><input name="name" placeholder="Plat *" value="${esc(e.name)}" /><select name="icon">${iconOptions(e.icon || "ramen")}</select></div>
       <input name="text" placeholder="Où, comment" value="${esc(e.text)}" /></div>`;
+  const pictoOptions = (sel) => (window.HodoPictos ? HodoPictos.names : ["sparkle"]).map((n) => `<option ${n === sel ? "selected" : ""}>${n}</option>`).join("");
   const iconOptions = (sel) => (window.HodoIcons ? HodoIcons.names : ["star"]).map((n) => `<option ${n === sel ? "selected" : ""}>${n}</option>`).join("");
   function editDay(id) {
     const d = id ? S.data.days.find((x) => x.id === id) : { color: "mint", icon: "star", stops: [], eat: [], published: false };
@@ -609,10 +611,10 @@
         if (f.dataset.id) row.id = f.dataset.id;
         await api.saveDay(row); closeSheet(); await reloadTrip(); toast(row.published ? "Publié : visible par les voyageurs" : "Brouillon enregistré");
       } else if (f.id === "infosForm") {
-        const practical = [...f.querySelectorAll("[data-sec]")].map(rowVals).map((x) => ({ title: x.title, text: x.text, source: x.source })).filter((x) => x.title || x.text);
+        const practical = [...f.querySelectorAll("[data-sec]")].map(rowVals).map((x) => ({ icon: x.icon, title: x.title, text: x.text, source: x.source })).filter((x) => x.title || x.text);
         await api.saveTrip({ id: S.tripId, practical }); await reloadTrip(); toast("Infos pratiques enregistrées");
       } else if (f.id === "tripForm") {
-        const row = { title: val(f, "title"), emoji: val(f, "emoji") || "✈️", country: val(f, "country").toUpperCase() || null,
+        const row = { title: val(f, "title"), emoji: val(f, "emoji") || "torii", country: val(f, "country").toUpperCase() || null,
           travelers: val(f, "travelers").split(",").map((x) => x.trim()).filter(Boolean),
           start_date: val(f, "start_date") || null, end_date: val(f, "end_date") || null, status: val(f, "status") || "brief" };
         if (!row.title) throw new Error("Indique la destination.");
@@ -637,7 +639,7 @@
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; if (S.screen === "welcome") render(); });
   function installBox() {
     if (standalone()) return "";
-    if (installEvt) return `<button class="btn yellow" data-action="install" style="width:100%;max-width:310px">📲 Installer l’app sur mon téléphone</button>`;
+    if (installEvt) return `<button class="btn yellow" data-action="install" style="width:100%;max-width:310px"><i class="pic" data-picto="phone"></i> Installer l’app sur mon téléphone</button>`;
     const ua = navigator.userAgent;
     let how;
     if (/; wv\)|FBAN|FBAV|Instagram|WhatsApp|Line\//i.test(ua)) how = "Tu es dans le navigateur d’une autre app. Ouvre d’abord ce lien dans <b>Chrome</b>.";
@@ -645,7 +647,7 @@
     else if (/iPhone|iPad|iPod/i.test(ua)) how = "Dans <b>Safari</b> : <b>Partager</b> ⬆️ → <b>Sur l’écran d’accueil</b>.";
     else if (/Android/i.test(ua)) how = "Dans <b>Chrome</b> : menu <b>⋮</b> → <b>Ajouter à l’écran d’accueil</b> → <b>Installer</b>.";
     else how = "Menu du navigateur → « Installer » ou « Ajouter à l’écran d’accueil ».";
-    return `<div class="note" style="text-align:left;width:100%;max-width:310px"><span class="ico">📲</span><span><b>Installer l’app :</b> ${how}</span></div>`;
+    return `<div class="note" style="text-align:left;width:100%;max-width:310px"><span class="ico"><i class="pic" data-picto="phone"></i></span><span><b>Installer l’app :</b> ${how}</span></div>`;
   }
 
   // =================== démarrage ===================
